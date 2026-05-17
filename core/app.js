@@ -121,7 +121,7 @@ function applyTheme(t) {
   _theme = t;
   document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : '');
   localStorage.setItem(THEME_KEY, t);
-  themeBtn.textContent = t === 'light' ? '☾' : '☀︎';
+  themeBtn.innerHTML = `<span class="material-symbols-outlined">${t === 'light' ? 'dark_mode' : 'light_mode'}</span>`;
 }
 
 // ── Settings panel ─────────────────────────────────────────────────
@@ -193,7 +193,7 @@ themeBtn.className = 'tab-ctrl-btn';
 const settingsBtn = document.createElement('button');
 settingsBtn.id = 'settings-btn';
 settingsBtn.className = 'tab-ctrl-btn';
-settingsBtn.textContent = '⚙';
+settingsBtn.innerHTML = '<span class="material-symbols-outlined">settings</span>';
 settingsBtn.addEventListener('click', e => { e.stopPropagation(); toggleSettings(); });
 
 themeBtn.addEventListener('click', e => {
