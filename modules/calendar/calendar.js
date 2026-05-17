@@ -20,6 +20,7 @@ const CATS = [
 
 let _container, _data, _onSave;
 let _year = new Date().getFullYear();
+let _view = 'month'; // 'week' | 'month' | 'year'
 let _modal = null;
 
 // ── Helpers ────────────────────────────────────────────────────────
@@ -106,12 +107,23 @@ function render() {
     requestAnimationFrame(() => scrollToMonth(new Date().getMonth()));
   });
 
+  // View toggle
+  const viewToggle = document.createElement('div');
+  viewToggle.className = 'cal-view-toggle';
+  ['week', 'month', 'year'].forEach(v => {
+    const btn = document.createElement('button');
+    btn.className = 'cal-view-btn' + (_view === v ? ' active' : '');
+    btn.textContent = v.charAt(0).toUpperCase() + v.slice(1);
+    btn.addEventListener('click', () => { _view = v; render(); });
+    viewToggle.appendChild(btn);
+  });
+
   const addBtn = document.createElement('button');
   addBtn.className = 'cal-add-btn';
   addBtn.textContent = '+ add event';
   addBtn.addEventListener('click', () => openModal(todayStr()));
 
-  header.append(prevBtn, yearLabel, nextBtn, todayBtn, addBtn);
+  header.append(prevBtn, yearLabel, nextBtn, todayBtn, viewToggle, addBtn);
   _container.appendChild(header);
 
   // Scroll area
@@ -120,11 +132,16 @@ function render() {
   scroll.id = 'cal-scroll';
   _container.appendChild(scroll);
 
-  buildMonths(scroll);
-
-  // Scroll to current month if viewing current year
-  if (_year === new Date().getFullYear()) {
-    requestAnimationFrame(() => scrollToMonth(new Date().getMonth()));
+  if (_view === 'month') {
+    buildMonths(scroll);
+    if (_year === new Date().getFullYear()) {
+      requestAnimationFrame(() => scrollToMonth(new Date().getMonth()));
+    }
+  } else {
+    const stub = document.createElement('div');
+    stub.style.cssText = 'padding:var(--s7) var(--s5);color:var(--text-3);font-size:var(--fs-sm);';
+    stub.textContent = `${_view.charAt(0).toUpperCase() + _view.slice(1)} view coming soon.`;
+    scroll.appendChild(stub);
   }
 }
 
@@ -369,7 +386,7 @@ function openModal(date, editId = null) {
 
   if (editing) {
     const parkBtn = document.createElement('button');
-    parkBtn.className = 'cal-del-btn';
+    parkBtn.className = 'cal-park-btn';
     parkBtn.textContent = 'Park for later';
     parkBtn.title = 'Move to unscheduled — find it in the Notes sidebar';
     parkBtn.addEventListener('click', () => {

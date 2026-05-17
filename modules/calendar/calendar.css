@@ -58,13 +58,11 @@
 .cal-scroll {
   flex: 1;
   overflow-y: auto;
-  scroll-snap-type: y proximity;
 }
 
 .cal-month {
-  scroll-snap-align: start;
-  min-height: 100%;
   padding: var(--s4) var(--s5) var(--s6);
+  border-bottom: 1px solid var(--border-dim);
 }
 
 .cal-month-title {
@@ -93,7 +91,7 @@
 }
 
 .cal-cell {
-  min-height: 76px;
+  min-height: 64px;
   padding: var(--s1) var(--s2);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -312,6 +310,16 @@
   padding-top: var(--s2);
 }
 
+.cal-park-btn {
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  padding: var(--s2) var(--s3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: color var(--dur-fast), border-color var(--dur-fast), background var(--dur-fast);
+}
+.cal-park-btn:hover { color: var(--text); border-color: var(--border); background: var(--surface-3); }
+
 .cal-del-btn {
   font-size: var(--fs-sm);
   color: var(--text-3);
@@ -320,6 +328,27 @@
   transition: color var(--dur-fast), background var(--dur-fast);
 }
 .cal-del-btn:hover { color: var(--red); background: color-mix(in srgb, var(--red) 10%, transparent); }
+
+/* ── View toggle ── */
+.cal-view-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  margin-left: var(--s3);
+}
+
+.cal-view-btn {
+  font-size: var(--fs-xs);
+  padding: 3px var(--s3);
+  border-radius: 4px;
+  color: var(--text-3);
+  transition: color var(--dur-fast), background var(--dur-fast);
+}
+.cal-view-btn:hover { color: var(--text-2); }
+.cal-view-btn.active { background: var(--surface-3); color: var(--text); }
 
 .cal-save-btn {
   padding: var(--s2) var(--s5);
