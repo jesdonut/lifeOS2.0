@@ -8,16 +8,22 @@
 - [x] `period-standalone.html` — standalone prototype: year calendar, stats panel, day logger, JSON export (gitignored) — *17 May*
 - [x] Color palette — heavy/medium/light (reds), spotting (purple), predicted (blue x3 fading), fertile (green) — *17 May*
 - [x] `index.html` — app shell, tab bar, panel — *17 May*
-- [x] `style/base.css` — all CSS variables, reset, typography — *17 May*
-- [x] `style/layout.css` — tab bar + panel layout — *17 May*
+- [x] `style/base.css` — all CSS variables, reset, typography, light theme — *17 May*
+- [x] `style/layout.css` — tab bar, panel layout, notes sidebar — *17 May*
 - [x] `core/store.js` — localStorage load/save, subscribe, export/import JSON — *17 May*
-- [x] `core/app.js` — tab routing, dynamic module import, lifecycle — *17 May*
+- [x] `core/app.js` — tab routing, dynamic module import, gesture nav, theme toggle, settings button — *17 May*
 - [x] `landing.html` — hero, preview carousel (4 scenes), feature cards with hover float, period ink trail, dark/light theme, scroll reveal — *18 May*
-- [x] `setup.html` — onboarding: name, birthday, timezone, base currency, accent color — *18 May*
+- [x] `setup.html` — onboarding: name, birthday, timezone, nationalities, locations, currencies, period toggle — *18 May*
 - [x] `privacy.html` — privacy policy — *18 May*
 - [x] `terms.html` — terms of use — *18 May*
 - [x] `license.html` — full PolyForm NonCommercial license — *18 May*
-- [x] Module folders reorganized: removed `nisa/` (NISA conditional inside `savings/` per country setting) — *18 May*
+- [x] `style/pages.css` + `style/setup.css` — CSS refactor for landing/setup pages — *18 May*
+- [x] `style/landing.css` — landing page styles — *18 May*
+- [x] `core/gestures.js` — horizontal swipe navigation between tabs, axis-locked to prevent browser back/forward — *18 May*
+- [x] `lib/Sortable.min.js` — SortableJS 1.15.3, local copy — *18 May*
+- [x] `modules/calendar/calendar.js` + `calendar.css` — month view, 9 built-in categories, event add/edit/delete, drag-and-drop between days, park-for-later, view switcher (week/year stubs) — *18 May*
+- [x] `modules/notes/notes.js` + `notes.css` — collapsible sidebar, parking lot for unscheduled events (schedule from sidebar), free-form notes with inline editing — *18 May*
+- [x] `core/settings.js` + `style/settings.css` — full settings modal: profile (name, birth, timezone, nationalities, locations, currencies, period toggle), calendar categories (rename/add with color picker/delete custom), appearance (dark/light theme), data (export/import/clear + browser guide) — *18 May*
 
 ## In progress
 
@@ -25,14 +31,13 @@
 
 ## Next
 
-- [ ] `modules/period/period-ui.js` — period module for main app (integrates period-data.js)
-- [ ] `style/components.css` — shared buttons, modals, chips, inputs
-- [ ] `modules/calendar/` — events + daily spending, weekly/monthly/yearly views
-- [ ] `modules/finance/` — income fields (country-adaptive), links to calendar spending
+- [ ] `modules/period/period-ui.js` — period module UI (integrates period-data.js): year calendar, day logger, stats panel
+- [ ] `modules/calendar/` — week view (Mon-Sun grid, daily spending per category, day totals)
+- [ ] `modules/calendar/` — year view (monthly overview, goals, age display)
+- [ ] `modules/finance/` — income and expenses, country-adaptive fields (Japan: salary/health insurance/pension/resident tax), links to calendar daily spend
 - [ ] `modules/bank/` — account balances, multi-country, multi-currency
-- [ ] `modules/savings/` — deposits, bonds, NISA (JP only), pension contributions
-- [ ] `modules/currency/` — lot tracking, FX rates, P&L
-- [ ] `modules/notes/` — quick notes, pinned
+- [ ] `modules/savings/` — fixed deposits, bonds, NISA (JP only), pension contributions
+- [ ] `modules/currency/` — lot tracking, FX rates, P&L in base currency
 
 ## Decisions
 
@@ -47,3 +52,8 @@
 - NISA and country-specific savings schemes rendered conditionally inside `savings/` based on `settings.country`
 - Finance income fields adapt per country (Japan: salary, health insurance, pension, resident tax, etc.)
 - No hardcoded hex values in JS — all colors via CSS variables
+- Calendar events with `date: null` are "parked" — live in `calendar.events`, filtered by notes sidebar
+- Every user-created record gets `createdAt` (ISO) on create, `updatedAt` (ISO) on edit
+- Calendar categories: 9 fixed defaults (CSS-var colors) + unlimited custom (stored hex). Managed in settings, read by calendar module
+- `settings.weekStart = 'mon'` default; week view will use this
+- Gesture axis locking: `e.preventDefault()` fires as soon as `|deltaX| > |deltaY|`, not after axis lock — prevents browser back/forward during accumulation
