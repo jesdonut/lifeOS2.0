@@ -7,120 +7,7 @@
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
   <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
   <link rel="stylesheet" href="style/base.css" />
-  <style>
-    body {
-      overflow-x: hidden;
-      overflow-y: auto;
-      background: var(--bg);
-    }
-
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 var(--s6);
-      height: 56px;
-      background: color-mix(in srgb, var(--bg) 70%, transparent);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-dim);
-    }
-
-    .nav-logo {
-      font-size: var(--fs-base);
-      font-weight: 600;
-      color: var(--accent);
-      letter-spacing: -0.3px;
-      text-decoration: none;
-    }
-
-    .nav-back {
-      font-size: var(--fs-sm);
-      color: var(--text-2);
-      text-decoration: none;
-      transition: color 150ms ease;
-    }
-    .nav-back:hover { color: var(--text); }
-
-    .page {
-      max-width: 640px;
-      margin: 0 auto;
-      padding: calc(56px + var(--s7)) var(--s5) var(--s7);
-    }
-
-    .eyebrow {
-      font-size: var(--fs-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--accent);
-      margin-bottom: var(--s3);
-    }
-
-    h1 {
-      font-size: clamp(28px, 5vw, 44px);
-      font-weight: 700;
-      letter-spacing: -1px;
-      line-height: 1.1;
-      margin-bottom: var(--s3);
-    }
-
-    .intro {
-      font-size: var(--fs-base);
-      color: var(--text-2);
-      line-height: 1.7;
-      margin-bottom: var(--s7);
-      padding-bottom: var(--s6);
-      border-bottom: 1px solid var(--border-dim);
-    }
-
-    .section {
-      margin-bottom: var(--s6);
-    }
-
-    h2 {
-      font-size: var(--fs-lg);
-      font-weight: 600;
-      margin-bottom: var(--s3);
-    }
-
-    p {
-      font-size: var(--fs-sm);
-      color: var(--text-2);
-      line-height: 1.8;
-      margin-bottom: var(--s3);
-    }
-
-    p strong { color: var(--text); font-weight: 500; }
-
-    .highlight {
-      background: color-mix(in srgb, var(--accent) 8%, transparent);
-      border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
-      border-radius: var(--radius);
-      padding: var(--s4) var(--s5);
-      margin-bottom: var(--s5);
-    }
-
-    .highlight p {
-      margin: 0;
-      font-size: var(--fs-base);
-      color: var(--text);
-    }
-
-    .divider {
-      border: none;
-      border-top: 1px solid var(--border-dim);
-      margin: var(--s6) 0;
-    }
-
-    .updated {
-      font-size: var(--fs-xs);
-      color: var(--text-3);
-      margin-top: var(--s7);
-    }
-  </style>
+  <link rel="stylesheet" href="style/pages.css" />
 </head>
 <body>
 
@@ -129,7 +16,7 @@
   <a class="nav-back" href="landing.html">← Back</a>
 </nav>
 
-<div class="page">
+<div class="doc-page">
 
   <p class="eyebrow">Privacy</p>
   <h1>We don't have your data.</h1>
