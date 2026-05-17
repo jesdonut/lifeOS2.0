@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeOS: Terms of Use</title>
+  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
+  <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
+  <link rel="stylesheet" href="style/base.css" />
+  <style>
+    body {
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--s6);
+      height: 56px;
+      background: color-mix(in srgb, var(--bg) 70%, transparent);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .nav-logo {
+      font-size: var(--fs-base);
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+      text-decoration: none;
+    }
+
+    .nav-back {
+      font-size: var(--fs-sm);
+      color: var(--text-2);
+      text-decoration: none;
+      transition: color 150ms ease;
+    }
+    .nav-back:hover { color: var(--text); }
+
+    .page {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: calc(56px + var(--s7)) var(--s5) var(--s7);
+    }
+
+    .eyebrow {
+      font-size: var(--fs-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      margin-bottom: var(--s3);
+    }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: var(--s3);
+    }
+
+    .intro {
+      font-size: var(--fs-base);
+      color: var(--text-2);
+      line-height: 1.7;
+      margin-bottom: var(--s7);
+      padding-bottom: var(--s6);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .section {
+      margin-bottom: var(--s6);
+    }
+
+    h2 {
+      font-size: var(--fs-lg);
+      font-weight: 600;
+      margin-bottom: var(--s3);
+    }
+
+    p {
+      font-size: var(--fs-sm);
+      color: var(--text-2);
+      line-height: 1.8;
+      margin-bottom: var(--s3);
+    }
+
+    p strong { color: var(--text); font-weight: 500; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border-dim);
+      margin: var(--s6) 0;
+    }
+
+    .updated {
+      font-size: var(--fs-xs);
+      color: var(--text-3);
+      margin-top: var(--s7);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="landing.html">LifeOS</a>
+  <a class="nav-back" href="landing.html">← Back</a>
+</nav>
+
+<div class="page">
+
+  <p class="eyebrow">Terms of use</p>
+  <h1>Simple, honest terms.</h1>
+  <p class="intro">LifeOS is a personal tool built to last. These terms explain what you can expect from it and what we ask in return. There's no legal maze here.</p>
+
+  <div class="section">
+    <h2>Who this is for</h2>
+    <p>LifeOS is built for personal, non-commercial use. You can use it to track your own health, finances, and life data. You cannot use it as part of a product or service you charge money for, and you cannot resell or relicense it.</p>
+    <p>This is not a company. There is no support team, no SLA, no uptime guarantee. It is open source software made by one person, shared freely.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>No warranty</h2>
+    <p>LifeOS is provided <strong>as is</strong>, without warranty of any kind. This means: it might have bugs. It might behave unexpectedly. It might stop working if your browser updates or clears your local storage.</p>
+    <p><strong>You are responsible for your own data.</strong> Export a JSON backup regularly. If your browser data is cleared, your LifeOS data goes with it. There is no server to recover it from.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>License</h2>
+    <p>LifeOS is licensed under the <strong>PolyForm NonCommercial License 1.0.0</strong>. The short version:</p>
+    <p>You may use it, fork it, and adapt it for personal, non-commercial purposes. If you fork or redistribute it, you must include the original copyright notice and a link back to the original project. You may not use it for commercial purposes, sell it, or include it in a paid product or service.</p>
+    <p>The full license text is <a href="license.html" style="color:var(--accent)">available here</a>.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Copyright</h2>
+    <p>Copyright 2026 <a href="https://github.com/jesdonut" target="_blank" style="color:var(--accent)">@jesdonut</a>. All rights reserved except as granted by the license above.</p>
+    <p>If you fork this project, credit is required. That means keeping the copyright notice intact and linking back to the original repository. Building on someone's work is great. Taking credit for it is not.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Third-party software</h2>
+    <p>LifeOS uses <a href="https://sortablejs.github.io/Sortable/" target="_blank" style="color:var(--accent)">SortableJS</a> for drag-and-drop functionality, under the MIT License.</p>
+    <p>Icons are provided by Google Fonts (Material Symbols), loaded from Google's CDN. No other third-party libraries are used.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Changes to these terms</h2>
+    <p>If these terms change, the updated version will be posted here with a new date. Since LifeOS runs entirely in your browser with no account, there is no way to notify you directly. Check this page if you want to stay informed.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Questions</h2>
+    <p>If you have questions or concerns, open an issue on <a href="https://github.com/jesdonut/lifeOS2.0/issues" target="_blank" style="color:var(--accent)">GitHub</a>.</p>
+  </div>
+
+  <p class="updated">Last updated: May 2026</p>
+
+</div>
+
+
+</body>
+</html>

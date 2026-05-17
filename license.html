@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeOS: License</title>
+  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
+  <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
+  <link rel="stylesheet" href="style/base.css" />
+  <style>
+    body {
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--s6);
+      height: 56px;
+      background: color-mix(in srgb, var(--bg) 70%, transparent);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .nav-logo {
+      font-size: var(--fs-base);
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+      text-decoration: none;
+    }
+
+    .nav-back {
+      font-size: var(--fs-sm);
+      color: var(--text-2);
+      text-decoration: none;
+      transition: color 150ms ease;
+    }
+    .nav-back:hover { color: var(--text); }
+
+    .page {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: calc(56px + var(--s7)) var(--s5) var(--s7);
+    }
+
+    .eyebrow {
+      font-size: var(--fs-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      margin-bottom: var(--s3);
+    }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: var(--s3);
+    }
+
+    .intro {
+      font-size: var(--fs-base);
+      color: var(--text-2);
+      line-height: 1.7;
+      margin-bottom: var(--s7);
+      padding-bottom: var(--s6);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .section {
+      margin-bottom: var(--s6);
+    }
+
+    h2 {
+      font-size: var(--fs-lg);
+      font-weight: 600;
+      margin-bottom: var(--s3);
+    }
+
+    p {
+      font-size: var(--fs-sm);
+      color: var(--text-2);
+      line-height: 1.8;
+      margin-bottom: var(--s3);
+    }
+
+    p strong { color: var(--text); font-weight: 500; }
+
+    .notice-block {
+      background: color-mix(in srgb, var(--surface-2) 80%, transparent);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius);
+      padding: var(--s4) var(--s5);
+      margin-bottom: var(--s4);
+      font-size: var(--fs-xs);
+      color: var(--text-3);
+      font-family: monospace;
+      line-height: 1.6;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border-dim);
+      margin: var(--s6) 0;
+    }
+
+    .updated {
+      font-size: var(--fs-xs);
+      color: var(--text-3);
+      margin-top: var(--s7);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="landing.html">LifeOS</a>
+  <a class="nav-back" href="landing.html">Back</a>
+</nav>
+
+<div class="page">
+
+  <p class="eyebrow">License</p>
+  <h1>PolyForm Noncommercial 1.0.0</h1>
+  <p class="intro">LifeOS is free to use, fork, and adapt for personal, non-commercial purposes. This is the full license text. The short version is in <a href="terms.html" style="color:var(--accent)">Terms of use</a>.</p>
+
+  <div class="notice-block">
+    Copyright 2026 @jesdonut (https://github.com/jesdonut)<br>
+    Required Notice: Copyright 2026 @jesdonut — https://github.com/jesdonut/lifeOS2.0
+  </div>
+
+  <div class="section">
+    <h2>Acceptance</h2>
+    <p>In order to get any license under these terms, you must agree to them as both strict obligations and conditions to all your licenses.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Copyright license</h2>
+    <p>The licensor grants you a copyright license for the software to do everything you might do with the software that would otherwise infringe the licensor's copyright in it for any permitted purpose. However, you may only distribute the software according to Distribution License and make changes or new works based on the software according to Changes and New Works License.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Distribution license</h2>
+    <p>The licensor grants you an additional copyright license to distribute copies of the software. Your license to distribute covers distributing the software with changes and new works permitted by Changes and New Works License.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Notices</h2>
+    <p>You must ensure that anyone who gets a copy of any part of the software from you also gets a copy of these terms or the URL for them above, as well as copies of any plain-text lines beginning with <strong>Required Notice:</strong> that the licensor provided with the software.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Changes and new works license</h2>
+    <p>The licensor grants you an additional copyright license to make changes and new works based on the software for any permitted purpose.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Patent license</h2>
+    <p>The licensor grants you a patent license for the software that covers patent claims the licensor can license, or will be able to license, that you would infringe by using the software.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Noncommercial purposes</h2>
+    <p>Any noncommercial purpose is a permitted purpose. A commercial purpose is not. Commercial purposes include, but are not limited to, selling, licensing, or otherwise making the software or works based on it available for a fee, using it to provide commercial services, or using it in a product or service designed to generate revenue.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Acceptance and termination</h2>
+    <p>If you use the software in violation of these terms, such use is not licensed, and your licenses will automatically terminate. If the licensor provides you with a notice of your violation, and you cease all violation of this license no later than 30 days after you receive that notice, your licenses will be reinstated retroactively. However, if you violate these terms after such reinstatement, any additional violation will cause your licenses to terminate automatically and permanently.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>No liability</h2>
+    <p>As far as the law allows, the software comes as is, without any warranty or condition, and the licensor will not be liable to you for any damages arising out of these terms or the use or nature of the software, under any kind of legal claim.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Definitions</h2>
+    <p>The <strong>licensor</strong> is the entity offering these terms, and the <strong>software</strong> is the software the licensor makes available under these terms.</p>
+    <p><strong>You</strong> refers to the individual or entity agreeing to these terms.</p>
+    <p><strong>Your company</strong> is any legal entity, sole proprietorship, or other kind of organization that you work for, plus all organizations that have control over, are under the control of, or are under common control with that organization. <strong>Control</strong> means ownership of substantially all the assets of an entity, or the power to direct its management and legal affairs.</p>
+    <p><strong>Your licenses</strong> are all the licenses granted to you for the software under these terms.</p>
+    <p><strong>Use</strong> means anything you do with the software requiring one of your licenses.</p>
+    <p><strong>Trademark</strong> means trademarks, service marks, and similar rights.</p>
+  </div>
+
+  <p class="updated">PolyForm Noncommercial License 1.0.0 — <a href="https://polyformproject.org/licenses/noncommercial/1.0.0" target="_blank" style="color:var(--accent)">polyformproject.org</a></p>
+
+</div>
+
+</body>
+</html>

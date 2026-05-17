@@ -1,6 +1,9 @@
-// app.js — tab routing, module lifecycle, notes sidebar
+// app.js — tab routing, gesture navigation, notes sidebar
 
 import { load, save, subscribe } from './store.js';
+import { initGestures } from './gestures.js';
+
+const TABS = ['calendar', 'period', 'finance', 'bank', 'currency', 'nisa', 'savings'];
 
 const MODULE_MAP = {
   calendar: () => import('../modules/calendar/calendar.js'),
@@ -12,73 +15,109 @@ const MODULE_MAP = {
   savings:  () => import('../modules/savings/savings.js'),
 };
 
-const panel       = document.getElementById('panel');
-const tabs        = document.querySelectorAll('.tab');
+// ── DOM refs ───────────────────────────────────────────────────────
+const tabBar      = document.getElementById('tab-bar');
+const stage       = document.getElementById('stage');
 const sidebar     = document.getElementById('sidebar');
 const sidebarBody = document.getElementById('sidebar-body');
 const sidebarBtn  = document.getElementById('sidebar-toggle');
 
-let active      = null;  // { name, mod }
-let notesMod    = null;
+// ── State ──────────────────────────────────────────────────────────
+let activeIndex = 0;
+const mods = {};   // name → loaded module instance
 
-// ── Main tab routing ──────────────────────────────────────────────
+// ── Build stage panels ─────────────────────────────────────────────
+TABS.forEach(name => {
+  const panel = document.createElement('div');
+  panel.className = 'module-panel';
+  panel.id = `panel-${name}`;
+  stage.appendChild(panel);
+});
 
-async function switchTo(name) {
-  if (active?.name === name) return;
+// ── Gestures ───────────────────────────────────────────────────────
+const gestures = initGestures({
+  stage,
+  getIndex:  () => activeIndex,
+  getCount:  () => TABS.length,
+  onSwitch:  (delta) => switchTo(activeIndex + delta),
+});
 
-  active?.mod.destroy();
-  active = null;
+// ── Tab switching ──────────────────────────────────────────────────
+async function switchTo(index) {
+  index = Math.max(0, Math.min(TABS.length - 1, index));
+  if (index === activeIndex && mods[TABS[index]]) return;
 
-  tabs.forEach(t => t.classList.toggle('active', t.dataset.module === name));
-  panel.innerHTML = '';
+  activeIndex = index;
+  const name  = TABS[index];
 
-  const data = load();
+  // Update tab bar
+  tabBar.querySelectorAll('.tab').forEach((t, i) =>
+    t.classList.toggle('active', i === index)
+  );
 
-  try {
-    const mod = await MODULE_MAP[name]();
-    mod.init(panel, data, partial => save(partial));
-    active = { name, mod };
-  } catch (err) {
-    panel.innerHTML = `<p style="color:var(--negative);padding:var(--space-5);font-family:var(--font-mono);font-size:var(--text-sm)">${name} error: ${err.message}</p>`;
-    console.error(`[${name}]`, err);
+  // Animate stage
+  gestures.jumpTo(index);
+
+  // Load module if not yet loaded
+  if (!mods[name]) {
+    const panel = document.getElementById(`panel-${name}`);
+    try {
+      const mod = await MODULE_MAP[name]();
+      mods[name] = mod;
+      mod.init(panel, load(), partial => save(partial));
+    } catch (err) {
+      const panel = document.getElementById(`panel-${name}`);
+      panel.innerHTML = `<p style="color:var(--red);font-family:var(--mono);font-size:var(--fs-sm);padding:var(--s5)">${name}: ${err.message}</p>`;
+      console.error(`[${name}]`, err);
+    }
   }
 }
 
-subscribe(newData => {
-  active?.mod.onDataChange(newData);
-  notesMod?.onDataChange(newData);
+// ── Tab bar clicks ─────────────────────────────────────────────────
+TABS.forEach((name, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'tab';
+  btn.dataset.module = name;
+  btn.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+  btn.addEventListener('click', () => switchTo(i));
+  tabBar.appendChild(btn);
 });
 
-tabs.forEach(t => t.addEventListener('click', () => switchTo(t.dataset.module)));
+// ── Data updates ───────────────────────────────────────────────────
+subscribe(newData => {
+  Object.values(mods).forEach(mod => mod?.onDataChange?.(newData));
+});
 
-// ── Notes sidebar ─────────────────────────────────────────────────
-
-const SIDEBAR_KEY = 'lifeOS_sidebar_collapsed';
+// ── Notes sidebar ──────────────────────────────────────────────────
+const SIDEBAR_KEY = 'lifeOS_sidebar';
 
 function initSidebar() {
-  const collapsed = localStorage.getItem(SIDEBAR_KEY) === '1';
-  setSidebarCollapsed(collapsed, false);
+  const collapsed = localStorage.getItem(SIDEBAR_KEY) === '0';
+  setSidebar(collapsed, false);
 
   import('../modules/notes/notes.js').then(mod => {
-    notesMod = mod;
     mod.init(sidebarBody, load(), partial => save(partial));
+    subscribe(d => mod.onDataChange?.(d));
   }).catch(err => {
-    sidebarBody.innerHTML = `<p style="color:var(--negative);padding:var(--space-4);font-size:var(--text-sm)">${err.message}</p>`;
-    console.error('[notes]', err);
+    sidebarBody.innerHTML = `<p style="color:var(--red);padding:var(--s4);font-size:var(--fs-sm)">${err.message}</p>`;
   });
 
-  sidebarBtn.addEventListener('click', () => {
-    setSidebarCollapsed(!sidebar.classList.contains('collapsed'), true);
-  });
+  sidebarBtn.addEventListener('click', () =>
+    setSidebar(!sidebar.classList.contains('collapsed'), true)
+  );
 }
 
-function setSidebarCollapsed(collapsed, persist) {
+function setSidebar(collapsed, persist) {
   sidebar.classList.toggle('collapsed', collapsed);
   sidebarBtn.textContent = collapsed ? '›' : '‹';
-  if (persist) localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '');
+  if (persist) localStorage.setItem(SIDEBAR_KEY, collapsed ? '0' : '1');
 }
 
-// ── Boot ──────────────────────────────────────────────────────────
-
-switchTo('calendar');
-initSidebar();
+// ── Boot ───────────────────────────────────────────────────────────
+const _data = load();
+if (!_data.settings?.setupDone) {
+  window.location.href = 'landing.html';
+} else {
+  switchTo(0);
+  initSidebar();
+}

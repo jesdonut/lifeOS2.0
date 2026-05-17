@@ -6,31 +6,22 @@
   <title>LifeOS</title>
   <link rel="stylesheet" href="style/base.css" />
   <link rel="stylesheet" href="style/layout.css" />
-  <link rel="stylesheet" href="style/components.css" />
 </head>
 <body>
 
   <div id="app">
-
-    <nav id="tab-bar">
-      <button class="tab" data-module="calendar">Calendar</button>
-      <button class="tab" data-module="period">Period</button>
-      <button class="tab" data-module="finance">Finance</button>
-      <button class="tab" data-module="bank">Bank</button>
-      <button class="tab" data-module="currency">Currency</button>
-      <button class="tab" data-module="nisa">NISA</button>
-      <button class="tab" data-module="savings">Savings</button>
-    </nav>
+    <nav id="tab-bar"></nav>
 
     <div id="body-row">
-      <main id="panel"></main>
+      <div id="viewport">
+        <div id="stage"></div>
+      </div>
 
       <aside id="sidebar">
-        <button id="sidebar-toggle" title="Toggle notes">‹</button>
+        <button id="sidebar-toggle">‹</button>
         <div id="sidebar-body"></div>
       </aside>
     </div>
-
   </div>
 
   <script type="module" src="core/app.js"></script>

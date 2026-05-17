@@ -1,57 +1,60 @@
-/* base.css — CSS variables, reset, typography */
-
 :root {
-  /* Neutral palette */
-  --bg:          #0f0f0f;
-  --surface:     #1a1a1a;
-  --surface-2:   #252525;
-  --border:      #2e2e2e;
-  --text:        #e8e8e8;
-  --text-muted:  #888;
-  --text-faint:  #555;
+  /* Surface — warm dark */
+  --bg:         #131110;
+  --surface:    #1c1917;
+  --surface-2:  #252220;
+  --surface-3:  #302c29;
+  --border:     #302c29;
+  --border-dim: #252220;
 
-  /* Accent */
-  --accent:      #c4a882;
-  --accent-dim:  #8a7357;
+  /* Text */
+  --text:       #ede8e3;
+  --text-2:     #8a8076;
+  --text-3:     #55504a;
 
-  /* Period — flow */
+  /* Accent — dusty rose */
+  --accent:     #c9a0b4;
+  --accent-2:   #a07890;
+
+  /* Semantic */
+  --green:      #4caf7d;
+  --red:        #e05c6a;
+  --amber:      #d4952a;
+  --blue:       #5a88d0;
+  --purple:     #9b5cd4;
+
+  /* Period */
   --flow-heavy:   #8c2f4a;
   --flow-medium:  #d44d70;
   --flow-light:   #f08aaa;
-  --flow-spotting:#9b5cd4;
+  --flow-spotting:var(--purple);
+  --predicted:    var(--blue);
+  --fertile:      var(--green);
 
-  /* Period — prediction + fertility */
-  --predicted:    #5a88d0;
-  --fertile:      #4aaa60;
+  /* Motion */
+  --ease:       cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-out:   cubic-bezier(0, 0, 0.2, 1);
+  --ease-spring:cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast:   120ms;
+  --dur-base:   220ms;
+  --dur-slow:   380ms;
 
-  /* Status */
-  --positive:    #4aaa60;
-  --negative:    #d44d70;
-  --warning:     #d4a02a;
+  /* Layout */
+  --tab-h:      44px;
+  --sidebar-w:  280px;
+  --radius-sm:  6px;
+  --radius:     10px;
+  --radius-lg:  16px;
 
-  /* Spacing scale */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
+  /* Space */
+  --s1: 4px;   --s2: 8px;   --s3: 12px;
+  --s4: 16px;  --s5: 24px;  --s6: 32px;  --s7: 48px;
 
-  /* Typography */
-  --font:        -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono:   'SF Mono', 'Fira Code', monospace;
-  --text-sm:     13px;
-  --text-base:   15px;
-  --text-lg:     18px;
-  --text-xl:     22px;
-
-  /* Radius */
-  --radius-sm:   4px;
-  --radius:      8px;
-  --radius-lg:   12px;
-
-  /* Tab bar */
-  --tab-h:       44px;
+  /* Type */
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+  --mono: 'SF Mono', 'Fira Code', monospace;
+  --fs-xs: 11px;  --fs-sm: 13px;  --fs-base: 15px;
+  --fs-lg: 18px;  --fs-xl: 22px;  --fs-2xl: 28px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,9 +64,10 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  font-size: var(--text-base);
+  font-size: var(--fs-base);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  overflow: hidden;
 }
 
 button {
@@ -78,11 +82,39 @@ button {
 input, textarea, select {
   font-family: inherit;
   font-size: inherit;
-  color: inherit;
+  color: var(--text);
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--s2) var(--s3);
+  outline: none;
 }
 
-a { color: var(--accent); text-decoration: none; }
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent-2);
+}
+
+::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+
+/* ── Light theme ── */
+[data-theme="light"] {
+  --bg:         #f2ede8;
+  --surface:    #ebe4dd;
+  --surface-2:  #e0d8d0;
+  --surface-3:  #d4cbc2;
+  --border:     #c8bfb6;
+  --border-dim: #d8d0c8;
+  --text:       #1f1a17;
+  --text-2:     #6b5f57;
+  --text-3:     #a89080;
+  --accent:     #b07090;
+  --accent-2:   #8a5070;
+  --green:      #3a8f5a;
+  --red:        #c04050;
+  --amber:      #b07820;
+  --blue:       #4060b0;
+  --purple:     #7040a0;
+  --flow-heavy:   #7a1f38;
+  --flow-medium:  #c03460;
+  --flow-light:   #e07090;
+}

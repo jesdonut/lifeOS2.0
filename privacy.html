@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeOS: Privacy</title>
+  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
+  <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
+  <link rel="stylesheet" href="style/base.css" />
+  <style>
+    body {
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--s6);
+      height: 56px;
+      background: color-mix(in srgb, var(--bg) 70%, transparent);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .nav-logo {
+      font-size: var(--fs-base);
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+      text-decoration: none;
+    }
+
+    .nav-back {
+      font-size: var(--fs-sm);
+      color: var(--text-2);
+      text-decoration: none;
+      transition: color 150ms ease;
+    }
+    .nav-back:hover { color: var(--text); }
+
+    .page {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: calc(56px + var(--s7)) var(--s5) var(--s7);
+    }
+
+    .eyebrow {
+      font-size: var(--fs-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      margin-bottom: var(--s3);
+    }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: var(--s3);
+    }
+
+    .intro {
+      font-size: var(--fs-base);
+      color: var(--text-2);
+      line-height: 1.7;
+      margin-bottom: var(--s7);
+      padding-bottom: var(--s6);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .section {
+      margin-bottom: var(--s6);
+    }
+
+    h2 {
+      font-size: var(--fs-lg);
+      font-weight: 600;
+      margin-bottom: var(--s3);
+    }
+
+    p {
+      font-size: var(--fs-sm);
+      color: var(--text-2);
+      line-height: 1.8;
+      margin-bottom: var(--s3);
+    }
+
+    p strong { color: var(--text); font-weight: 500; }
+
+    .highlight {
+      background: color-mix(in srgb, var(--accent) 8%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+      border-radius: var(--radius);
+      padding: var(--s4) var(--s5);
+      margin-bottom: var(--s5);
+    }
+
+    .highlight p {
+      margin: 0;
+      font-size: var(--fs-base);
+      color: var(--text);
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border-dim);
+      margin: var(--s6) 0;
+    }
+
+    .updated {
+      font-size: var(--fs-xs);
+      color: var(--text-3);
+      margin-top: var(--s7);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="landing.html">LifeOS</a>
+  <a class="nav-back" href="landing.html">← Back</a>
+</nav>
+
+<div class="page">
+
+  <p class="eyebrow">Privacy</p>
+  <h1>We don't have your data.</h1>
+  <p class="intro">LifeOS is built so that your personal information never reaches us. There is no account, no server, no database on our end. This page explains where your data actually goes.</p>
+
+  <div class="highlight">
+    <p>The short version: everything stays on your device. We collect nothing. We store nothing. We see nothing.</p>
+  </div>
+
+  <div class="section">
+    <h2>How your data is stored</h2>
+    <p>When you use LifeOS, all your information — your name, dates, finances, health data, notes — is saved to your browser's <strong>localStorage</strong>. This is a storage area that lives entirely on your device, like a file on your computer. It is not sent anywhere.</p>
+    <p>If you clear your browser data, your LifeOS data clears with it. That's why we give you the option to export a backup file. That file also stays on your device — we never see it.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Apple Health import</h2>
+    <p>LifeOS can help you import data from Apple Health. Here is exactly how that works:</p>
+    <p>1. You export your data from the Health app on your iPhone. Apple gives you a zip file that goes directly to your device — not to us.</p>
+    <p>2. You open that file in LifeOS. The conversion happens <strong>entirely in your browser</strong>. The file is read locally, processed locally, and the result is saved to your localStorage.</p>
+    <p>The file never leaves your device. We never receive it, never touch it, never store it.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Cookies and tracking</h2>
+    <p>LifeOS uses <strong>no cookies</strong>, no analytics, no tracking scripts, no third-party services that collect data about you. There is nothing to opt out of.</p>
+    <p>The only external resource loaded on the landing page is the Google Fonts icon library (Material Symbols), which is used for icons. Google may log that request. If that concerns you, the app itself functions without it.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Your backup file</h2>
+    <p>You can export your data as a <strong>JSON file</strong> at any time. This file contains everything you've entered. You can keep it, move it to another device, or import it back into LifeOS. It is your file — we never see it or receive a copy.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Open source</h2>
+    <p>LifeOS is open source. You can read every line of code and verify these claims yourself. If you find something that contradicts what's written here, please <a href="https://github.com/jesdonut/lifeOS2.0/issues" style="color:var(--accent)">open an issue on GitHub</a>.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>Questions</h2>
+    <p>If you have any questions about privacy, you can reach out via <a href="https://github.com/jesdonut/lifeOS2.0/issues" style="color:var(--accent)">GitHub</a>.</p>
+  </div>
+
+  <p class="updated">Last updated: May 2026</p>
+
+</div>
+
+
+</body>
+</html>

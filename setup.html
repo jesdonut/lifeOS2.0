@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeOS: Setup</title>
+  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
+  <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
+  <link rel="stylesheet" href="style/base.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,300,0,0" />
+  <style>
+    body {
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    /* ── Nav (matches landing) ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--s6);
+      height: 56px;
+      background: color-mix(in srgb, var(--bg) 70%, transparent);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .nav-logo {
+      font-size: var(--fs-base);
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+      text-decoration: none;
+    }
+
+    .nav-back {
+      display: flex;
+      align-items: center;
+      gap: var(--s1);
+      font-size: var(--fs-sm);
+      color: var(--text-2);
+      text-decoration: none;
+      transition: color 150ms ease;
+    }
+    .nav-back:hover { color: var(--text); }
+
+    /* ── Page layout ── */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: calc(56px + var(--s7)) var(--s5) var(--s7);
+    }
+
+    .setup-wrap {
+      width: min(520px, 100%);
+    }
+
+    /* ── Header ── */
+    .setup-eyebrow {
+      font-size: var(--fs-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      margin-bottom: var(--s3);
+    }
+
+    .setup-title {
+      font-size: clamp(28px, 5vw, 40px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: var(--s3);
+    }
+
+    .setup-sub {
+      font-size: var(--fs-sm);
+      color: var(--text-2);
+      margin-bottom: var(--s7);
+      line-height: 1.6;
+    }
+
+    /* ── Form ── */
+    .setup-section {
+      font-size: var(--fs-xs);
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--s4);
+    }
+
+    .setup-divider {
+      border: none;
+      border-top: 1px solid var(--border-dim);
+      margin: var(--s6) 0;
+    }
+
+    .setup-field {
+      display: flex;
+      flex-direction: column;
+      gap: var(--s2);
+      margin-bottom: var(--s5);
+    }
+
+    .setup-label {
+      font-size: var(--fs-sm);
+      color: var(--text-2);
+    }
+
+    .setup-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--s3) var(--s4);
+      font-size: var(--fs-base);
+      color: var(--text);
+      transition: border-color 150ms ease, background 150ms ease;
+    }
+    .setup-input:focus {
+      border-color: var(--accent-2);
+      background: var(--surface-2);
+    }
+
+    .setup-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--s3);
+      margin-bottom: var(--s5);
+    }
+
+    .setup-hint {
+      font-size: var(--fs-xs);
+      color: var(--text-3);
+      margin-top: var(--s1);
+    }
+
+    /* ── Tag inputs ── */
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--s2);
+      margin-bottom: var(--s2);
+      min-height: 0;
+    }
+
+    .country-wrap {
+      position: relative;
+    }
+
+    .country-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 50;
+      display: none;
+    }
+    .country-dropdown.open { display: block; }
+
+    .country-option {
+      padding: var(--s2) var(--s4);
+      font-size: var(--fs-sm);
+      color: var(--text-2);
+      cursor: pointer;
+      transition: background 100ms ease, color 100ms ease;
+    }
+    .country-option:hover, .country-option.focused {
+      background: var(--surface-3);
+      color: var(--text);
+    }
+
+    /* ── Currency chips ── */
+    .currency-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--s2);
+    }
+
+    .currency-chip {
+      padding: var(--s2) var(--s3);
+      border-radius: 100px;
+      font-size: var(--fs-sm);
+      border: 1px solid var(--border);
+      color: var(--text-2);
+      background: var(--surface);
+      cursor: pointer;
+      transition: all 150ms ease;
+      user-select: none;
+    }
+    .currency-chip.selected {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+
+    /* ── Toggle ── */
+    .period-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--s4);
+      margin-bottom: var(--s5);
+      cursor: pointer;
+      transition: border-color 150ms ease;
+    }
+    .period-toggle:hover { border-color: var(--accent-2); }
+
+    .period-toggle-name  { font-size: var(--fs-base); margin-bottom: 2px; }
+    .period-toggle-label { font-size: var(--fs-sm); color: var(--text-2); }
+
+    .toggle-switch {
+      width: 40px;
+      height: 24px;
+      background: var(--surface-3);
+      border-radius: 100px;
+      position: relative;
+      transition: background 200ms ease;
+      flex-shrink: 0;
+    }
+    .toggle-switch.on { background: var(--accent); }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      background: var(--text);
+      border-radius: 50%;
+      transition: transform 200ms var(--ease-spring);
+    }
+    .toggle-switch.on::after { transform: translateX(16px); }
+
+    /* ── Submit ── */
+    .btn-start {
+      width: 100%;
+      padding: var(--s3) var(--s4);
+      background: var(--accent);
+      color: #000;
+      font-size: var(--fs-base);
+      font-weight: 600;
+      border-radius: 100px;
+      margin-top: var(--s6);
+      transition: background 150ms ease, transform 100ms ease;
+    }
+    .btn-start:hover  { background: var(--accent-2); color: var(--text); }
+    .btn-start:active { transform: scale(0.98); }
+
+    .error-msg {
+      font-size: var(--fs-sm);
+      color: var(--red);
+      margin-top: var(--s3);
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="landing.html">LifeOS</a>
+  <div style="display:flex;align-items:center;gap:var(--s3)">
+    <button id="theme-toggle" style="padding:7px var(--s4);border-radius:100px;border:1px solid var(--border);color:var(--text-2);font-size:var(--fs-sm);font-weight:600;background:var(--surface-2);cursor:pointer;transition:all 150ms ease">☀︎ Light</button>
+    <a class="nav-back" href="landing.html">
+      <span class="material-symbols-outlined" style="font-size:16px">arrow_back</span>
+      Back
+    </a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="setup-wrap">
+
+    <p class="setup-eyebrow">Welcome</p>
+    <h1 class="setup-title">Your life OS starts here.</h1>
+    <p class="setup-sub">Set up once. Everything adapts from here. You can change any of this later in settings.</p>
+    <div style="display:flex;align-items:flex-start;gap:var(--s3);padding:var(--s3) var(--s4);background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 20%,transparent);border-radius:var(--radius);margin-bottom:var(--s6)">
+      <span class="material-symbols-outlined" style="font-size:18px;color:var(--accent);flex-shrink:0;margin-top:1px">lock</span>
+      <p style="font-size:var(--fs-xs);color:var(--text-2);line-height:1.6">Everything you enter here is saved to <strong style="color:var(--text)">your browser only</strong>. Nothing is sent to any server. You can export your data as a file anytime and take it with you.</p>
+    </div>
+
+    <p class="setup-section">About you</p>
+
+    <div class="setup-field">
+      <label class="setup-label" for="f-name">Your name</label>
+      <input class="setup-input" id="f-name" type="text" placeholder="Your name" autocomplete="off" />
+    </div>
+
+    <div class="setup-row">
+      <div class="setup-field">
+        <label class="setup-label" for="f-birth">Date of birth</label>
+        <input class="setup-input" id="f-birth" type="date" />
+        <span class="setup-hint">Your 100-year calendar starts here.</span>
+      </div>
+      <div class="setup-field">
+        <label class="setup-label" for="f-tz">Timezone</label>
+        <select class="setup-input" id="f-tz"></select>
+      </div>
+    </div>
+
+    <div class="setup-field">
+      <label class="setup-label">Nationalities</label>
+      <div class="tag-list" id="nationality-tags"></div>
+      <div class="country-wrap" id="nationality-wrap">
+        <input class="setup-input" id="f-nationality" type="text" placeholder="Search country..." autocomplete="off" />
+        <div class="country-dropdown" id="nationality-dropdown"></div>
+      </div>
+      <span class="setup-hint">Add all that apply. Dual citizens welcome.</span>
+    </div>
+
+    <div class="setup-field">
+      <label class="setup-label">Where you live or have lived</label>
+      <div class="tag-list" id="location-tags"></div>
+      <div class="country-wrap" id="location-wrap">
+        <input class="setup-input" id="f-location" type="text" placeholder="Search country..." autocomplete="off" />
+        <div class="country-dropdown" id="location-dropdown"></div>
+      </div>
+      <span class="setup-hint">Useful for multi-currency and tax contexts.</span>
+    </div>
+
+    <hr class="setup-divider" />
+    <p class="setup-section">Currencies you use</p>
+
+    <div class="currency-grid" id="currency-grid"></div>
+    <div style="display:flex;align-items:center;gap:var(--s2);margin-top:var(--s3)">
+      <input class="setup-input" id="f-currency-custom" type="text" placeholder="Other (e.g. BRL)" style="width:160px;padding:var(--s2) var(--s3);font-size:var(--fs-sm)" maxlength="6" autocomplete="off" />
+      <button type="button" id="add-currency-custom" class="tag-add-btn">+ Add</button>
+    </div>
+    <p class="setup-hint" style="margin-top:var(--s2)">Select all you want to track. You can change this later.</p>
+
+    <hr class="setup-divider" />
+    <p class="setup-section">Optional modules</p>
+
+    <div class="period-toggle" id="toggle-period">
+      <div>
+        <div class="period-toggle-name">Period tracker</div>
+        <div class="period-toggle-label">Cycle logging, predictions, symptoms, medications</div>
+      </div>
+      <div class="toggle-switch" id="period-switch"></div>
+    </div>
+
+    <p class="error-msg" id="err-msg">Please fill in your name and date of birth.</p>
+
+    <button class="btn-start" id="btn-start">Get started →</button>
+
+  </div>
+</div>
+
+<script type="module">
+  import { load, save } from './core/store.js';
+
+  // ── Theme (syncs with landing page preference) ─────────────────
+  const html = document.documentElement;
+  const toggleBtn = document.getElementById('theme-toggle');
+  let theme = localStorage.getItem('lifeOS_landing_theme') || 'dark';
+
+  function applyTheme(t) {
+    theme = t;
+    html.setAttribute('data-theme', t === 'light' ? 'light' : '');
+    toggleBtn.textContent = t === 'light' ? '☾ Dark' : '☀︎ Light';
+    localStorage.setItem('lifeOS_landing_theme', t);
+  }
+  applyTheme(theme);
+  toggleBtn.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
+
+  // ── Timezones ──────────────────────────────────────────────────
+  const TZ_LIST = [
+    'Pacific/Honolulu','America/Los_Angeles','America/Denver','America/Chicago',
+    'America/New_York','America/Sao_Paulo','Europe/London','Europe/Paris',
+    'Europe/Berlin','Europe/Moscow','Asia/Dubai','Asia/Kolkata','Asia/Dhaka',
+    'Asia/Bangkok','Asia/Singapore','Asia/Tokyo','Asia/Seoul','Asia/Shanghai',
+    'Australia/Sydney','Pacific/Auckland',
+  ];
+  const tzSel = document.getElementById('f-tz');
+  const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  TZ_LIST.forEach(tz => {
+    const opt = document.createElement('option');
+    opt.value = tz;
+    opt.textContent = tz.replace(/_/g, ' ');
+    if (tz === userTz || (!TZ_LIST.includes(userTz) && tz === 'Asia/Tokyo')) opt.selected = true;
+    tzSel.appendChild(opt);
+  });
+
+  // ── Currencies ────────────────────────────────────────────────
+  const CURRENCIES = ['JPY','IDR','USD','EUR','GBP','SGD','AUD','CAD','KRW','THB','MYR','PHP','INR'];
+  const selected = new Set(['JPY', 'IDR']);
+  const grid = document.getElementById('currency-grid');
+
+  CURRENCIES.forEach(c => {
+    const chip = document.createElement('button');
+    chip.className = 'currency-chip' + (selected.has(c) ? ' selected' : '');
+    chip.textContent = c;
+    chip.addEventListener('click', () => {
+      if (selected.has(c)) { selected.delete(c); chip.classList.remove('selected'); }
+      else                  { selected.add(c);    chip.classList.add('selected'); }
+    });
+    grid.appendChild(chip);
+  });
+
+  // ── Custom currency ───────────────────────────────────────────
+  function addCustomCurrency(code) {
+    code = code.trim().toUpperCase();
+    if (!code || selected.has(code)) return;
+    selected.add(code);
+    const chip = document.createElement('button');
+    chip.className = 'currency-chip selected';
+    chip.textContent = code;
+    chip.addEventListener('click', () => {
+      if (selected.has(code)) { selected.delete(code); chip.classList.remove('selected'); }
+      else                    { selected.add(code);    chip.classList.add('selected'); }
+    });
+    grid.appendChild(chip);
+    document.getElementById('f-currency-custom').value = '';
+  }
+
+  document.getElementById('add-currency-custom').addEventListener('click', () =>
+    addCustomCurrency(document.getElementById('f-currency-custom').value)
+  );
+  document.getElementById('f-currency-custom').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addCustomCurrency(e.target.value); }
+  });
+
+  // ── Period toggle ─────────────────────────────────────────────
+  let periodEnabled = false;
+  const periodSwitch = document.getElementById('period-switch');
+  document.getElementById('toggle-period').addEventListener('click', () => {
+    periodEnabled = !periodEnabled;
+    periodSwitch.classList.toggle('on', periodEnabled);
+  });
+
+  // ── Country search tag inputs ─────────────────────────────────
+  const COUNTRIES = [
+    'Afghanistan','Albania','Algeria','Andorra','Angola','Argentina','Armenia','Australia',
+    'Austria','Azerbaijan','Bahrain','Bangladesh','Belarus','Belgium','Bolivia','Bosnia and Herzegovina',
+    'Botswana','Brazil','Bulgaria','Cambodia','Cameroon','Canada','Chile','China','Colombia',
+    'Costa Rica','Croatia','Cuba','Cyprus','Czech Republic','Denmark','Dominican Republic',
+    'Ecuador','Egypt','El Salvador','Estonia','Ethiopia','Finland','France','Georgia','Germany',
+    'Ghana','Greece','Guatemala','Honduras','Hong Kong','Hungary','Iceland','India','Indonesia',
+    'Iran','Iraq','Ireland','Israel','Italy','Japan','Jordan','Kazakhstan','Kenya','Kosovo',
+    'Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Libya','Liechtenstein','Lithuania',
+    'Luxembourg','Malaysia','Malta','Mexico','Moldova','Monaco','Mongolia','Montenegro','Morocco',
+    'Myanmar','Nepal','Netherlands','New Zealand','Nicaragua','Nigeria','North Korea','Norway',
+    'Oman','Pakistan','Palestine','Panama','Paraguay','Peru','Philippines','Poland','Portugal',
+    'Qatar','Romania','Russia','Rwanda','Saudi Arabia','Senegal','Serbia','Singapore','Slovakia',
+    'Slovenia','Somalia','South Africa','South Korea','Spain','Sri Lanka','Sudan','Sweden',
+    'Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Tunisia','Turkey',
+    'Turkmenistan','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States',
+    'Uruguay','Uzbekistan','Venezuela','Vietnam','Yemen','Zimbabwe',
+  ];
+
+  function makeCountrySearch(inputId, dropdownId, listId) {
+    const items    = [];
+    const input    = document.getElementById(inputId);
+    const dropdown = document.getElementById(dropdownId);
+    const list     = document.getElementById(listId);
+    let focusIdx   = -1;
+
+    function addItem(val) {
+      if (!val || items.includes(val)) return;
+      items.push(val);
+      const tag = document.createElement('span');
+      tag.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:100px;font-size:var(--fs-xs);color:var(--text-2)';
+      tag.innerHTML = `${val} <button style="color:var(--text-3);font-size:12px;line-height:1;background:none;border:none;cursor:pointer">✕</button>`;
+      tag.querySelector('button').addEventListener('click', () => {
+        items.splice(items.indexOf(val), 1);
+        tag.remove();
+      });
+      list.appendChild(tag);
+      input.value = '';
+      closeDropdown();
+    }
+
+    function renderDropdown(query) {
+      const matches = COUNTRIES.filter(c =>
+        c.toLowerCase().startsWith(query.toLowerCase()) && !items.includes(c)
+      ).slice(0, 8);
+      dropdown.innerHTML = '';
+      focusIdx = -1;
+      if (!matches.length) { closeDropdown(); return; }
+      matches.forEach((c, i) => {
+        const opt = document.createElement('div');
+        opt.className = 'country-option';
+        opt.textContent = c;
+        opt.addEventListener('mousedown', e => { e.preventDefault(); addItem(c); });
+        dropdown.appendChild(opt);
+      });
+      dropdown.classList.add('open');
+    }
+
+    function closeDropdown() {
+      dropdown.classList.remove('open');
+      focusIdx = -1;
+    }
+
+    input.addEventListener('input', () => {
+      if (input.value.trim()) renderDropdown(input.value.trim());
+      else closeDropdown();
+    });
+
+    input.addEventListener('keydown', e => {
+      const opts = dropdown.querySelectorAll('.country-option');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        focusIdx = Math.min(focusIdx + 1, opts.length - 1);
+        opts.forEach((o, i) => o.classList.toggle('focused', i === focusIdx));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        focusIdx = Math.max(focusIdx - 1, 0);
+        opts.forEach((o, i) => o.classList.toggle('focused', i === focusIdx));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (focusIdx >= 0 && opts[focusIdx]) addItem(opts[focusIdx].textContent);
+      } else if (e.key === 'Escape') {
+        closeDropdown();
+      }
+    });
+
+    input.addEventListener('blur', () => setTimeout(closeDropdown, 150));
+
+    return items;
+  }
+
+  const nationalities = makeCountrySearch('f-nationality', 'nationality-dropdown', 'nationality-tags');
+  const locations     = makeCountrySearch('f-location',    'location-dropdown',    'location-tags');
+
+  // ── Submit ────────────────────────────────────────────────────
+  document.getElementById('btn-start').addEventListener('click', () => {
+    const name  = document.getElementById('f-name').value.trim();
+    const birth = document.getElementById('f-birth').value;
+    const err   = document.getElementById('err-msg');
+
+    if (!name || !birth) { err.style.display = 'block'; return; }
+    err.style.display = 'none';
+
+    save({
+      settings: {
+        name,
+        birth,
+        birthYear:     new Date(birth).getFullYear(),
+        timezone:      document.getElementById('f-tz').value,
+        nationalities: [...nationalities],
+        locations:     [...locations],
+        currencies:    [...selected],
+        periodEnabled,
+        setupDone: true,
+      }
+    });
+
+    window.location.href = 'index.html';
+  });
+
+  // ── Skip if already set up ────────────────────────────────────
+  const d = load();
+  if (d.settings?.setupDone) window.location.href = 'index.html';
+  if (d.settings?.name) document.getElementById('f-name').value = d.settings.name;
+</script>
+
+</body>
+</html>

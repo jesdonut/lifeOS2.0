@@ -1,5 +1,4 @@
-/* layout.css — shell, tab bar, panel, sidebar */
-
+/* Shell */
 #app {
   display: flex;
   flex-direction: column;
@@ -8,69 +7,83 @@
 }
 
 /* ── Tab bar ── */
-
 #tab-bar {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: 0 var(--space-4);
+  gap: 2px;
+  padding: 0 var(--s4);
   height: var(--tab-h);
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-dim);
   flex-shrink: 0;
+  position: relative;
+  z-index: 10;
 }
 
 .tab {
-  padding: var(--space-2) var(--space-3);
+  padding: var(--s2) var(--s3);
   border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  color: var(--text-muted);
-  transition: color 0.15s, background 0.15s;
+  font-size: var(--fs-sm);
+  color: var(--text-3);
+  transition: color var(--dur-fast) var(--ease),
+              background var(--dur-fast) var(--ease);
+  user-select: none;
 }
+.tab:hover  { color: var(--text-2); background: var(--surface-2); }
+.tab.active { color: var(--text);   background: var(--surface-2); }
 
-.tab:hover {
-  color: var(--text);
-  background: var(--surface-2);
-}
-
-.tab.active {
-  color: var(--accent);
-  background: var(--surface-2);
-}
-
-/* ── Body row (panel + sidebar) ── */
-
+/* ── Body row ── */
 #body-row {
   display: flex;
   flex: 1;
   overflow: hidden;
+  position: relative;
 }
 
-#panel {
+/* ── Viewport — clips the sliding stage ── */
+#viewport {
   flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Stage — holds all module panels side by side ── */
+#stage {
+  display: flex;
+  height: 100%;
+  will-change: transform;
+  /* transition applied by JS when snapping, removed during drag */
+}
+
+/* ── Each module panel ── */
+.module-panel {
+  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
   overflow-y: auto;
-  padding: var(--space-5);
+  overflow-x: hidden;
+  padding: var(--s5);
 }
 
 /* ── Notes sidebar ── */
-
 #sidebar {
-  width: 260px;
-  border-left: 1px solid var(--border);
+  width: var(--sidebar-w);
+  border-left: 1px solid var(--border-dim);
   background: var(--surface);
   display: flex;
-  flex-direction: row;
   flex-shrink: 0;
-  transition: width 0.2s ease;
   overflow: hidden;
+  transition: width var(--dur-base) var(--ease-out);
 }
 
 #sidebar.collapsed {
   width: 28px;
 }
-
 #sidebar.collapsed #sidebar-body {
-  display: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
 #sidebar-toggle {
@@ -79,22 +92,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-muted);
-  font-size: 16px;
-  border-right: 1px solid var(--border);
+  color: var(--text-3);
+  font-size: 14px;
+  border-right: 1px solid var(--border-dim);
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
-  writing-mode: vertical-lr;
-  letter-spacing: 2px;
+  transition: color var(--dur-fast) var(--ease),
+              background var(--dur-fast) var(--ease);
 }
-
-#sidebar-toggle:hover {
-  color: var(--text);
-  background: var(--surface-2);
-}
+#sidebar-toggle:hover { color: var(--text-2); background: var(--surface-2); }
 
 #sidebar-body {
   flex: 1;
   overflow-y: auto;
   min-width: 0;
+  transition: opacity var(--dur-base) var(--ease);
 }
