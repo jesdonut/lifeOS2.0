@@ -26,23 +26,46 @@ export function getPeriodEntries(data) {
 export function periodStats(entries) {
   if (entries.length < 2) return null;
 
-  const cycles = [];
+  const allCycles = [];
   for (let i = 1; i < entries.length; i++) {
-    const len = daysBetween(parseDate(entries[i - 1].start), parseDate(entries[i].start));
-    if (len >= 15 && len <= 90) cycles.push(len);
+    allCycles.push(daysBetween(parseDate(entries[i - 1].start), parseDate(entries[i].start)));
   }
 
-  if (!cycles.length) return null;
+  // Only filter < 21 days (data artifacts). Long cycles are real — do not exclude.
+  const usable = allCycles.filter(l => l >= 21);
+  if (!usable.length) return null;
 
-  const sorted = [...cycles].sort((a, b) => a - b);
-  const sum = cycles.reduce((a, b) => a + b, 0);
+  // Exponential weighted moving average — all cycles contribute, recent ones count more.
+  // λ=0.88: weight halves every ~5 cycles. A cycle from 5 years ago still counts, just less.
+  const lambda = 0.88;
+  let wSum = 0, wTotal = 0;
+  for (let i = 0; i < usable.length; i++) {
+    const w = Math.pow(lambda, usable.length - 1 - i);
+    wSum   += usable[i] * w;
+    wTotal += w;
+  }
+  const avg = wSum / wTotal;
+
+  // Weighted stdev
+  let wVarSum = 0;
+  for (let i = 0; i < usable.length; i++) {
+    const w = Math.pow(lambda, usable.length - 1 - i);
+    wVarSum += w * Math.pow(usable[i] - avg, 2);
+  }
+  const stdev = Math.sqrt(wVarSum / wTotal);
+
+  const sorted = [...usable].sort((a, b) => a - b);
 
   return {
-    min: sorted[0],
-    max: sorted[sorted.length - 1],
-    med: sorted[Math.floor(sorted.length / 2)],
-    avg: Math.round(sum / cycles.length),
-    count: cycles.length,
+    avg:       Math.round(avg),
+    med:       sorted[Math.floor(sorted.length / 2)],
+    min:       sorted[0],
+    max:       sorted[sorted.length - 1],
+    stdev:     Math.round(stdev * 10) / 10,
+    count:     usable.length,
+    windowMin: Math.round(avg - stdev),
+    windowMax: Math.round(avg + stdev),
+    irregular: stdev > 9,
   };
 }
 
@@ -50,20 +73,25 @@ export function currentWindow(entries, stats) {
   if (!entries.length || !stats) return null;
   const last = parseDate(entries[entries.length - 1].start);
   return {
-    earliest: addDays(last, stats.min),
-    center:   addDays(last, stats.med),
-    latest:   addDays(last, stats.max),
+    earliest: addDays(last, stats.windowMin),
+    center:   addDays(last, stats.avg),
+    latest:   addDays(last, stats.windowMax),
   };
 }
 
 export function futurePredictions(entries, stats, n = 5) {
   if (!entries.length || !stats) return [];
   const last = parseDate(entries[entries.length - 1].start);
-  return Array.from({ length: n }, (_, i) => ({
-    earliest: addDays(last, stats.min * (i + 1)),
-    center:   addDays(last, stats.med * (i + 1)),
-    latest:   addDays(last, stats.max * (i + 1)),
-  }));
+  // Uncertainty compounds: window widens honestly for further predictions
+  return Array.from({ length: n }, (_, i) => {
+    const k = i + 1;
+    const spread = Math.round(Math.sqrt(k) * stats.stdev);
+    return {
+      earliest: addDays(last, stats.avg * k - spread),
+      center:   addDays(last, stats.avg * k),
+      latest:   addDays(last, stats.avg * k + spread),
+    };
+  });
 }
 
 export function ovulationDay(window) {

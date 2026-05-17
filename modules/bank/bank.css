@@ -1,0 +1,143 @@
+/* bank.css — Bank module styles */
+
+/* ── Layout ────────────────────────────────────────────────────────────────── */
+
+.bank-module {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  max-width: 860px;
+}
+
+/* ── Totals bar ────────────────────────────────────────────────────────────── */
+
+.bank-totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.bank-total-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  min-width: 180px;
+}
+
+.bank-total-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bank-total-amount {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Account grid ──────────────────────────────────────────────────────────── */
+
+.bank-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+/* ── Account card ──────────────────────────────────────────────────────────── */
+
+.bank-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.15s;
+}
+
+.bank-card:hover {
+  border-color: var(--accent-dim);
+}
+
+.bank-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.bank-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bank-card-name {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bank-card-bank {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.bank-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.bank-card-balance {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.bank-card-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-3);
+}
+
+/* ── Buttons (small variant) ───────────────────────────────────────────────── */
+
+.btn-sm {
+  font-size: var(--text-sm);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+}
+
+/* ── Confirm modal text ────────────────────────────────────────────────────── */
+
+.bank-confirm-text {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: var(--space-3) 0 var(--space-2);
+  line-height: 1.6;
+}
+
+/* ── Small modal variant ───────────────────────────────────────────────────── */
+
+.modal.modal-sm {
+  max-width: 380px;
+}

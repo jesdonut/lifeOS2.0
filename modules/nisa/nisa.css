@@ -1,0 +1,284 @@
+/* nisa.css — NISA module styles */
+
+.nisa-root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* ── Summary grid ── */
+
+.nisa-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+.nisa-summary-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.nisa-summary-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.nisa-summary-amount {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.nisa-summary-sublabel {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.nisa-summary-sublabel.warn {
+  color: var(--warning);
+  font-weight: 500;
+}
+
+/* ── Progress bar ── */
+
+.nisa-progress-track {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.nisa-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.nisa-progress-fill.warn {
+  background: var(--warning);
+}
+
+.nisa-progress-fill.full {
+  background: var(--negative);
+}
+
+/* ── Year selector ── */
+
+.nisa-year-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.nisa-year-label {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* ── Section ── */
+
+.nisa-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.nisa-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.nisa-section-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+/* ── Table ── */
+
+.nisa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.nisa-table th {
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.nisa-table td {
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.nisa-table tr:last-child td {
+  border-bottom: none;
+}
+
+.nisa-table tbody tr:hover td {
+  background: var(--surface-2);
+}
+
+.nisa-table .col-amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.nisa-table .col-action {
+  width: 40px;
+  text-align: right;
+}
+
+/* ── Empty state ── */
+
+.nisa-empty {
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
+
+/* ── Delete button ── */
+
+.nisa-delete-btn {
+  opacity: 0;
+  transition: opacity 0.12s;
+  color: var(--negative);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  line-height: 1;
+}
+
+.nisa-table tbody tr:hover .nisa-delete-btn {
+  opacity: 1;
+}
+
+.nisa-delete-btn:hover {
+  background: color-mix(in srgb, var(--negative) 15%, transparent);
+}
+
+/* ── Type chips ── */
+
+.nisa-chip-tsumitate {
+  display: inline-block;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.nisa-chip-growth {
+  display: inline-block;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  background: color-mix(in srgb, var(--positive) 18%, transparent);
+  color: var(--positive);
+  white-space: nowrap;
+}
+
+/* ── Modal ── */
+
+.nisa-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.nisa-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.nisa-modal-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.nisa-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+
+.nisa-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.nisa-form-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.nisa-form-input {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  color: var(--text);
+  width: 100%;
+  font-size: var(--text-base);
+  font-family: inherit;
+}
+
+.nisa-form-input:focus {
+  outline: none;
+  border-color: var(--accent-dim);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 600px) {
+  .nisa-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .nisa-table th:nth-child(4),
+  .nisa-table td:nth-child(4) {
+    display: none;
+  }
+}

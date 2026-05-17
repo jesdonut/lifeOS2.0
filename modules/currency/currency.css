@@ -1,0 +1,243 @@
+/* currency.css — Currency module styles */
+
+.currency-root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* ── Rates section ── */
+
+.currency-rates {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.currency-rate-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.currency-rate-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.currency-rate-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.currency-rate-value {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.currency-rate-meta {
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+}
+
+.currency-rate-edit {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin-top: var(--space-1);
+}
+
+.currency-rate-edit .form-input {
+  max-width: 160px;
+}
+
+/* ── Lots section ── */
+
+.currency-lots-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.currency-lots-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.currency-lots-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+/* ── Lots table ── */
+
+.currency-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.currency-table th {
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  white-space: nowrap;
+}
+
+.currency-table td {
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.currency-table tr:last-child td {
+  border-bottom: none;
+}
+
+.currency-table tbody tr:hover td {
+  background: var(--surface-2);
+}
+
+.currency-table .col-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.currency-table .col-action {
+  width: 40px;
+  text-align: right;
+}
+
+.currency-table .col-date {
+  white-space: nowrap;
+}
+
+.currency-table .col-notes {
+  color: var(--text-muted);
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Delete button (hover-reveal) ── */
+
+.currency-delete-btn {
+  opacity: 0;
+  transition: opacity 0.12s;
+  color: var(--negative);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  line-height: 1;
+}
+
+.currency-table tbody tr:hover .currency-delete-btn {
+  opacity: 1;
+}
+
+.currency-delete-btn:hover {
+  background: color-mix(in srgb, var(--negative) 15%, transparent);
+}
+
+/* ── Empty state inside table ── */
+
+.currency-empty {
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
+
+/* ── Summary section ── */
+
+.currency-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+.currency-summary-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.currency-summary-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.currency-summary-amount {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.currency-summary-sub {
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+}
+
+/* ── Modal: lot form ── */
+
+.currency-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.currency-modal-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 680px) {
+  .currency-rates {
+    grid-template-columns: 1fr;
+  }
+
+  .currency-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .currency-table th,
+  .currency-table td {
+    padding: var(--space-2);
+  }
+
+  .currency-modal-form .form-row {
+    grid-template-columns: 1fr;
+  }
+}

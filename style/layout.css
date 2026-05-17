@@ -1,0 +1,100 @@
+/* layout.css — shell, tab bar, panel, sidebar */
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Tab bar ── */
+
+#tab-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-4);
+  height: var(--tab-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.tab {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  transition: color 0.15s, background 0.15s;
+}
+
+.tab:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.tab.active {
+  color: var(--accent);
+  background: var(--surface-2);
+}
+
+/* ── Body row (panel + sidebar) ── */
+
+#body-row {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+#panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5);
+}
+
+/* ── Notes sidebar ── */
+
+#sidebar {
+  width: 260px;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  transition: width 0.2s ease;
+  overflow: hidden;
+}
+
+#sidebar.collapsed {
+  width: 28px;
+}
+
+#sidebar.collapsed #sidebar-body {
+  display: none;
+}
+
+#sidebar-toggle {
+  width: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 16px;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  writing-mode: vertical-lr;
+  letter-spacing: 2px;
+}
+
+#sidebar-toggle:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+#sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  min-width: 0;
+}
