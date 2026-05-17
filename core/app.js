@@ -1,4 +1,4 @@
-// app.js — tab routing, gesture navigation, notes sidebar
+// app.js — tab routing, gesture navigation, notes sidebar, theme
 
 import { load, save, subscribe } from './store.js';
 import { initGestures } from './gestures.js';
@@ -113,7 +113,100 @@ function setSidebar(collapsed, persist) {
   if (persist) localStorage.setItem(SIDEBAR_KEY, collapsed ? '0' : '1');
 }
 
+// ── Theme ──────────────────────────────────────────────────────────
+const THEME_KEY = 'lifeOS_landing_theme';
+let _theme = localStorage.getItem(THEME_KEY) || 'dark';
+
+function applyTheme(t) {
+  _theme = t;
+  document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : '');
+  localStorage.setItem(THEME_KEY, t);
+  themeBtn.textContent = t === 'light' ? '☾' : '☀︎';
+}
+
+// ── Settings panel ─────────────────────────────────────────────────
+let _settingsOpen = false;
+
+function toggleSettings() {
+  if (_settingsOpen) { closeSettings(); return; }
+  _settingsOpen = true;
+  settingsBtn.classList.add('active');
+
+  const panel = document.createElement('div');
+  panel.id = 'settings-panel';
+
+  panel.innerHTML = `
+    <div class="sp-header">
+      <span class="sp-title">Settings</span>
+      <button class="sp-close" id="sp-close">✕</button>
+    </div>
+    <div class="sp-section">
+      <div class="sp-label">Appearance</div>
+      <div class="sp-row">
+        <span class="sp-row-name">Theme</span>
+        <div class="sp-theme-btns" id="sp-theme-btns">
+          <button class="sp-theme-btn${_theme === 'dark'  ? ' active' : ''}" data-theme="dark">Dark</button>
+          <button class="sp-theme-btn${_theme === 'light' ? ' active' : ''}" data-theme="light">Light</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('app').appendChild(panel);
+
+  panel.querySelector('#sp-close').addEventListener('click', closeSettings);
+  panel.querySelector('#sp-theme-btns').addEventListener('click', e => {
+    const t = e.target.dataset.theme;
+    if (!t) return;
+    applyTheme(t);
+    panel.querySelectorAll('.sp-theme-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.theme === t)
+    );
+  });
+
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', outsideClose);
+  }, 0);
+}
+
+function closeSettings() {
+  _settingsOpen = false;
+  settingsBtn.classList.remove('active');
+  document.getElementById('settings-panel')?.remove();
+  document.removeEventListener('click', outsideClose);
+}
+
+function outsideClose(e) {
+  const panel = document.getElementById('settings-panel');
+  if (panel && !panel.contains(e.target) && e.target !== settingsBtn) closeSettings();
+}
+
+// ── Tab bar — tabs + right-side controls ───────────────────────────
+const tabRight = document.createElement('div');
+tabRight.id = 'tab-right';
+
+const themeBtn = document.createElement('button');
+themeBtn.id = 'theme-btn';
+themeBtn.className = 'tab-ctrl-btn';
+
+const settingsBtn = document.createElement('button');
+settingsBtn.id = 'settings-btn';
+settingsBtn.className = 'tab-ctrl-btn';
+settingsBtn.textContent = '⚙';
+settingsBtn.addEventListener('click', e => { e.stopPropagation(); toggleSettings(); });
+
+themeBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  applyTheme(_theme === 'dark' ? 'light' : 'dark');
+});
+
+tabRight.append(themeBtn, settingsBtn);
+tabBar.appendChild(tabRight);
+
 // ── Boot ───────────────────────────────────────────────────────────
+applyTheme(_theme);
+
 const _data = load();
 if (!_data.settings?.setupDone) {
   window.location.href = 'landing.html';

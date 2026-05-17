@@ -79,7 +79,10 @@ html, body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
+  color-scheme: dark;
 }
+
+[data-theme="light"] { color-scheme: light; }
 
 button {
   font-family: inherit;
