@@ -6,9 +6,11 @@ function defaultData() {
   return {
     version: 2,
     settings: {
-      timezone:  'Asia/Tokyo',
-      birthYear: null,
+      timezone:   'Asia/Tokyo',
+      birthYear:  null,
       currencies: ['JPY', 'IDR'],
+      weekStart:  'mon',
+      setupDone:  true,
     },
     period:   { entries: [], spotting: [], symptoms: {}, discharge: {}, bbt: {}, settings: {} },
     calendar: { events: [] },

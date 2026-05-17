@@ -415,8 +415,12 @@ function closeModal() {
 function saveEvent(evt) {
   const evts = [...events()];
   const idx  = evts.findIndex(e => e.id === evt.id);
-  if (idx >= 0) evts[idx] = evt;
-  else evts.push(evt);
+  const now  = new Date().toISOString();
+  if (idx >= 0) {
+    evts[idx] = { ...evt, createdAt: evts[idx].createdAt ?? now, updatedAt: now };
+  } else {
+    evts.push({ ...evt, createdAt: now });
+  }
   _onSave({ calendar: { events: evts } });
 }
 
