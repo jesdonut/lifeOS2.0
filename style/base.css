@@ -31,6 +31,17 @@
   --predicted:    var(--blue);
   --fertile:      var(--green);
 
+  /* Calendar event categories — fixed, not user-configurable */
+  --cat-work:      #B8C89A;
+  --cat-personal:  #D69AA5;
+  --cat-health:    #C79A9A;
+  --cat-family:    #86AFC5;
+  --cat-friends:   #7C9CCB;
+  --cat-travel:    #D1B36A;
+  --cat-education: #8FAFA2;
+  --cat-project:   #C49A73;
+  --cat-partner:   #B7A6B5;
+
   /* Motion */
   --ease:       cubic-bezier(0.25, 0.1, 0.25, 1);
   --ease-out:   cubic-bezier(0, 0, 0.2, 1);

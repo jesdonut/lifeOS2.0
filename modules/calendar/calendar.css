@@ -1,0 +1,330 @@
+/* calendar.css */
+
+/* ── Shell ── */
+.cal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: 0 var(--s5);
+  height: 48px;
+  border-bottom: 1px solid var(--border-dim);
+  flex-shrink: 0;
+}
+
+.cal-year-btn {
+  color: var(--text-3);
+  font-size: var(--fs-lg);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.cal-year-btn:hover { color: var(--text); background: var(--surface-2); }
+
+.cal-year-label {
+  font-family: var(--mono);
+  font-size: var(--fs-lg);
+  font-weight: 500;
+  color: var(--text);
+  min-width: 52px;
+  text-align: center;
+}
+
+.cal-today-btn {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding: 2px var(--s2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-dim);
+  transition: color var(--dur-fast), border-color var(--dur-fast);
+}
+.cal-today-btn:hover { color: var(--text-2); border-color: var(--border); }
+
+.cal-add-btn {
+  margin-left: auto;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding: var(--s1) var(--s3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-dim);
+  transition: color var(--dur-fast), border-color var(--dur-fast);
+}
+.cal-add-btn:hover { color: var(--accent); border-color: var(--accent-2); }
+
+/* ── Months scroll area ── */
+.cal-scroll {
+  flex: 1;
+  overflow-y: auto;
+  scroll-snap-type: y proximity;
+}
+
+.cal-month {
+  scroll-snap-align: start;
+  min-height: 100%;
+  padding: var(--s4) var(--s5) var(--s6);
+}
+
+.cal-month-title {
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-3);
+  margin-bottom: var(--s3);
+}
+
+/* ── Day grid ── */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-dow-row { margin-bottom: 2px; }
+
+.cal-dow {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  text-align: center;
+  padding: var(--s1) 0;
+}
+
+.cal-cell {
+  min-height: 76px;
+  padding: var(--s1) var(--s2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background var(--dur-fast) var(--ease);
+  overflow: hidden;
+}
+.cal-cell:hover { background: var(--surface-2); }
+
+.cal-cell.today { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.cal-cell.today .cal-day-num { color: var(--accent); font-weight: 600; }
+
+.cal-cell.other-month { opacity: 0.25; pointer-events: none; }
+
+.cal-day-num {
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  margin-bottom: 3px;
+  line-height: 1;
+}
+
+/* ── Event chips ── */
+.cal-evt {
+  font-size: 10px;
+  padding: 1px var(--s2);
+  border-radius: 3px;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  line-height: 1.5;
+}
+.cal-evt:hover { opacity: 0.85; }
+
+.cal-evt-more {
+  font-size: 10px;
+  color: var(--text-3);
+  padding-left: 2px;
+}
+
+/* ── Category colors ── */
+.evt-work      { background: color-mix(in srgb, var(--cat-work)      18%, transparent); color: var(--cat-work); }
+.evt-personal  { background: color-mix(in srgb, var(--cat-personal)  18%, transparent); color: var(--cat-personal); }
+.evt-health    { background: color-mix(in srgb, var(--cat-health)     18%, transparent); color: var(--cat-health); }
+.evt-family    { background: color-mix(in srgb, var(--cat-family)     18%, transparent); color: var(--cat-family); }
+.evt-friends   { background: color-mix(in srgb, var(--cat-friends)    18%, transparent); color: var(--cat-friends); }
+.evt-travel    { background: color-mix(in srgb, var(--cat-travel)     18%, transparent); color: var(--cat-travel); }
+.evt-education { background: color-mix(in srgb, var(--cat-education)  18%, transparent); color: var(--cat-education); }
+.evt-project   { background: color-mix(in srgb, var(--cat-project)    18%, transparent); color: var(--cat-project); }
+.evt-partner   { background: color-mix(in srgb, var(--cat-partner)    18%, transparent); color: var(--cat-partner); }
+
+/* ── Modal overlay ── */
+.cal-modal {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg) 65%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: var(--s5);
+}
+
+.cal-modal-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--s5);
+  width: min(420px, 100%);
+  max-height: 85%;
+  overflow-y: auto;
+  box-shadow: 0 8px 40px color-mix(in srgb, var(--bg) 60%, transparent);
+}
+
+.cal-modal-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--s4);
+}
+
+.cal-modal-date {
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cal-modal-close {
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+  padding: var(--s1) var(--s2);
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  transition: color var(--dur-fast), background var(--dur-fast);
+}
+.cal-modal-close:hover { color: var(--text); background: var(--surface-3); }
+
+/* ── Event list in modal ── */
+.cal-modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  margin-bottom: var(--s4);
+}
+
+.cal-modal-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s3);
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+}
+
+.cal-modal-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cal-modal-evt-title {
+  flex: 1;
+  font-size: var(--fs-sm);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cal-modal-cat {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  text-transform: capitalize;
+}
+
+.cal-modal-edit-btn {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding: 2px var(--s2);
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast), background var(--dur-fast);
+}
+.cal-modal-edit-btn:hover { color: var(--text-2); background: var(--surface-2); }
+
+.cal-modal-del-row {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  transition: color var(--dur-fast);
+}
+.cal-modal-del-row:hover { color: var(--red); }
+
+/* ── Add / Edit form ── */
+.cal-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  border-top: 1px solid var(--border-dim);
+  padding-top: var(--s4);
+}
+
+.cal-form-label {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--s2);
+}
+
+.cal-modal-input {
+  width: 100%;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--s2) var(--s3);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  transition: border-color var(--dur-fast);
+}
+.cal-modal-input:focus { border-color: var(--accent-2); }
+
+.cal-cat-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}
+
+.cal-cat-chip {
+  padding: 3px var(--s3);
+  border-radius: 100px;
+  font-size: var(--fs-xs);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: opacity var(--dur-fast), border-color var(--dur-fast);
+  opacity: 0.4;
+}
+.cal-cat-chip:hover  { opacity: 0.75; }
+.cal-cat-chip.selected { opacity: 1; border-color: currentColor; }
+
+.cal-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s3);
+  padding-top: var(--s2);
+}
+
+.cal-del-btn {
+  font-size: var(--fs-sm);
+  color: var(--text-3);
+  padding: var(--s2) var(--s3);
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast), background var(--dur-fast);
+}
+.cal-del-btn:hover { color: var(--red); background: color-mix(in srgb, var(--red) 10%, transparent); }
+
+.cal-save-btn {
+  padding: var(--s2) var(--s5);
+  background: var(--accent);
+  color: var(--bg);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  border-radius: 100px;
+  transition: background var(--dur-fast), transform 80ms;
+}
+.cal-save-btn:hover  { background: var(--accent-2); }
+.cal-save-btn:active { transform: scale(0.97); }
