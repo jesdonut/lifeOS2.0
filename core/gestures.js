@@ -52,6 +52,10 @@ export function initGestures({ stage, getIndex, getCount, onSwitch }) {
     clearTimeout(timer);
     timer = setTimeout(() => { snap(); }, IDLE_MS);
 
+    // Prevent browser back/forward navigation: intercept any predominantly
+    // horizontal swipe before the browser's own gesture recognizer sees it.
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) e.preventDefault();
+
     // Accumulate before axis locks
     if (!axis) {
       accX += Math.abs(e.deltaX);

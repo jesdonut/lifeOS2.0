@@ -368,14 +368,24 @@ function openModal(date, editId = null) {
   actions.className = 'cal-modal-actions';
 
   if (editing) {
+    const parkBtn = document.createElement('button');
+    parkBtn.className = 'cal-del-btn';
+    parkBtn.textContent = 'Park for later';
+    parkBtn.title = 'Move to unscheduled — find it in the Notes sidebar';
+    parkBtn.addEventListener('click', () => {
+      saveEvent({ ...editing, date: null });
+      closeModal();
+    });
+
     const delBtn = document.createElement('button');
     delBtn.className = 'cal-del-btn';
-    delBtn.textContent = 'Delete event';
+    delBtn.textContent = 'Delete';
     delBtn.addEventListener('click', () => {
       removeEvent(editing.id);
       openModal(date);
     });
-    actions.appendChild(delBtn);
+
+    actions.append(parkBtn, delBtn);
   }
 
   const saveBtn = document.createElement('button');
