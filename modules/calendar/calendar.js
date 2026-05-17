@@ -6,17 +6,31 @@ const MONTHS = [
 ];
 const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
-const CATS = [
-  { key: 'work',      label: 'Work' },
-  { key: 'personal',  label: 'Personal' },
-  { key: 'health',    label: 'Health' },
-  { key: 'family',    label: 'Family' },
-  { key: 'friends',   label: 'Friends' },
-  { key: 'travel',    label: 'Travel' },
-  { key: 'education', label: 'Education' },
-  { key: 'project',   label: 'Project' },
-  { key: 'partner',   label: 'Partner' },
+const DEFAULT_CATS = [
+  { id: 'work',      name: 'Work',      isCustom: false },
+  { id: 'personal',  name: 'Personal',  isCustom: false },
+  { id: 'health',    name: 'Health',    isCustom: false },
+  { id: 'family',    name: 'Family',    isCustom: false },
+  { id: 'friends',   name: 'Friends',   isCustom: false },
+  { id: 'travel',    name: 'Travel',    isCustom: false },
+  { id: 'education', name: 'Education', isCustom: false },
+  { id: 'project',   name: 'Project',   isCustom: false },
+  { id: 'partner',   name: 'Partner',   isCustom: false },
 ];
+
+function cats() { return _data.settings?.categories ?? DEFAULT_CATS; }
+
+function catColor(id) {
+  const cat = cats().find(c => c.id === id);
+  return cat?.isCustom && cat.color ? cat.color : `var(--cat-${id})`;
+}
+
+function catBg(id) {
+  const cat = cats().find(c => c.id === id);
+  if (cat?.isCustom && cat.color)
+    return `color-mix(in srgb, ${cat.color} 18%, transparent)`;
+  return '';  // let CSS class handle it
+}
 
 let _container, _data, _onSave;
 let _year = new Date().getFullYear();
@@ -235,8 +249,11 @@ function buildMonths(scroll) {
       evtList.dataset.date = key;
 
       evts.forEach(evt => {
-        const chip = document.createElement('div');
-        chip.className = `cal-evt evt-${evt.category ?? 'personal'}`;
+        const catId = evt.category ?? 'personal';
+        const bg    = catBg(catId);
+        const chip  = document.createElement('div');
+        chip.className = `cal-evt${bg ? '' : ` evt-${catId}`}`;
+        if (bg) { chip.style.background = bg; chip.style.color = catColor(catId); }
         chip.dataset.id = evt.id;
         chip.textContent = evt.title;
         chip.addEventListener('click', e => {
@@ -318,7 +335,7 @@ function openModal(date, editId = null) {
 
       const dot = document.createElement('span');
       dot.className = 'cal-modal-dot';
-      dot.style.background = `var(--cat-${evt.category ?? 'personal'})`;
+      dot.style.background = catColor(evt.category ?? 'personal');
 
       const title = document.createElement('span');
       title.className = 'cal-modal-evt-title';
@@ -364,17 +381,28 @@ function openModal(date, editId = null) {
   let selectedCat = editing?.category ?? 'personal';
   const catGrid = document.createElement('div');
   catGrid.className = 'cal-cat-grid';
-  CATS.forEach(c => {
+  cats().forEach(c => {
+    const bg   = catBg(c.id);
     const chip = document.createElement('button');
     chip.type = 'button';
-    chip.className = `cal-cat-chip evt-${c.key}${selectedCat === c.key ? ' selected' : ''}`;
-    chip.dataset.cat = c.key;
-    chip.textContent = c.label;
+    chip.className = `cal-cat-chip${bg ? '' : ` evt-${c.id}`}${selectedCat === c.id ? ' selected' : ''}`;
+    chip.dataset.cat = c.id;
+    chip.textContent = c.name;
+    if (bg) {
+      chip.style.background = bg;
+      chip.style.color = catColor(c.id);
+      if (selectedCat === c.id) chip.style.borderColor = catColor(c.id);
+    }
     chip.addEventListener('click', () => {
-      selectedCat = c.key;
-      catGrid.querySelectorAll('.cal-cat-chip').forEach(b =>
-        b.classList.toggle('selected', b.dataset.cat === c.key)
-      );
+      selectedCat = c.id;
+      catGrid.querySelectorAll('.cal-cat-chip').forEach(b => {
+        const isSelected = b.dataset.cat === c.id;
+        b.classList.toggle('selected', isSelected);
+        const bcat = cats().find(x => x.id === b.dataset.cat);
+        if (bcat?.isCustom && bcat.color) {
+          b.style.borderColor = isSelected ? bcat.color : '';
+        }
+      });
     });
     catGrid.appendChild(chip);
   });

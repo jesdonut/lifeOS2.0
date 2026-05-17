@@ -2,6 +2,7 @@
 
 import { load, save, subscribe } from './store.js';
 import { initGestures } from './gestures.js';
+import { openSettings } from './settings.js';
 
 const TABS = ['calendar', 'period', 'finance', 'bank', 'currency', 'nisa', 'savings'];
 
@@ -125,61 +126,14 @@ function applyTheme(t) {
 }
 
 // ── Settings panel ─────────────────────────────────────────────────
-let _settingsOpen = false;
 
 function toggleSettings() {
-  if (_settingsOpen) { closeSettings(); return; }
-  _settingsOpen = true;
-  settingsBtn.classList.add('active');
-
-  const panel = document.createElement('div');
-  panel.id = 'settings-panel';
-
-  panel.innerHTML = `
-    <div class="sp-header">
-      <span class="sp-title">Settings</span>
-      <button class="sp-close" id="sp-close">✕</button>
-    </div>
-    <div class="sp-section">
-      <div class="sp-label">Appearance</div>
-      <div class="sp-row">
-        <span class="sp-row-name">Theme</span>
-        <div class="sp-theme-btns" id="sp-theme-btns">
-          <button class="sp-theme-btn${_theme === 'dark'  ? ' active' : ''}" data-theme="dark">Dark</button>
-          <button class="sp-theme-btn${_theme === 'light' ? ' active' : ''}" data-theme="light">Light</button>
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('app').appendChild(panel);
-
-  panel.querySelector('#sp-close').addEventListener('click', closeSettings);
-  panel.querySelector('#sp-theme-btns').addEventListener('click', e => {
-    const t = e.target.dataset.theme;
-    if (!t) return;
-    applyTheme(t);
-    panel.querySelectorAll('.sp-theme-btn').forEach(b =>
-      b.classList.toggle('active', b.dataset.theme === t)
-    );
+  openSettings({
+    data:          load(),
+    onSave:        partial => save(partial),
+    theme:         _theme,
+    onThemeChange: t => applyTheme(t),
   });
-
-  // Close on outside click
-  setTimeout(() => {
-    document.addEventListener('click', outsideClose);
-  }, 0);
-}
-
-function closeSettings() {
-  _settingsOpen = false;
-  settingsBtn.classList.remove('active');
-  document.getElementById('settings-panel')?.remove();
-  document.removeEventListener('click', outsideClose);
-}
-
-function outsideClose(e) {
-  const panel = document.getElementById('settings-panel');
-  if (panel && !panel.contains(e.target) && e.target !== settingsBtn) closeSettings();
 }
 
 // ── Tab bar — tabs + right-side controls ───────────────────────────
