@@ -117,6 +117,10 @@
 }
 
 /* ── Event chips ── */
+.cal-evt-list {
+  min-height: 4px;
+}
+
 .cal-evt {
   font-size: 10px;
   padding: 1px var(--s2);

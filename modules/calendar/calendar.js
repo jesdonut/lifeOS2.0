@@ -136,6 +136,21 @@ function renderGrid() {
   scroll.scrollTop = top;
 }
 
+function initSortable(scroll) {
+  scroll.querySelectorAll('.cal-evt-list').forEach(list => {
+    Sortable.create(list, {
+      group:     'cal-events',
+      animation: 120,
+      onEnd(evt) {
+        if (evt.from === evt.to) return;
+        const id      = evt.item.dataset.id;
+        const newDate = evt.to.dataset.date;
+        moveEvent(id, newDate);
+      },
+    });
+  });
+}
+
 function buildMonths(scroll) {
   scroll.innerHTML = '';
 
@@ -197,24 +212,24 @@ function buildMonths(scroll) {
       num.textContent = d;
       cell.appendChild(num);
 
-      evts.slice(0, 3).forEach(evt => {
+      // Sortable event list — drag events between days
+      const evtList = document.createElement('div');
+      evtList.className = 'cal-evt-list';
+      evtList.dataset.date = key;
+
+      evts.forEach(evt => {
         const chip = document.createElement('div');
         chip.className = `cal-evt evt-${evt.category ?? 'personal'}`;
+        chip.dataset.id = evt.id;
         chip.textContent = evt.title;
         chip.addEventListener('click', e => {
           e.stopPropagation();
           openModal(key, evt.id);
         });
-        cell.appendChild(chip);
+        evtList.appendChild(chip);
       });
 
-      if (evts.length > 3) {
-        const more = document.createElement('div');
-        more.className = 'cal-evt-more';
-        more.textContent = `+${evts.length - 3} more`;
-        cell.appendChild(more);
-      }
-
+      cell.appendChild(evtList);
       cell.addEventListener('click', () => openModal(key));
       grid.appendChild(cell);
     }
@@ -232,6 +247,8 @@ function buildMonths(scroll) {
     section.appendChild(grid);
     scroll.appendChild(section);
   }
+
+  initSortable(scroll);
 }
 
 function scrollToMonth(month) {
@@ -405,4 +422,9 @@ function saveEvent(evt) {
 
 function removeEvent(id) {
   _onSave({ calendar: { events: events().filter(e => e.id !== id) } });
+}
+
+function moveEvent(id, newDate) {
+  const evts = events().map(e => e.id === id ? { ...e, date: newDate } : e);
+  _onSave({ calendar: { events: evts } });
 }
