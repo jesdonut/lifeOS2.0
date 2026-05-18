@@ -163,7 +163,7 @@ applyTheme(_theme);
 
 const _data = load();
 if (!_data.settings?.setupDone) {
-  window.location.href = 'landing.html';
+  window.location.href = 'index.html';
 } else {
   switchTo(0);
   initSidebar();

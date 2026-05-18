@@ -14,10 +14,10 @@
 <body>
 
 <nav>
-  <a class="nav-logo" href="landing.html">LifeOS</a>
+  <a class="nav-logo" href="index.html">LifeOS</a>
   <div style="display:flex;align-items:center;gap:var(--s3)">
     <button id="theme-toggle" style="padding:7px var(--s4);border-radius:100px;border:1px solid var(--border);color:var(--text-2);font-size:var(--fs-sm);font-weight:600;background:var(--surface-2);cursor:pointer;transition:all 150ms ease">☀︎ Light</button>
-    <a class="nav-back" href="landing.html">
+    <a class="nav-back" href="index.html">
       <span class="material-symbols-outlined" style="font-size:16px">arrow_back</span>
       Back
     </a>
@@ -302,12 +302,12 @@
       }
     });
 
-    window.location.href = 'index.html';
+    window.location.href = 'app.html';
   });
 
   // ── Skip if already set up ────────────────────────────────────
   const d = load();
-  if (d.settings?.setupDone) window.location.href = 'index.html';
+  if (d.settings?.setupDone) window.location.href = 'app.html';
   if (d.settings?.name) document.getElementById('f-name').value = d.settings.name;
 </script>
 
