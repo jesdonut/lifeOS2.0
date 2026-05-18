@@ -1,0 +1,869 @@
+/* period.css — Period tracker module styles */
+
+/* ── Panel override: bleed gradient to edges ── */
+#panel-period { padding: 0; }
+
+/* ── Root + animated gradient ── */
+@keyframes pr-gradient-shift {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+
+.pr-root {
+  min-height: 100%;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--flow-heavy)  12%, var(--bg)),
+    color-mix(in srgb, var(--flow-medium) 8%,  var(--bg)),
+    color-mix(in srgb, var(--purple)      10%, var(--bg)),
+    color-mix(in srgb, var(--flow-light)  6%,  var(--bg))
+  );
+  background-size: 400% 400%;
+  animation: pr-gradient-shift 20s ease infinite;
+}
+
+.pr-content {
+  padding: var(--s5) var(--s5) var(--s7);
+}
+
+/* ── Top bar ── */
+.pr-top {
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+  padding: var(--s4) var(--s5);
+  border-bottom: 1px solid var(--border-dim);
+  flex-wrap: wrap;
+}
+
+.pr-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  flex-shrink: 0;
+}
+
+.pr-brand-name {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.pr-cycle-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--flow-medium);
+  background: color-mix(in srgb, var(--flow-medium) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--flow-medium) 25%, transparent);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* ── Tabs ── */
+.pr-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-dim);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.pr-tab {
+  padding: 5px var(--s4);
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.pr-tab:hover { color: var(--text); }
+
+.pr-tab.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+/* ── Meta ── */
+.pr-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.pr-dot {
+  color: var(--text-3);
+  opacity: 0.5;
+}
+
+/* ── Divider ── */
+.pr-hr {
+  border: none;
+  border-top: 1px solid var(--border-dim);
+  margin: var(--s5) 0;
+}
+
+/* ── Overview headline ── */
+.pr-headline {
+  padding-top: var(--s2);
+  margin-bottom: var(--s4);
+}
+
+.pr-h1 {
+  font-family: var(--brand-serif);
+  font-variation-settings: "opsz" 144;
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  margin-bottom: var(--s2);
+}
+
+.pr-em {
+  font-style: italic;
+  color: var(--flow-medium);
+}
+
+.pr-hl-sub {
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  line-height: 1.6;
+  margin-bottom: var(--s4);
+}
+
+/* ── Status pills ── */
+.pr-status-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}
+
+.pr-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px var(--s3);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  border: 1px solid var(--border-dim);
+  border-radius: 100px;
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  backdrop-filter: blur(8px);
+}
+
+.pr-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Year section ── */
+.pr-year-section {
+  margin-top: var(--s4);
+}
+
+.pr-year-hdr {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+  flex-wrap: wrap;
+}
+
+.pr-year-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pr-year-hint {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+}
+
+.pr-year-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s3);
+}
+
+/* ── Month card (mini) ── */
+.pr-month-card {
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius);
+  padding: var(--s3);
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, transform 120ms ease;
+  backdrop-filter: blur(8px);
+}
+
+.pr-month-card:hover {
+  border-color: var(--border);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  transform: translateY(-1px);
+}
+
+.pr-month-card.current {
+  border-color: color-mix(in srgb, var(--flow-medium) 40%, var(--border));
+}
+
+.pr-month-card.selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+}
+
+/* ── Month card header ── */
+.pr-month-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--s2);
+}
+
+.pr-month-name {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pr-month-badge {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.pr-month-badge.cycle-len {
+  color: var(--text-3);
+  background: var(--surface-2);
+}
+
+.pr-month-badge.now {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.pr-month-badge.coming-up {
+  color: var(--flow-medium);
+  background: color-mix(in srgb, var(--flow-medium) 12%, transparent);
+}
+
+.pr-month-snippet {
+  font-size: 9px;
+  color: var(--text-3);
+  margin-top: var(--s2);
+  line-height: 1.4;
+}
+
+/* ── Calendar grid (shared: mini + detail) ── */
+.pr-cal-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 1px;
+}
+
+.pr-cal-dow .pr-cal-cell {
+  font-size: 8px;
+  color: var(--text-3);
+  text-align: center;
+  padding-bottom: 3px;
+  font-weight: 500;
+}
+
+.pr-cal-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Day circle ── */
+.pr-day {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: var(--text-2);
+  position: relative;
+  transition: background 150ms ease;
+  box-sizing: border-box;
+}
+
+.pr-day-lg {
+  width: 32px;
+  height: 32px;
+  font-size: 11px;
+}
+
+.pr-day.today {
+  font-weight: 700;
+  color: var(--text);
+  box-shadow: 0 0 0 1.5px var(--text-2);
+}
+
+/* Flow: period days */
+.pr-day.period.flow-heavy {
+  background: var(--flow-heavy);
+  color: #fff;
+}
+
+.pr-day.period.flow-medium {
+  background: var(--flow-medium);
+  color: #fff;
+}
+
+.pr-day.period.flow-light {
+  background: color-mix(in srgb, var(--flow-light) 70%, transparent);
+  color: var(--text);
+}
+
+.pr-day.period.flow-none {
+  background: color-mix(in srgb, var(--flow-light) 30%, transparent);
+  color: var(--text-2);
+}
+
+/* Spotting: small dot below */
+.pr-day.spotting::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--flow-medium);
+}
+
+/* Predicted: dashed border */
+.pr-day.predicted {
+  border: 1.5px dashed color-mix(in srgb, var(--flow-medium) 50%, transparent);
+  color: var(--text-3);
+}
+
+/* Ovulation: purple ring */
+.pr-day.ovulation {
+  box-shadow: 0 0 0 2px var(--purple);
+  color: var(--text);
+}
+
+/* Fertile: subtle dot above */
+.pr-day.fertile::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--purple) 50%, transparent);
+}
+
+/* ── Month detail panel ── */
+.pr-detail {
+  margin-top: var(--s5);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 2px);
+  padding: var(--s5);
+  backdrop-filter: blur(12px);
+}
+
+.pr-detail-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--s4);
+}
+
+.pr-detail-title {
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pr-detail-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border-dim);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 150ms ease, color 150ms ease;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.pr-detail-close:hover { background: var(--surface); color: var(--text); }
+
+.pr-detail-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s5);
+}
+
+.pr-detail-left,
+.pr-detail-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+}
+
+.pr-detail-label {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  margin-bottom: var(--s2);
+}
+
+.pr-detail-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.pr-detail-cal {
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+  border-radius: var(--radius);
+  padding: var(--s3);
+}
+
+.pr-detail-empty {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  line-height: 1.6;
+  padding: var(--s3) 0;
+}
+
+/* ── Cycle block ── */
+.pr-cycle-block {
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius);
+  padding: var(--s3) var(--s4);
+}
+
+.pr-cycle-label {
+  font-family: var(--brand-serif);
+  font-variation-settings: "opsz" 144;
+  font-size: var(--fs-base);
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.pr-cycle-sub {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  margin-top: 4px;
+}
+
+/* ── BBT card ── */
+.pr-bbt-card {
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius);
+  padding: var(--s4);
+  overflow: hidden;
+}
+
+.pr-bbt-card-hl {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: var(--s1);
+}
+
+.pr-bbt-card-sub {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  line-height: 1.6;
+  margin-bottom: var(--s3);
+}
+
+.pr-bbt-stats {
+  display: flex;
+  gap: var(--s4);
+  margin-top: var(--s3);
+  flex-wrap: wrap;
+}
+
+.pr-bbt-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pr-bbt-stat-lbl {
+  font-size: 9px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pr-bbt-stat-val {
+  font-family: var(--brand-serif);
+  font-variation-settings: "opsz" 144;
+  font-size: var(--fs-base);
+  font-weight: 500;
+  color: var(--flow-medium);
+  line-height: 1.2;
+}
+
+.pr-bbt-stat-val.post { color: var(--purple); }
+.pr-bbt-stat-val.jump { color: var(--green); }
+
+.pr-bbt-stat-deg {
+  font-size: 0.65em;
+  opacity: 0.7;
+}
+
+/* ── Symptoms list (detail) ── */
+.pr-sym-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.pr-sym-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.pr-sym-emoji {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--surface-2) 80%, transparent);
+  border: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.pr-sym-text {
+  flex: 1;
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  line-height: 1.4;
+}
+
+.pr-sym-name {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.pr-sym-count {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* ── Today view ── */
+.pr-today-hdr {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+  flex-wrap: wrap;
+}
+
+.pr-today-title {
+  font-family: var(--brand-serif);
+  font-variation-settings: "opsz" 144;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.pr-today-hint {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+}
+
+/* ── Log card ── */
+.pr-log-card {
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  border: 1px solid var(--border-dim);
+  border-radius: calc(var(--radius) + 2px);
+  padding: var(--s5);
+  backdrop-filter: blur(12px);
+  margin-bottom: var(--s4);
+}
+
+.pr-log-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+  flex-wrap: wrap;
+}
+
+.pr-log-card-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pr-autosave {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+}
+
+.pr-log-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s5);
+}
+
+.pr-log-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+}
+
+.pr-log-sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.pr-log-lbl {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text-3);
+}
+
+/* ── Chips ── */
+.pr-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1);
+}
+
+.pr-chip {
+  padding: 5px var(--s3);
+  border-radius: 100px;
+  border: 1px solid var(--border-dim);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.pr-chip:hover {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.pr-chip.active {
+  background: color-mix(in srgb, var(--flow-medium) 18%, var(--surface));
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--flow-medium) 40%, var(--border));
+}
+
+.pr-chip-cnt {
+  font-size: 9px;
+  color: var(--text-3);
+  margin-left: 1px;
+}
+
+/* ── BBT input ── */
+.pr-bbt-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.pr-bbt-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border-dim);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: var(--fs-base);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 150ms ease, color 150ms ease;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.pr-bbt-btn:hover { background: var(--surface); color: var(--text); }
+
+.pr-bbt-disp {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  flex: 1;
+  justify-content: center;
+}
+
+.pr-bbt-val {
+  font-family: var(--brand-serif);
+  font-variation-settings: "opsz" 144;
+  font-size: var(--fs-xl);
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.pr-bbt-unit {
+  font-size: var(--fs-sm);
+  color: var(--text-3);
+}
+
+.pr-bbt-note {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  line-height: 1.5;
+}
+
+.pr-bbt-clr {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 150ms ease;
+}
+
+.pr-bbt-clr:hover { color: var(--text-2); }
+
+/* ── Insights ── */
+.pr-insights {
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  border: 1px solid var(--border-dim);
+  border-radius: calc(var(--radius) + 2px);
+  padding: var(--s5);
+  backdrop-filter: blur(12px);
+}
+
+.pr-insights-hdr {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+  flex-wrap: wrap;
+}
+
+.pr-insights-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pr-insights-sub {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+}
+
+.pr-insights-empty {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  line-height: 1.6;
+}
+
+.pr-insights-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s3);
+}
+
+.pr-insight-card {
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius);
+  padding: var(--s4);
+}
+
+.pr-insight-eyebrow {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+  margin-bottom: var(--s2);
+}
+
+.pr-insight-hl {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: var(--s2);
+}
+
+.pr-insight-hl em {
+  font-style: italic;
+  font-family: var(--brand-serif);
+  font-variation-settings: "opsz" 144;
+  color: var(--flow-light);
+}
+
+.pr-insight-body {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  line-height: 1.6;
+}
+
+/* ── Responsive ── */
+@media (max-width: 960px) {
+  .pr-year-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 700px) {
+  .pr-year-grid       { grid-template-columns: repeat(2, 1fr); }
+  .pr-detail-body     { grid-template-columns: 1fr; }
+  .pr-log-grid        { grid-template-columns: 1fr; }
+  .pr-insights-grid   { grid-template-columns: 1fr; }
+  .pr-meta            { display: none; }
+}
+
+@media (max-width: 480px) {
+  .pr-year-grid { grid-template-columns: repeat(2, 1fr); }
+  .pr-content   { padding: var(--s4) var(--s4) var(--s6); }
+}

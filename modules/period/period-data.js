@@ -110,6 +110,194 @@ export function isTravelAdjusted(window, travelDates = []) {
   });
 }
 
+// ── Duration helpers ───────────────────────────────────────────────
+
+export function periodDuration(entry) {
+  return daysBetween(parseDate(entry.start), parseDate(entry.end)) + 1;
+}
+
+export function avgPeriodDuration(entries) {
+  if (!entries.length) return null;
+  const total = entries.reduce((sum, e) => sum + periodDuration(e), 0);
+  return Math.round(total / entries.length);
+}
+
+// ── Remove a single day from entries ──────────────────────────────
+// Trims start/end or splits the entry if day is in the middle.
+
+export function removeDay(entries, dateStr) {
+  let sorted = [...entries].sort((a, b) => a.start.localeCompare(b.start));
+  const d = parseDate(dateStr);
+  const idx = sorted.findIndex(e => d >= parseDate(e.start) && d <= parseDate(e.end));
+  if (idx === -1) return sorted;
+
+  const e     = sorted[idx];
+  const start = parseDate(e.start);
+  const end   = parseDate(e.end);
+
+  const stripKey = (obj, key) =>
+    Object.fromEntries(Object.entries(obj ?? {}).filter(([k]) => k !== key));
+
+  if (fd(start) === dateStr && fd(end) === dateStr) {
+    sorted.splice(idx, 1);
+  } else if (fd(start) === dateStr) {
+    sorted[idx] = {
+      ...e,
+      start:     fd(addDays(start, 1)),
+      flow:      stripKey(e.flow, dateStr),
+      symptoms:  stripKey(e.symptoms, dateStr),
+      bbt:       stripKey(e.bbt, dateStr),
+      discharge: stripKey(e.discharge, dateStr),
+    };
+  } else if (fd(end) === dateStr) {
+    sorted[idx] = {
+      ...e,
+      end:       fd(addDays(end, -1)),
+      flow:      stripKey(e.flow, dateStr),
+      symptoms:  stripKey(e.symptoms, dateStr),
+      bbt:       stripKey(e.bbt, dateStr),
+      discharge: stripKey(e.discharge, dateStr),
+    };
+  } else {
+    const before = {
+      ...e,
+      end:       fd(addDays(d, -1)),
+      flow:      Object.fromEntries(Object.entries(e.flow      ?? {}).filter(([k]) => k < dateStr)),
+      symptoms:  Object.fromEntries(Object.entries(e.symptoms  ?? {}).filter(([k]) => k < dateStr)),
+      bbt:       Object.fromEntries(Object.entries(e.bbt       ?? {}).filter(([k]) => k < dateStr)),
+      discharge: Object.fromEntries(Object.entries(e.discharge ?? {}).filter(([k]) => k < dateStr)),
+    };
+    const after = {
+      ...e,
+      id:        'p_' + fd(addDays(d, 1)).replaceAll('-', '_'),
+      start:     fd(addDays(d, 1)),
+      flow:      Object.fromEntries(Object.entries(e.flow      ?? {}).filter(([k]) => k > dateStr)),
+      symptoms:  Object.fromEntries(Object.entries(e.symptoms  ?? {}).filter(([k]) => k > dateStr)),
+      bbt:       Object.fromEntries(Object.entries(e.bbt       ?? {}).filter(([k]) => k > dateStr)),
+      discharge: Object.fromEntries(Object.entries(e.discharge ?? {}).filter(([k]) => k > dateStr)),
+    };
+    sorted.splice(idx, 1, before, after);
+  }
+
+  return sorted;
+}
+
+// ── Spotting (pure helpers — pass period.spotting array) ───────────
+
+export function addSpotting(spottingArr, dateStr) {
+  const s = [...(spottingArr ?? [])];
+  return s.includes(dateStr) ? s : [...s, dateStr];
+}
+
+export function removeSpotting(spottingArr, dateStr) {
+  return (spottingArr ?? []).filter(d => d !== dateStr);
+}
+
+// ── Per-day data helpers (pure — pass the map, get a new map) ─────
+// Symptoms, BBT, and discharge are tracked for any day, not just period days.
+// Stored in period.symptoms[dateStr], period.bbt[dateStr], period.discharge[dateStr].
+
+export function setSymptom(map, dateStr, key, value) {
+  const day = { ...(map?.[dateStr] ?? {}) };
+  if (value === null || value === false || value === '') {
+    delete day[key];
+  } else {
+    day[key] = value;
+  }
+  if (!Object.keys(day).length) {
+    const next = { ...(map ?? {}) };
+    delete next[dateStr];
+    return next;
+  }
+  return { ...(map ?? {}), [dateStr]: day };
+}
+
+export function setBbt(map, dateStr, value) {
+  if (value === null || value === '') {
+    const next = { ...(map ?? {}) };
+    delete next[dateStr];
+    return next;
+  }
+  return { ...(map ?? {}), [dateStr]: value };
+}
+
+export function setDischarge(map, dateStr, value) {
+  if (value === null || value === '') {
+    const next = { ...(map ?? {}) };
+    delete next[dateStr];
+    return next;
+  }
+  return { ...(map ?? {}), [dateStr]: value };
+}
+
+// ── Cycle phase for a date ─────────────────────────────────────────
+// Returns: 'menstrual' | 'follicular' | 'ovulatory' | 'luteal' | null
+
+export function getPhase(entries, stats, dateStr) {
+  const d      = parseDate(dateStr);
+  const sorted = [...entries].sort((a, b) => a.start.localeCompare(b.start));
+
+  if (sorted.some(e => d >= parseDate(e.start) && d <= parseDate(e.end))) return 'menstrual';
+  if (!stats || !sorted.length) return null;
+
+  let lastStart = null;
+  for (const e of sorted) {
+    if (parseDate(e.start) <= d) lastStart = parseDate(e.start);
+  }
+  if (!lastStart) return null;
+
+  const cycleDay = daysBetween(lastStart, d) + 1;
+  const ovDay    = stats.avg - 14;
+
+  if (cycleDay < ovDay - 4)                          return 'follicular';
+  if (cycleDay >= ovDay - 4 && cycleDay <= ovDay + 1) return 'ovulatory';
+  return 'luteal';
+}
+
+// ── Comprehensive day info (used by calendar and day detail view) ──
+
+export function getDayInfo(data, stats, dateStr) {
+  const entries     = getPeriodEntries(data);
+  const d           = parseDate(dateStr);
+  const periodEntry = entries.find(e => d >= parseDate(e.start) && d <= parseDate(e.end));
+
+  const flow      = periodEntry?.flow?.[dateStr]      ?? null;
+  const spotting  = (data.period?.spotting ?? []).includes(dateStr);
+  const phase     = getPhase(entries, stats, dateStr);
+
+  const win  = entries.length ? currentWindow(entries, stats) : null;
+  const preds = entries.length ? futurePredictions(entries, stats, 5) : [];
+
+  let isPredicted = false;
+  if (!periodEntry && !spotting && win) {
+    isPredicted = (d >= win.earliest && d <= win.latest)
+      || preds.some(p => d >= p.earliest && d <= p.latest);
+  }
+
+  let isFertile   = false;
+  let isOvulation = false;
+  if (win) {
+    const fw = fertileWindow(win);
+    const ov = ovulationDay(win);
+    if (d >= fw.start && d <= fw.end) isFertile   = true;
+    if (fd(d) === fd(ov))             isOvulation = true;
+  }
+
+  return {
+    isPeriod:    !!periodEntry,
+    flow,
+    isSpotting:  spotting,
+    isFertile,
+    isOvulation,
+    isPredicted,
+    phase,
+    symptoms:    data.period?.symptoms?.[dateStr]  ?? periodEntry?.symptoms?.[dateStr]  ?? {},
+    bbt:         data.period?.bbt?.[dateStr]        ?? periodEntry?.bbt?.[dateStr]        ?? null,
+    discharge:   data.period?.discharge?.[dateStr]  ?? periodEntry?.discharge?.[dateStr]  ?? null,
+    notes:       periodEntry?.notes ?? null,
+  };
+}
+
 export function mergeEntry(entries, dateStr, field, value) {
   let sorted = [...entries].sort((a, b) => a.start.localeCompare(b.start));
   const d = parseDate(dateStr);
