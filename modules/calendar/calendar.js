@@ -35,6 +35,7 @@ function catBg(id) {
 let _container, _data, _onSave;
 let _year = new Date().getFullYear();
 let _view = 'month'; // 'week' | 'month' | 'year'
+let _weekStart = null; // Monday of displayed week; null until first week render
 let _modal = null;
 
 // ── Helpers ────────────────────────────────────────────────────────
@@ -54,6 +55,32 @@ function events() {
 
 function dateStr(y, m, d) {
   return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
+function dateStrFromDate(date) {
+  return dateStr(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function getWeekMonday(date) {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const day = d.getDay();
+  d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day));
+  return d;
+}
+
+function addDays(date, n) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n);
+  return d;
+}
+
+function currencySymbol() {
+  const cur = (_data.settings?.currencies ?? [])[0] ?? 'JPY';
+  return cur === 'IDR' ? 'Rp' : cur === 'JPY' ? '¥' : cur;
+}
+
+function fmtSpend(amount) {
+  return `${currencySymbol()} ${Number(amount).toLocaleString()}`;
 }
 
 // ── Module contract ────────────────────────────────────────────────
@@ -101,25 +128,39 @@ function render() {
   const prevBtn = document.createElement('button');
   prevBtn.className = 'cal-year-btn';
   prevBtn.textContent = '‹';
-  prevBtn.addEventListener('click', () => { _year--; render(); });
 
   const yearLabel = document.createElement('span');
-  yearLabel.className = 'cal-year-label';
-  yearLabel.textContent = _year;
 
   const nextBtn = document.createElement('button');
   nextBtn.className = 'cal-year-btn';
   nextBtn.textContent = '›';
-  nextBtn.addEventListener('click', () => { _year++; render(); });
 
   const todayBtn = document.createElement('button');
   todayBtn.className = 'cal-today-btn';
   todayBtn.textContent = 'today';
-  todayBtn.addEventListener('click', () => {
-    _year = new Date().getFullYear();
-    render();
-    requestAnimationFrame(() => scrollToMonth(new Date().getMonth()));
-  });
+
+  if (_view === 'week') {
+    if (!_weekStart) _weekStart = getWeekMonday(new Date());
+    yearLabel.className = 'cal-week-label';
+    const wEnd = addDays(_weekStart, 6);
+    const sameMonth = _weekStart.getMonth() === wEnd.getMonth();
+    yearLabel.textContent = sameMonth
+      ? `${MONTHS[_weekStart.getMonth()].slice(0, 3)} ${_weekStart.getDate()}–${wEnd.getDate()}`
+      : `${MONTHS[_weekStart.getMonth()].slice(0, 3)} ${_weekStart.getDate()} – ${MONTHS[wEnd.getMonth()].slice(0, 3)} ${wEnd.getDate()}`;
+    prevBtn.addEventListener('click', () => { _weekStart = addDays(_weekStart, -7); render(); });
+    nextBtn.addEventListener('click', () => { _weekStart = addDays(_weekStart, 7); render(); });
+    todayBtn.addEventListener('click', () => { _weekStart = getWeekMonday(new Date()); render(); });
+  } else {
+    yearLabel.className = 'cal-year-label';
+    yearLabel.textContent = _year;
+    prevBtn.addEventListener('click', () => { _year--; render(); });
+    nextBtn.addEventListener('click', () => { _year++; render(); });
+    todayBtn.addEventListener('click', () => {
+      _year = new Date().getFullYear();
+      render();
+      if (_view === 'month') requestAnimationFrame(() => scrollToMonth(new Date().getMonth()));
+    });
+  }
 
   // View toggle
   const viewToggle = document.createElement('div');
@@ -135,7 +176,16 @@ function render() {
   const addBtn = document.createElement('button');
   addBtn.className = 'cal-add-btn';
   addBtn.textContent = '+ add event';
-  addBtn.addEventListener('click', () => openModal(todayStr()));
+  addBtn.addEventListener('click', () => {
+    if (_view === 'week' && _weekStart) {
+      const tk = todayStr();
+      const wEnd = addDays(_weekStart, 6);
+      const inWeek = tk >= dateStrFromDate(_weekStart) && tk <= dateStrFromDate(wEnd);
+      openModal(inWeek ? tk : dateStrFromDate(_weekStart));
+    } else {
+      openModal(todayStr());
+    }
+  });
 
   header.append(prevBtn, yearLabel, nextBtn, todayBtn, viewToggle, addBtn);
   _container.appendChild(header);
@@ -151,10 +201,12 @@ function render() {
     if (_year === new Date().getFullYear()) {
       requestAnimationFrame(() => scrollToMonth(new Date().getMonth()));
     }
+  } else if (_view === 'week') {
+    buildWeek(scroll);
   } else {
     const stub = document.createElement('div');
     stub.style.cssText = 'padding:var(--s7) var(--s5);color:var(--text-3);font-size:var(--fs-sm);';
-    stub.textContent = `${_view.charAt(0).toUpperCase() + _view.slice(1)} view coming soon.`;
+    stub.textContent = 'Year view coming soon.';
     scroll.appendChild(stub);
   }
 }
@@ -162,9 +214,13 @@ function render() {
 function renderGrid() {
   const scroll = _container.querySelector('#cal-scroll');
   if (!scroll) return;
-  const top = scroll.scrollTop;
-  buildMonths(scroll);
-  scroll.scrollTop = top;
+  if (_view === 'week') {
+    buildWeek(scroll);
+  } else if (_view === 'month') {
+    const top = scroll.scrollTop;
+    buildMonths(scroll);
+    scroll.scrollTop = top;
+  }
 }
 
 function initSortable(scroll) {
@@ -291,6 +347,132 @@ function scrollToMonth(month) {
   if (section) section.scrollIntoView({ behavior: 'instant' });
 }
 
+function buildWeek(scroll) {
+  scroll.innerHTML = '';
+  if (!_weekStart) _weekStart = getWeekMonday(new Date());
+
+  const todayKey = todayStr();
+  const evtMap = {};
+  events().forEach(e => {
+    if (!e.date) return;
+    if (!evtMap[e.date]) evtMap[e.date] = [];
+    evtMap[e.date].push(e);
+  });
+
+  const wrap = document.createElement('div');
+  wrap.className = 'cal-week-wrap';
+
+  const grid = document.createElement('div');
+  grid.className = 'cal-week-grid';
+
+  for (let i = 0; i < 7; i++) {
+    const day   = addDays(_weekStart, i);
+    const key   = dateStrFromDate(day);
+    const dayEvts = evtMap[key] ?? [];
+    const isToday = key === todayKey;
+
+    const col = document.createElement('div');
+    col.className = 'cal-week-day' + (isToday ? ' today' : '');
+
+    // Column header
+    const hdr = document.createElement('div');
+    hdr.className = 'cal-week-day-hdr';
+    const dayName = document.createElement('div');
+    dayName.className = 'cal-week-day-name';
+    dayName.textContent = DAYS[i];
+    const dayNum = document.createElement('div');
+    dayNum.className = 'cal-week-day-num';
+    dayNum.textContent = day.getDate();
+    hdr.append(dayName, dayNum);
+    col.appendChild(hdr);
+
+    // Column body
+    const body = document.createElement('div');
+    body.className = 'cal-week-day-body';
+    body.addEventListener('click', () => openModal(key));
+
+    const evtList = document.createElement('div');
+    evtList.className = 'cal-evt-list';
+    evtList.dataset.date = key;
+
+    dayEvts.forEach(evt => {
+      const catId = evt.category ?? 'personal';
+      const bg    = catBg(catId);
+      const chip  = document.createElement('div');
+      chip.className = `cal-evt cal-week-evt${bg ? '' : ` evt-${catId}`}`;
+      if (bg) { chip.style.background = bg; chip.style.color = catColor(catId); }
+      chip.dataset.id = evt.id;
+      chip.textContent = evt.title;
+      if (evt.spend) {
+        const amt = document.createElement('span');
+        amt.className = 'cal-evt-spend';
+        amt.textContent = fmtSpend(evt.spend);
+        chip.appendChild(amt);
+      }
+      chip.addEventListener('click', e => { e.stopPropagation(); openModal(key, evt.id); });
+      evtList.appendChild(chip);
+    });
+
+    body.appendChild(evtList);
+
+    // Spending summary
+    const withSpend = dayEvts.filter(e => e.spend);
+    if (withSpend.length > 0) {
+      const spendSec = document.createElement('div');
+      spendSec.className = 'cal-week-spend';
+
+      const catTotals = {};
+      withSpend.forEach(e => {
+        const cat = e.category ?? 'personal';
+        catTotals[cat] = (catTotals[cat] ?? 0) + Number(e.spend);
+      });
+
+      Object.entries(catTotals).forEach(([catId, total]) => {
+        const row = document.createElement('div');
+        row.className = 'cal-week-spend-row';
+        const dot = document.createElement('span');
+        dot.className = 'cal-week-spend-dot';
+        dot.style.background = catColor(catId);
+        const nameEl = document.createElement('span');
+        nameEl.textContent = cats().find(c => c.id === catId)?.name ?? catId;
+        const amtEl = document.createElement('span');
+        amtEl.textContent = fmtSpend(total);
+        row.append(dot, nameEl, amtEl);
+        spendSec.appendChild(row);
+      });
+
+      const div = document.createElement('div');
+      div.className = 'cal-week-spend-divider';
+      spendSec.appendChild(div);
+
+      const totalRow = document.createElement('div');
+      totalRow.className = 'cal-week-spend-total';
+      const total = withSpend.reduce((s, e) => s + Number(e.spend), 0);
+      totalRow.innerHTML = `<span>Total</span><span>${fmtSpend(total)}</span>`;
+      spendSec.appendChild(totalRow);
+
+      body.appendChild(spendSec);
+    }
+
+    col.appendChild(body);
+    grid.appendChild(col);
+  }
+
+  grid.querySelectorAll('.cal-evt-list').forEach(list => {
+    Sortable.create(list, {
+      group:     'cal-events',
+      animation: 120,
+      onEnd(evt) {
+        if (evt.from === evt.to) return;
+        moveEvent(evt.item.dataset.id, evt.to.dataset.date);
+      },
+    });
+  });
+
+  wrap.appendChild(grid);
+  scroll.appendChild(wrap);
+}
+
 // ── Modal ──────────────────────────────────────────────────────────
 
 function openModal(date, editId = null) {
@@ -408,6 +590,32 @@ function openModal(date, editId = null) {
   });
   form.appendChild(catGrid);
 
+  // Spend
+  const spendRow = document.createElement('div');
+  spendRow.className = 'cal-modal-spend-row';
+  const spendLbl = document.createElement('div');
+  spendLbl.className = 'cal-form-label';
+  spendLbl.textContent = 'Amount spent';
+  const spendWrap = document.createElement('div');
+  spendWrap.className = 'cal-modal-spend-wrap';
+  const spendSym = document.createElement('span');
+  spendSym.className = 'cal-modal-spend-sym';
+  spendSym.textContent = currencySymbol();
+  const spendInput = document.createElement('input');
+  spendInput.className = 'cal-modal-spend-input';
+  spendInput.type = 'number';
+  spendInput.min = '0';
+  spendInput.step = '1';
+  spendInput.placeholder = '0';
+  spendInput.value = editing?.spend ?? '';
+  spendInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); saveBtn.click(); }
+    if (e.key === 'Escape') closeModal();
+  });
+  spendWrap.append(spendSym, spendInput);
+  spendRow.append(spendLbl, spendWrap);
+  form.appendChild(spendRow);
+
   // Actions
   const actions = document.createElement('div');
   actions.className = 'cal-modal-actions';
@@ -439,7 +647,8 @@ function openModal(date, editId = null) {
   saveBtn.addEventListener('click', () => {
     const title = input.value.trim();
     if (!title) { input.focus(); return; }
-    saveEvent({ id: editing?.id ?? uid(), date, title, category: selectedCat });
+    const spend = parseFloat(spendInput.value) || undefined;
+    saveEvent({ id: editing?.id ?? uid(), date, title, category: selectedCat, ...(spend !== undefined ? { spend } : {}) });
     openModal(date);
   });
   actions.appendChild(saveBtn);
