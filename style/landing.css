@@ -525,9 +525,17 @@ footer {
 @media (max-width: 640px) {
   .preview-body {
     grid-template-columns: 1fr 1fr;
-    min-height: auto;
+    height: 180px;
+    min-height: unset;
+    overflow: hidden;
     padding: var(--s4);
     gap: var(--s2);
+    align-items: start;
+  }
+  .preview-card {
+    overflow: hidden;
+    height: 100%;
+    box-sizing: border-box;
   }
   .preview-card:nth-child(3) { display: none; }
 
@@ -539,7 +547,11 @@ footer {
 }
 
 @media (max-width: 420px) {
-  .preview-body { grid-template-columns: 1fr; }
+  .preview-body {
+    grid-template-columns: 1fr;
+    height: 160px;
+  }
+  .preview-card:nth-child(2),
   .preview-card:nth-child(3) { display: none; }
 
   .features-grid { grid-template-columns: 1fr; }
