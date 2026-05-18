@@ -1,4 +1,4 @@
-# LifeOS 2.0
+# Seratus 2.0
 
 A personal life OS, yours for 100 years, starting from your birthday.
 

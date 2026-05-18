@@ -74,6 +74,17 @@ async function switchTo(index) {
   }
 }
 
+// ── Brand pill ─────────────────────────────────────────────────────
+const brandWrap = document.createElement('div');
+brandWrap.style.cssText = 'display:flex;align-items:center;gap:8px;margin-right:var(--s3);flex-shrink:0;';
+brandWrap.innerHTML = `
+  <span class="brand-pill-name" style="font-size:16px">Seratus</span>
+  <span class="brand-pill" style="padding:3px 10px">
+    <span class="brand-pill-ver">lifeOS v2.0</span>
+  </span>
+`;
+tabBar.insertBefore(brandWrap, tabBar.firstChild);
+
 // ── Tab bar clicks ─────────────────────────────────────────────────
 TABS.forEach((name, i) => {
   const btn = document.createElement('button');
@@ -93,7 +104,7 @@ subscribe(newData => {
 const SIDEBAR_KEY = 'lifeOS_sidebar';
 
 function initSidebar() {
-  const collapsed = localStorage.getItem(SIDEBAR_KEY) === '0';
+  const collapsed = localStorage.getItem(SIDEBAR_KEY) !== '1';
   setSidebar(collapsed, false);
 
   import('../modules/notes/notes.js').then(mod => {

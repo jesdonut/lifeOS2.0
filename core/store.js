@@ -9,7 +9,7 @@ function defaultData() {
       timezone:   'Asia/Tokyo',
       birthYear:  null,
       currencies: ['JPY', 'IDR'],
-      weekStart:  'mon',
+      weekStart:  1,
       setupDone:  true,
     },
     period:   { entries: [], spotting: [], symptoms: {}, discharge: {}, bbt: {}, settings: {} },
