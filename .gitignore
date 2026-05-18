@@ -5,3 +5,4 @@ export.xml
 .DS_Store
 period-standalone.html
 scripts/
+.vercel

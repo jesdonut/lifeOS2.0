@@ -50,7 +50,7 @@ Vanilla JS (ES Modules) · No build step · localStorage · SortableJS (drag and
 
 Everything is stored in `localStorage`. Export to JSON anytime from Settings. Nothing is sent anywhere.
 
-Apple Health data can be imported via `scripts/import-health.py`, runs locally, outputs to `_local/`, never leaves your device.
+Apple Health period data can be imported via the browser-based [import-data.html](import-data.html) tool. Parsed locally, nothing leaves your device. Download as JSON to review before importing.
 
 ---
 

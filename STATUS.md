@@ -24,6 +24,10 @@
 - [x] `modules/calendar/calendar.js` + `calendar.css` — month view, 9 built-in categories, event add/edit/delete, drag-and-drop between days, park-for-later, view switcher (week/year stubs) — *18 May*
 - [x] `modules/notes/notes.js` + `notes.css` — collapsible sidebar, parking lot for unscheduled events (schedule from sidebar), free-form notes with inline editing — *18 May*
 - [x] `core/settings.js` + `style/settings.css` — full settings modal: profile (name, birth, timezone, nationalities, locations, currencies, period toggle), calendar categories (rename/add with color picker/delete custom), appearance (dark/light theme), data (export/import/clear + browser guide) — *18 May*
+- [x] `coming-soon.html` — public-facing not-ready page; CTAs on landing point here; Vercel blocks `/app.html` and `/setup.html` to this — *18 May*
+- [x] `import-data.html` — browser-based data import tool: Apple Health XML parser (flow, spotting, BBT, mucus, ovulation, contraceptive), coming soon cards for Clue/Flo/Natural Cycles/v1. Parsed locally, JSON download only, no data leaves device — *18 May*
+- [x] `vercel.json` — redirects app.html and setup.html to coming-soon.html on production — *18 May*
+- [x] `index.html` → landing page, `app.html` → app shell (renamed so Vercel serves landing at `/`) — *18 May*
 
 ## In progress
 
@@ -38,6 +42,10 @@
 - [ ] `modules/bank/` — account balances, multi-country, multi-currency
 - [ ] `modules/savings/` — fixed deposits, bonds, NISA (JP only), pension contributions
 - [ ] `modules/currency/` — lot tracking, FX rates, P&L in base currency
+- [ ] `import-data.html` — Clue JSON parser
+- [ ] `import-data.html` — Natural Cycles CSV parser
+- [ ] `import-data.html` — Flo JSON parser
+- [ ] `import-data.html` — LifeOS v1 JSON importer
 
 ## Decisions
 
@@ -52,6 +60,9 @@
 - NISA and country-specific savings schemes rendered conditionally inside `savings/` based on `settings.country`
 - Finance income fields adapt per country (Japan: salary, health insurance, pension, resident tax, etc.)
 - No hardcoded hex values in JS — all colors via CSS variables
+- Import tool is browser-only (no server, no data controller status) — no GDPR consent needed, inline privacy badge is sufficient
+- Apple Health XML parsed with regex (not DOMParser) for performance on large exports; only period-related record types extracted
+- Import output is JSON download only, not written directly to localStorage — user reviews before importing
 - Calendar events with `date: null` are "parked" — live in `calendar.events`, filtered by notes sidebar
 - Every user-created record gets `createdAt` (ISO) on create, `updatedAt` (ISO) on edit
 - Calendar categories: 9 fixed defaults (CSS-var colors) + unlimited custom (stored hex). Managed in settings, read by calendar module

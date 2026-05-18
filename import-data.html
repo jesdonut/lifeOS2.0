@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeOS: Import data</title>
+  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
+  <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
+  <link rel="stylesheet" href="style/base.css" />
+  <link rel="stylesheet" href="style/pages.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,300,0,0" />
+  <style>
+    .import-page {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 96px var(--s5) var(--s7);
+    }
+
+    .import-eyebrow {
+      font-size: var(--fs-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: var(--s3);
+    }
+
+    .import-title {
+      font-size: var(--fs-2xl);
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+      margin-bottom: var(--s2);
+    }
+
+    .import-sub {
+      font-size: var(--fs-base);
+      color: var(--text-2);
+      line-height: 1.6;
+      margin-bottom: var(--s6);
+    }
+
+    /* Privacy badge */
+    .privacy-badge {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--s3);
+      padding: var(--s3) var(--s4);
+      background: color-mix(in srgb, var(--accent) 8%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+      border-radius: var(--radius);
+      margin-bottom: var(--s5);
+    }
+
+    .privacy-badge .material-symbols-outlined {
+      font-size: 18px;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .privacy-badge p {
+      font-size: var(--fs-xs);
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+
+    .privacy-badge a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .privacy-badge a:hover { text-decoration: underline; }
+
+    /* Import cards */
+    .import-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--s5);
+      margin-bottom: var(--s4);
+    }
+
+    .import-card-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--s4);
+    }
+
+    .import-card-title {
+      font-size: var(--fs-base);
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: var(--s2);
+    }
+
+    .import-card-title .material-symbols-outlined {
+      font-size: 18px;
+      color: var(--accent);
+    }
+
+    .badge-soon {
+      font-size: var(--fs-xs);
+      padding: 2px var(--s2);
+      border-radius: 100px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-3);
+    }
+
+    /* Steps */
+    .step {
+      margin-bottom: var(--s4);
+    }
+
+    .step-label {
+      font-size: var(--fs-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-3);
+      margin-bottom: var(--s2);
+    }
+
+    .step-body {
+      font-size: var(--fs-sm);
+      color: var(--text-2);
+      line-height: 1.7;
+    }
+
+    .step-body ol {
+      padding-left: var(--s4);
+    }
+
+    .step-body li {
+      margin-bottom: 4px;
+    }
+
+    /* OS tabs */
+    .os-tabs {
+      display: flex;
+      gap: 2px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-sm);
+      padding: 2px;
+      width: fit-content;
+      margin-bottom: var(--s3);
+    }
+
+    .os-tab {
+      font-size: var(--fs-xs);
+      padding: 4px var(--s3);
+      border-radius: 4px;
+      color: var(--text-3);
+      cursor: pointer;
+      border: none;
+      background: none;
+      transition: color var(--dur-fast), background var(--dur-fast);
+    }
+    .os-tab:hover  { color: var(--text-2); }
+    .os-tab.active { background: var(--surface-3); color: var(--text); }
+
+    .os-instructions { display: none; }
+    .os-instructions.active { display: block; }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: var(--s6) var(--s5);
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--dur-fast), background var(--dur-fast);
+      position: relative;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 5%, transparent);
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-zone .material-symbols-outlined {
+      font-size: 32px;
+      color: var(--text-3);
+      display: block;
+      margin-bottom: var(--s2);
+    }
+
+    .drop-zone-label {
+      font-size: var(--fs-sm);
+      color: var(--text-2);
+      margin-bottom: var(--s1);
+    }
+
+    .drop-zone-hint {
+      font-size: var(--fs-xs);
+      color: var(--text-3);
+    }
+
+    /* Results */
+    #ah-result { display: none; margin-top: var(--s4); }
+
+    .result-summary {
+      background: var(--surface-2);
+      border-radius: var(--radius);
+      padding: var(--s4);
+      margin-bottom: var(--s4);
+    }
+
+    .result-title {
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: var(--s3);
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--fs-xs);
+      color: var(--text-2);
+      padding: var(--s1) 0;
+      border-bottom: 1px solid var(--border-dim);
+    }
+    .result-row:last-child { border-bottom: none; }
+    .result-row span:last-child { color: var(--text); font-weight: 500; }
+
+    .result-none {
+      font-size: var(--fs-sm);
+      color: var(--text-3);
+      text-align: center;
+      padding: var(--s4);
+    }
+
+    .download-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--s2);
+      width: 100%;
+      padding: var(--s3) var(--s4);
+      background: var(--accent);
+      color: var(--bg);
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      transition: background var(--dur-fast);
+    }
+    .download-btn:hover { background: var(--accent-2); }
+    .download-btn .material-symbols-outlined { font-size: 16px; }
+
+    .error-msg {
+      font-size: var(--fs-xs);
+      color: var(--red);
+      padding: var(--s3) var(--s4);
+      background: color-mix(in srgb, var(--red) 8%, transparent);
+      border: 1px solid color-mix(in srgb, var(--red) 20%, transparent);
+      border-radius: var(--radius-sm);
+      margin-top: var(--s3);
+      display: none;
+    }
+
+    .processing-msg {
+      font-size: var(--fs-xs);
+      color: var(--text-3);
+      text-align: center;
+      padding: var(--s3);
+      display: none;
+    }
+
+    /* v1 card */
+    .v1-desc {
+      font-size: var(--fs-sm);
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border-dim);
+      margin: var(--s5) 0;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">LifeOS</a>
+  <a class="nav-back" href="index.html">← Back</a>
+</nav>
+
+<div class="import-page">
+
+  <p class="import-eyebrow">Tools</p>
+  <h1 class="import-title">Import data</h1>
+  <p class="import-sub">Bring your existing health data into LifeOS. Everything is processed in your browser — nothing is sent anywhere.</p>
+
+  <div class="privacy-badge">
+    <span class="material-symbols-outlined">lock</span>
+    <p>Your file never leaves your device. All parsing happens locally in your browser. No data is uploaded to any server. You can verify this by reading the source code on <a href="https://github.com/jesdonut/lifeOS2.0" target="_blank" rel="noopener">GitHub</a>.</p>
+  </div>
+
+  <!-- Apple Health card -->
+  <div class="import-card">
+    <div class="import-card-hdr">
+      <div class="import-card-title">
+        <span class="material-symbols-outlined">favorite</span>
+        Apple Health
+      </div>
+    </div>
+
+    <p style="font-size:var(--fs-xs);color:var(--text-3);margin-bottom:var(--s4)">Imports period and cycle data only: flow, spotting, ovulation tests, BBT, cervical mucus, and contraceptives.</p>
+
+    <div class="step">
+      <div class="step-label">Step 1 — Export from your iPhone</div>
+      <div class="step-body">
+        <ol>
+          <li>Open the <strong style="color:var(--text)">Health</strong> app on your iPhone.</li>
+          <li>Tap your profile picture in the top right.</li>
+          <li>Scroll down and tap <strong style="color:var(--text)">Export All Health Data</strong>.</li>
+          <li>Tap <strong style="color:var(--text)">Export</strong> and save or AirDrop the ZIP file to your computer.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="step">
+      <div class="step-label">Step 2 — Extract the ZIP file</div>
+      <div class="os-tabs" id="os-tabs">
+        <button class="os-tab active" data-os="mac">Mac</button>
+        <button class="os-tab" data-os="windows">Windows</button>
+        <button class="os-tab" data-os="linux">Linux</button>
+      </div>
+      <div class="os-instructions active" id="os-mac">
+        <div class="step-body">
+          Double-click the ZIP file in Finder. It will extract to a folder called <strong style="color:var(--text)">apple_health_export</strong>. Open that folder and find <strong style="color:var(--text)">export.xml</strong>.
+        </div>
+      </div>
+      <div class="os-instructions" id="os-windows">
+        <div class="step-body">
+          Right-click the ZIP file and choose <strong style="color:var(--text)">Extract All</strong>. Open the extracted folder <strong style="color:var(--text)">apple_health_export</strong> and find <strong style="color:var(--text)">export.xml</strong>.
+        </div>
+      </div>
+      <div class="os-instructions" id="os-linux">
+        <div class="step-body">
+          Run <code style="font-family:var(--mono);background:var(--surface-2);padding:1px 6px;border-radius:4px">unzip export.zip</code> in your terminal. Open the extracted folder <strong style="color:var(--text)">apple_health_export</strong> and find <strong style="color:var(--text)">export.xml</strong>.
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="step" style="margin-bottom:0">
+      <div class="step-label">Step 3 — Upload export.xml</div>
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="file-input" accept=".xml" />
+        <span class="material-symbols-outlined">upload_file</span>
+        <div class="drop-zone-label">Drop export.xml here, or click to choose</div>
+        <div class="drop-zone-hint">Only export.xml is accepted. No ZIP files.</div>
+      </div>
+      <div class="processing-msg" id="processing-msg">Parsing your file, this may take a moment...</div>
+      <div class="error-msg" id="error-msg"></div>
+
+      <div id="ah-result">
+        <div class="result-summary" id="result-summary"></div>
+        <button class="download-btn" id="download-btn">
+          <span class="material-symbols-outlined">download</span>
+          Download as JSON
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clue card -->
+  <div class="import-card" style="opacity:0.6">
+    <div class="import-card-hdr">
+      <div class="import-card-title">
+        <span class="material-symbols-outlined">water_drop</span>
+        Clue
+      </div>
+      <span class="badge-soon">Coming soon</span>
+    </div>
+    <p class="v1-desc">Import from Clue's JSON export. Includes flow, symptoms, and BBT. Request your data export from Clue's app settings under Account, then Data Export.</p>
+  </div>
+
+  <!-- Natural Cycles card -->
+  <div class="import-card" style="opacity:0.6">
+    <div class="import-card-hdr">
+      <div class="import-card-title">
+        <span class="material-symbols-outlined">thermometer</span>
+        Natural Cycles
+      </div>
+      <span class="badge-soon">Coming soon</span>
+    </div>
+    <p class="v1-desc">Import from Natural Cycles' CSV export. Includes flow, spotting, cervical mucus, and ovulation tests. Request your data from Natural Cycles' account settings.</p>
+  </div>
+
+  <!-- Flo card -->
+  <div class="import-card" style="opacity:0.6">
+    <div class="import-card-hdr">
+      <div class="import-card-title">
+        <span class="material-symbols-outlined">spa</span>
+        Flo
+      </div>
+      <span class="badge-soon">Coming soon</span>
+    </div>
+    <p class="v1-desc">Import from Flo's JSON export. To get your data, email Flo support at support@flo.health and request a data export. They'll send you a JSON file.</p>
+  </div>
+
+  <!-- v1 card -->
+  <div class="import-card" style="opacity:0.6">
+    <div class="import-card-hdr">
+      <div class="import-card-title">
+        <span class="material-symbols-outlined">history</span>
+        LifeOS v1
+      </div>
+      <span class="badge-soon">Coming soon</span>
+    </div>
+    <p class="v1-desc">Import your data from <a href="https://github.com/jesdonut/lifeOS" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">LifeOS v1</a>. The data format is being mapped to v2 before this is ready.</p>
+  </div>
+
+</div>
+
+<script>
+  // ── OS tabs ────────────────────────────────────────────────────────
+  document.getElementById('os-tabs').addEventListener('click', e => {
+    const btn = e.target.closest('.os-tab');
+    if (!btn) return;
+    const os = btn.dataset.os;
+    document.querySelectorAll('.os-tab').forEach(b => b.classList.toggle('active', b.dataset.os === os));
+    document.querySelectorAll('.os-instructions').forEach(el => el.classList.remove('active'));
+    document.getElementById('os-' + os).classList.add('active');
+  });
+
+  // ── Drag and drop ──────────────────────────────────────────────────
+  const dropZone  = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+  fileInput.addEventListener('change', e => {
+    if (e.target.files[0]) handleFile(e.target.files[0]);
+  });
+
+  // ── File handling ──────────────────────────────────────────────────
+  function handleFile(file) {
+    if (!file.name.endsWith('.xml')) {
+      showError('Please choose the export.xml file, not the ZIP.');
+      return;
+    }
+    showError('');
+    document.getElementById('processing-msg').style.display = 'block';
+    document.getElementById('ah-result').style.display = 'none';
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      setTimeout(() => {
+        try {
+          const result = parseAppleHealth(e.target.result);
+          showResult(result);
+        } catch (err) {
+          showError('Could not read the file. Make sure you chose export.xml from the apple_health_export folder.');
+          console.error(err);
+        }
+        document.getElementById('processing-msg').style.display = 'none';
+      }, 50); // let browser paint the "processing" state first
+    };
+    reader.readAsText(file);
+  }
+
+  // ── Apple Health parser ────────────────────────────────────────────
+  const TYPES = {
+    menstrual:   'HKCategoryTypeIdentifierMenstrualFlow',
+    spotting:    'HKCategoryTypeIdentifierIntermenstrualBleeding',
+    ovulation:   'HKCategoryTypeIdentifierOvulationTestResult',
+    pregnancy:   'HKCategoryTypeIdentifierPregnancyTestResult',
+    mucus:       'HKCategoryTypeIdentifierCervicalMucusQuality',
+    contraceptive: 'HKCategoryTypeIdentifierContraceptive',
+    bbt:         'HKQuantityTypeIdentifierBasalBodyTemperature',
+  };
+
+  const FLOW_MAP = {
+    HKCategoryValueMenstrualFlowHeavy:       'heavy',
+    HKCategoryValueMenstrualFlowMedium:      'medium',
+    HKCategoryValueMenstrualFlowLight:       'light',
+    HKCategoryValueMenstrualFlowUnspecified: 'medium',
+  };
+
+  const MUCUS_MAP = {
+    HKCategoryValueCervicalMucusQualityDry:        'dry',
+    HKCategoryValueCervicalMucusQualitySticky:     'sticky',
+    HKCategoryValueCervicalMucusQualityCreamy:     'creamy',
+    HKCategoryValueCervicalMucusQualityWatery:     'watery',
+    HKCategoryValueCervicalMucusQualityEggWhite:   'egg-white',
+  };
+
+  const OVULATION_MAP = {
+    HKCategoryValueOvulationTestResultNegative:        'negative',
+    HKCategoryValueOvulationTestResultLHSurge:         'positive',
+    HKCategoryValueOvulationTestResultPositive:        'positive',
+    HKCategoryValueOvulationTestResultIndeterminate:   'indeterminate',
+  };
+
+  function parseAppleHealth(text) {
+    // Regex-based extraction — much faster than full DOM parse on large files
+    const allTypes = Object.values(TYPES);
+    const typeGroup = allTypes.map(t => t.replace('HKCategoryTypeIdentifier', '').replace('HKQuantityTypeIdentifier', '')).join('|');
+
+    const records = { menstrual: [], spotting: [], ovulation: [], pregnancy: [], mucus: [], contraceptive: [], bbt: [] };
+
+    // Match all Record elements that have one of our types
+    const re = /<Record\b([^>]*?)\/>/g;
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const attrs = m[1];
+      const type  = attr(attrs, 'type');
+      const date  = attr(attrs, 'startDate')?.slice(0, 10);
+      const value = attr(attrs, 'value');
+      if (!date) continue;
+
+      if (type === TYPES.menstrual && value !== 'HKCategoryValueMenstrualFlowNone') {
+        const flow = FLOW_MAP[value] ?? 'medium';
+        records.menstrual.push({ date, flow });
+      } else if (type === TYPES.spotting) {
+        records.spotting.push({ date });
+      } else if (type === TYPES.ovulation) {
+        records.ovulation.push({ date, result: OVULATION_MAP[value] ?? value });
+      } else if (type === TYPES.pregnancy) {
+        records.pregnancy.push({ date, result: value });
+      } else if (type === TYPES.mucus) {
+        records.mucus.push({ date, quality: MUCUS_MAP[value] ?? value });
+      } else if (type === TYPES.contraceptive) {
+        records.contraceptive.push({ date, type: value });
+      } else if (type === TYPES.bbt) {
+        const unit = attr(attrs, 'unit') ?? 'degC';
+        records.bbt.push({ date, value: parseFloat(value), unit });
+      }
+    }
+
+    // Build period entries from consecutive menstrual flow days
+    const entries = buildEntries(records.menstrual);
+
+    // Build keyed objects
+    const bbt         = {};
+    records.bbt.forEach(r => { bbt[r.date] = { value: r.value, unit: r.unit }; });
+
+    const discharge = {};
+    records.mucus.forEach(r => { discharge[r.date] = r.quality; });
+
+    const ovulation = {};
+    records.ovulation.forEach(r => { ovulation[r.date] = r.result; });
+
+    const pregnancy = {};
+    records.pregnancy.forEach(r => { pregnancy[r.date] = r.result; });
+
+    const contraceptive = {};
+    records.contraceptive.forEach(r => { contraceptive[r.date] = r.type; });
+
+    return {
+      source:     'apple-health',
+      exportedAt: new Date().toISOString(),
+      counts: {
+        periodEntries: entries.length,
+        spottingDays:  records.spotting.length,
+        bbtReadings:   records.bbt.length,
+        ovulationTests: records.ovulation.length,
+        mucusReadings: records.mucus.length,
+        contraceptive: records.contraceptive.length,
+      },
+      period: {
+        entries,
+        spotting:    records.spotting.map(r => r.date),
+        bbt,
+        discharge,
+        ovulation,
+        pregnancy,
+        contraceptive,
+        symptoms: {},
+      },
+    };
+  }
+
+  function attr(str, name) {
+    const m = str.match(new RegExp(`\\b${name}="([^"]*)"`));
+    return m ? m[1] : null;
+  }
+
+  function buildEntries(flowRecords) {
+    if (!flowRecords.length) return [];
+    flowRecords.sort((a, b) => a.date.localeCompare(b.date));
+
+    const entries = [];
+    let cur = null;
+
+    for (const r of flowRecords) {
+      if (!cur) { cur = { start: r.date, end: r.date, flow: r.flow }; continue; }
+      const days = (new Date(r.date) - new Date(cur.end)) / 86400000;
+      if (days <= 1) {
+        cur.end  = r.date;
+        cur.flow = r.flow; // keep most recent flow level
+      } else {
+        entries.push(cur);
+        cur = { start: r.date, end: r.date, flow: r.flow };
+      }
+    }
+    if (cur) entries.push(cur);
+    return entries;
+  }
+
+  // ── Results display ────────────────────────────────────────────────
+  let _parsedData = null;
+
+  function showResult(data) {
+    _parsedData = data;
+    const c = data.counts;
+    const total = Object.values(c).reduce((a, b) => a + b, 0);
+
+    const resultEl = document.getElementById('ah-result');
+    const summaryEl = document.getElementById('result-summary');
+
+    if (total === 0) {
+      summaryEl.innerHTML = `<div class="result-none">No period-related data found in this file. Make sure you exported from the Health app and chose export.xml.</div>`;
+      document.getElementById('download-btn').style.display = 'none';
+    } else {
+      const rows = [
+        ['Period entries',    c.periodEntries],
+        ['Spotting days',     c.spottingDays],
+        ['BBT readings',      c.bbtReadings],
+        ['Ovulation tests',   c.ovulationTests],
+        ['Cervical mucus',    c.mucusReadings],
+        ['Contraceptive',     c.contraceptive],
+      ].filter(([, v]) => v > 0);
+
+      summaryEl.innerHTML = `
+        <div class="result-title">Found in your export</div>
+        ${rows.map(([label, val]) => `
+          <div class="result-row">
+            <span>${label}</span>
+            <span>${val.toLocaleString()}</span>
+          </div>
+        `).join('')}
+      `;
+      document.getElementById('download-btn').style.display = '';
+    }
+
+    resultEl.style.display = 'block';
+  }
+
+  document.getElementById('download-btn').addEventListener('click', () => {
+    if (!_parsedData) return;
+    const blob = new Blob([JSON.stringify(_parsedData, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), {
+      href:     url,
+      download: `lifeos-apple-health-${new Date().toISOString().slice(0, 10)}.json`,
+    });
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  function showError(msg) {
+    const el = document.getElementById('error-msg');
+    el.textContent = msg;
+    el.style.display = msg ? 'block' : 'none';
+  }
+
+  // ── Theme toggle ───────────────────────────────────────────────────
+  const THEME_KEY = 'lifeOS_landing_theme';
+  let theme = localStorage.getItem(THEME_KEY) || 'dark';
+  function applyTheme(t) {
+    theme = t;
+    document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : '');
+    localStorage.setItem(THEME_KEY, t);
+  }
+  applyTheme(theme);
+</script>
+
+</body>
+</html>
