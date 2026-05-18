@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeOS: Coming soon</title>
+  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
+  <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
+  <link rel="stylesheet" href="style/base.css" />
+  <link rel="stylesheet" href="style/pages.css" />
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">LifeOS</a>
+  <a class="nav-back" href="index.html">← Back</a>
+</nav>
+
+<div style="
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s7) var(--s5);
+  text-align: center;
+">
+  <p style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: var(--s4)">In development</p>
+  <h1 style="font-size: var(--fs-2xl); font-weight: 700; color: var(--text); letter-spacing: -0.5px; margin-bottom: var(--s4); line-height: 1.2">We're still building this.</h1>
+  <p style="font-size: var(--fs-base); color: var(--text-2); max-width: 420px; line-height: 1.7; margin-bottom: var(--s6)">LifeOS is a personal project in active development. It isn't ready for general use yet, but it's getting there.</p>
+  <a href="index.html" style="
+    display: inline-block;
+    padding: var(--s2) var(--s5);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+    text-decoration: none;
+    transition: color 150ms ease, border-color 150ms ease;
+  " onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border)'" onmouseout="this.style.color='var(--text-2)'">Back to home</a>
+</div>
+
+</body>
+</html>
