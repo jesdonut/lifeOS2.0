@@ -1,4 +1,5 @@
 /* pages.css — shared styles for all public-facing pages */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=DM+Sans:wght@400&display=swap');
 
 body {
   overflow-x: hidden;
@@ -23,10 +24,9 @@ nav {
 }
 
 .nav-logo {
-  font-size: var(--fs-base);
-  font-weight: 600;
-  color: var(--accent);
-  letter-spacing: -0.3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   text-decoration: none;
 }
 
@@ -197,6 +197,41 @@ nav {
   color: var(--text-3);
   font-family: monospace;
   line-height: 1.6;
+}
+
+/* ── About: name stats ── */
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s3);
+  margin-top: var(--s5);
+}
+
+.about-stat {
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius);
+  padding: var(--s4) var(--s5);
+}
+
+.about-stat-value {
+  font-family: var(--brand-serif);
+  font-variation-settings: "opsz" 144;
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: var(--s2);
+  line-height: 1.2;
+}
+
+.about-stat-label {
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+  .about-stats { grid-template-columns: 1fr; }
 }
 
 /* ── About page ── */
