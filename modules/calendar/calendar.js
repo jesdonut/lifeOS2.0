@@ -4,7 +4,9 @@ const MONTHS = [
   'January','February','March','April','May','June',
   'July','August','September','October','November','December',
 ];
-const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DAYS     = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DAYS_ALL = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; // indexed by getDay()
+const DOW_SINGLE = ['S','M','T','W','T','F','S'];             // single-letter, indexed by getDay()
 
 const DEFAULT_CATS = [
   { id: 'work',      name: 'Work',      isCustom: false },
@@ -83,6 +85,24 @@ function fmtSpend(amount) {
   return `${currencySymbol()} ${Number(amount).toLocaleString()}`;
 }
 
+function weekStartDay() {
+  const ws = _data?.settings?.weekStart;
+  return (typeof ws === 'number' && ws >= 0 && ws <= 6) ? ws : 1;
+}
+
+function getWeekStart(date) {
+  const ws = weekStartDay();
+  const d  = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const offset = (d.getDay() - ws + 7) % 7;
+  d.setDate(d.getDate() - offset);
+  return d;
+}
+
+function orderedDays() {
+  const ws = weekStartDay();
+  return Array.from({ length: 7 }, (_, i) => DAYS_ALL[(ws + i) % 7]);
+}
+
 // ── Module contract ────────────────────────────────────────────────
 
 export function init(container, data, onSave) {
@@ -111,8 +131,14 @@ export function destroy() {
 }
 
 export function onDataChange(newData) {
+  const prevWS = _data?.settings?.weekStart;
   _data = newData;
-  renderGrid();
+  if (newData.settings?.weekStart !== prevWS) {
+    _weekStart = null; // force recalculate for new week start
+    render();
+  } else {
+    renderGrid();
+  }
 }
 
 // ── Rendering ──────────────────────────────────────────────────────
@@ -140,7 +166,7 @@ function render() {
   todayBtn.textContent = 'today';
 
   if (_view === 'week') {
-    if (!_weekStart) _weekStart = getWeekMonday(new Date());
+    if (!_weekStart) _weekStart = getWeekStart(new Date());
     yearLabel.className = 'cal-week-label';
     const wEnd = addDays(_weekStart, 6);
     const sameMonth = _weekStart.getMonth() === wEnd.getMonth();
@@ -149,7 +175,7 @@ function render() {
       : `${MONTHS[_weekStart.getMonth()].slice(0, 3)} ${_weekStart.getDate()} – ${MONTHS[wEnd.getMonth()].slice(0, 3)} ${wEnd.getDate()}`;
     prevBtn.addEventListener('click', () => { _weekStart = addDays(_weekStart, -7); render(); });
     nextBtn.addEventListener('click', () => { _weekStart = addDays(_weekStart, 7); render(); });
-    todayBtn.addEventListener('click', () => { _weekStart = getWeekMonday(new Date()); render(); });
+    todayBtn.addEventListener('click', () => { _weekStart = getWeekStart(new Date()); render(); });
   } else {
     yearLabel.className = 'cal-year-label';
     yearLabel.textContent = _year;
@@ -204,10 +230,7 @@ function render() {
   } else if (_view === 'week') {
     buildWeek(scroll);
   } else {
-    const stub = document.createElement('div');
-    stub.style.cssText = 'padding:var(--s7) var(--s5);color:var(--text-3);font-size:var(--fs-sm);';
-    stub.textContent = 'Year view coming soon.';
-    scroll.appendChild(stub);
+    buildYear(scroll);
   }
 }
 
@@ -220,6 +243,8 @@ function renderGrid() {
     const top = scroll.scrollTop;
     buildMonths(scroll);
     scroll.scrollTop = top;
+  } else {
+    buildYear(scroll);
   }
 }
 
@@ -229,10 +254,11 @@ function initSortable(scroll) {
       group:     'cal-events',
       animation: 120,
       onEnd(evt) {
-        if (evt.from === evt.to) return;
-        const id      = evt.item.dataset.id;
-        const newDate = evt.to.dataset.date;
-        moveEvent(id, newDate);
+        if (evt.from === evt.to) {
+          renderGrid(); // snap back — no within-day reordering
+        } else {
+          moveEvent(evt.item.dataset.id, evt.to.dataset.date);
+        }
       },
     });
   });
@@ -262,9 +288,10 @@ function buildMonths(scroll) {
     // Day-of-week header
     const dowRow = document.createElement('div');
     dowRow.className = 'cal-grid cal-dow-row';
-    DAYS.forEach(d => {
+    orderedDays().forEach(d => {
+      const dow = DAYS_ALL.indexOf(d);
       const cell = document.createElement('div');
-      cell.className = 'cal-dow';
+      cell.className = 'cal-dow' + (dow === 0 || dow === 6 ? ' weekend' : '');
       cell.textContent = d;
       dowRow.appendChild(cell);
     });
@@ -277,7 +304,7 @@ function buildMonths(scroll) {
     const firstDay = new Date(_year, m, 1);
     const dim      = new Date(_year, m + 1, 0).getDate();
     const prevDim  = new Date(_year, m, 0).getDate();
-    const startDow = (firstDay.getDay() + 6) % 7; // Monday = 0
+    const startDow = (firstDay.getDay() - weekStartDay() + 7) % 7;
 
     // Leading blanks
     for (let i = 0; i < startDow; i++) {
@@ -289,10 +316,13 @@ function buildMonths(scroll) {
 
     // Days
     for (let d = 1; d <= dim; d++) {
-      const key  = dateStr(_year, m, d);
-      const evts = evtMap[key] ?? [];
-      const cell = document.createElement('div');
-      cell.className = 'cal-cell' + (key === todayKey ? ' today' : '');
+      const key     = dateStr(_year, m, d);
+      const evts    = evtMap[key] ?? [];
+      const dow     = new Date(_year, m, d).getDay();
+      const cell    = document.createElement('div');
+      cell.className = 'cal-cell'
+        + (key === todayKey ? ' today' : '')
+        + (dow === 0 || dow === 6 ? ' weekend' : '');
 
       const num = document.createElement('div');
       num.className = 'cal-day-num';
@@ -371,15 +401,17 @@ function buildWeek(scroll) {
     const dayEvts = evtMap[key] ?? [];
     const isToday = key === todayKey;
 
+    const dow = day.getDay();
+    const isWeekend = dow === 0 || dow === 6;
     const col = document.createElement('div');
-    col.className = 'cal-week-day' + (isToday ? ' today' : '');
+    col.className = 'cal-week-day' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
 
     // Column header
     const hdr = document.createElement('div');
     hdr.className = 'cal-week-day-hdr';
     const dayName = document.createElement('div');
     dayName.className = 'cal-week-day-name';
-    dayName.textContent = DAYS[i];
+    dayName.textContent = DAYS_ALL[day.getDay()];
     const dayNum = document.createElement('div');
     dayNum.className = 'cal-week-day-num';
     dayNum.textContent = day.getDate();
@@ -458,19 +490,142 @@ function buildWeek(scroll) {
     grid.appendChild(col);
   }
 
-  grid.querySelectorAll('.cal-evt-list').forEach(list => {
-    Sortable.create(list, {
-      group:     'cal-events',
-      animation: 120,
-      onEnd(evt) {
-        if (evt.from === evt.to) return;
-        moveEvent(evt.item.dataset.id, evt.to.dataset.date);
-      },
-    });
-  });
-
   wrap.appendChild(grid);
   scroll.appendChild(wrap);
+  initSortable(scroll);
+}
+
+function buildYear(scroll) {
+  scroll.innerHTML = '';
+
+  const todayKey = todayStr();
+  const evtMap   = {};
+  events().forEach(e => {
+    if (!e.date) return;
+    if (!evtMap[e.date]) evtMap[e.date] = [];
+    evtMap[e.date].push(e);
+  });
+
+  const grid = document.createElement('div');
+  grid.className = 'cal-year-grid';
+
+  for (let m = 0; m < 12; m++) {
+    const card = document.createElement('div');
+    card.className = 'cal-year-month';
+
+    const title = document.createElement('div');
+    title.className = 'cal-year-month-title';
+    title.textContent = MONTHS[m];
+    card.appendChild(title);
+
+    const dowRow = document.createElement('div');
+    dowRow.className = 'cal-year-dow-row';
+    const ws = weekStartDay();
+    for (let i = 0; i < 7; i++) {
+      const dayIdx = (ws + i) % 7;
+      const s = document.createElement('span');
+      s.textContent = DOW_SINGLE[dayIdx];
+      if (dayIdx === 0 || dayIdx === 6) s.classList.add('weekend');
+      dowRow.appendChild(s);
+    }
+    card.appendChild(dowRow);
+
+    const dayGrid = document.createElement('div');
+    dayGrid.className = 'cal-year-day-grid';
+
+    const dim      = new Date(_year, m + 1, 0).getDate();
+    const startDow = (new Date(_year, m, 1).getDay() - ws + 7) % 7;
+
+    for (let i = 0; i < startDow; i++) {
+      const blank = document.createElement('div');
+      blank.className = 'cal-year-cell blank';
+      dayGrid.appendChild(blank);
+    }
+
+    for (let d = 1; d <= dim; d++) {
+
+      const key       = dateStr(_year, m, d);
+      const dayEvts   = evtMap[key] ?? [];
+      const isToday   = key === todayKey;
+      const dayOfWeek = new Date(_year, m, d).getDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+      const cell = document.createElement('div');
+      cell.className = 'cal-year-cell'
+        + (isToday   ? ' today'   : '')
+        + (isWeekend ? ' weekend' : '');
+
+      const num = document.createElement('span');
+      num.className = 'cal-year-cell-num';
+      num.textContent = d;
+      cell.appendChild(num);
+
+      if (dayEvts.length > 0) {
+        const dot = document.createElement('span');
+        dot.className = 'cal-year-evt-dot';
+        dot.style.background = catColor(dayEvts[0].category ?? 'personal');
+        cell.appendChild(dot);
+      }
+
+      cell.addEventListener('click', e => {
+        e.stopPropagation();
+        _view = 'month';
+        render();
+        requestAnimationFrame(() => scrollToMonth(m));
+      });
+      dayGrid.appendChild(cell);
+    }
+
+    // Pad to always 42 cells (6 rows) so all cards are the same height
+    const filled = startDow + dim;
+    for (let i = filled; i < 42; i++) {
+      const blank = document.createElement('div');
+      blank.className = 'cal-year-cell blank';
+      dayGrid.appendChild(blank);
+    }
+
+    card.appendChild(dayGrid);
+
+    // Events preview
+    const monthPrefix = `${_year}-${String(m + 1).padStart(2, '0')}`;
+    const monthEvts   = events()
+      .filter(e => e.date?.startsWith(monthPrefix))
+      .sort((a, b) => (a.date > b.date ? 1 : -1));
+
+    const evtSec  = document.createElement('div');
+    evtSec.className = 'cal-year-events';
+
+    monthEvts.slice(0, 3).forEach(evt => {
+      const row = document.createElement('div');
+      row.className = 'cal-year-evt-row';
+      const dot = document.createElement('span');
+      dot.className = 'cal-year-evt-row-dot';
+      dot.style.background = catColor(evt.category ?? 'personal');
+      const lbl = document.createElement('span');
+      lbl.className = 'cal-year-evt-row-title';
+      lbl.textContent = evt.title;
+      row.append(dot, lbl);
+      evtSec.appendChild(row);
+    });
+
+    const extra = monthEvts.length - 3;
+    if (extra > 0) {
+      const more = document.createElement('div');
+      more.className = 'cal-year-evt-more';
+      more.textContent = `+${extra} more`;
+      evtSec.appendChild(more);
+    }
+
+    card.appendChild(evtSec);
+    card.addEventListener('click', () => {
+      _view = 'month';
+      render();
+      requestAnimationFrame(() => scrollToMonth(m));
+    });
+    grid.appendChild(card);
+  }
+
+  scroll.appendChild(grid);
 }
 
 // ── Modal ──────────────────────────────────────────────────────────
@@ -693,6 +848,7 @@ function removeEvent(id) {
 }
 
 function moveEvent(id, newDate) {
-  const evts = events().map(e => e.id === id ? { ...e, date: newDate } : e);
-  _onSave({ calendar: { events: evts } });
+  const moved  = events().find(e => e.id === id);
+  const others = events().filter(e => e.id !== id);
+  _onSave({ calendar: { events: [...others, { ...moved, date: newDate }] } });
 }
