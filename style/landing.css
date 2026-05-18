@@ -255,9 +255,9 @@ section {
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--s4);
-  width: min(900px, 90vw);
+  width: min(960px, 90vw);
   text-align: left;
 }
 
@@ -296,8 +296,8 @@ section {
 /* ── Card float animation ── */
 @keyframes card-float {
   0%, 100% { transform: scale(1.1) rotate(0deg); }
-  25%       { transform: scale(1.1) rotate(-2.5deg); }
-  75%       { transform: scale(1.1) rotate(2.5deg); }
+  25%       { transform: scale(1.1) rotate(-1deg); }
+  75%       { transform: scale(1.1) rotate(1deg); }
 }
 
 /* ── Period section ── */
@@ -519,4 +519,28 @@ footer {
 /* ── Animations ── */
 @keyframes fade-up {
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .preview-body {
+    grid-template-columns: 1fr 1fr;
+    min-height: auto;
+    padding: var(--s4);
+    gap: var(--s2);
+  }
+  .preview-card:nth-child(3) { display: none; }
+
+  .features-grid { grid-template-columns: 1fr 1fr; }
+
+  .period-stats { gap: var(--s4); }
+
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 420px) {
+  .preview-body { grid-template-columns: 1fr; }
+  .preview-card:nth-child(3) { display: none; }
+
+  .features-grid { grid-template-columns: 1fr; }
 }

@@ -1,6 +1,6 @@
 # LifeOS 2.0
 
-A personal life OS built to last 100 years, starting from your birthday.
+A personal life OS, yours for 100 years, starting from your birthday.
 
 Set your name, birth date, timezone, and currencies once. Everything adapts from there. Data lives in your browser. No account. No server. No subscription.
 

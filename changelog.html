@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeOS: Changelog</title>
+  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
+  <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
+  <link rel="stylesheet" href="style/base.css" />
+  <link rel="stylesheet" href="style/pages.css" />
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">LifeOS</a>
+  <div class="nav-right">
+    <button class="nav-theme-btn" id="theme-toggle">☀︎ Light</button>
+    <a class="nav-back" href="index.html">← Back</a>
+  </div>
+</nav>
+<script>
+  (function() {
+    const btn = document.getElementById('theme-toggle');
+    let t = localStorage.getItem('lifeOS_landing_theme') || 'dark';
+    function apply(v) { t = v; document.documentElement.setAttribute('data-theme', v === 'light' ? 'light' : ''); btn.textContent = v === 'light' ? '☾ Dark' : '☀︎ Light'; localStorage.setItem('lifeOS_landing_theme', v); }
+    apply(t);
+    btn.addEventListener('click', () => apply(t === 'dark' ? 'light' : 'dark'));
+  })();
+</script>
+
+<div class="doc-page">
+
+  <p class="eyebrow">History</p>
+  <h1>Changelog</h1>
+  <p class="intro">A record of what has been built and when. No patch notes or minor fixes — only things that meaningfully changed what LifeOS can do.</p>
+
+  <div class="section">
+    <h2>v2 — in development</h2>
+    <p>A full rewrite. Modular, clean, built to last. Replaces the v1 monolith entirely.</p>
+
+    <div class="changelog-entry">
+      <div class="changelog-date">May 2026</div>
+      <div class="changelog-items">
+        <div class="changelog-item">
+          <span class="changelog-tag">Landing</span>
+          Public landing page with hero, app preview carousel, feature cards, period section, philosophy. Dark and light theme. Scroll reveal animations.
+        </div>
+        <div class="changelog-item">
+          <span class="changelog-tag">Calendar</span>
+          Month view with 9 built-in categories. Add, edit, and delete events. Drag events between days. Park events for later in the notes sidebar. Week and year views in progress.
+        </div>
+        <div class="changelog-item">
+          <span class="changelog-tag">Notes</span>
+          Collapsible sidebar available from every screen. Parking lot for unscheduled events. Free-form notes with inline editing.
+        </div>
+        <div class="changelog-item">
+          <span class="changelog-tag">Period data</span>
+          Full period data model: cycle merging, EWMA-weighted predictions, fertile window, BBT, discharge, symptoms, birth control logging. Works across irregular cycles, long cycles (up to 90 days), and gaps.
+        </div>
+        <div class="changelog-item">
+          <span class="changelog-tag">Import</span>
+          Browser-based Apple Health XML importer: extracts period flow, spotting, BBT, discharge, ovulation, and contraceptive records. Parsed entirely on your device. Output is a JSON file you download and review before importing.
+        </div>
+        <div class="changelog-item">
+          <span class="changelog-tag">Settings</span>
+          Profile (name, birthday, timezone, nationalities, locations, currencies, period toggle), calendar category editor (rename, recolor, add, delete), appearance, and data management (export, import, clear).
+        </div>
+        <div class="changelog-item">
+          <span class="changelog-tag">Core</span>
+          localStorage-based storage with no download-per-save. JSON export and import for full backups. Horizontal swipe navigation between tabs. Day-change detection. Module contract enforced across all features.
+        </div>
+      </div>
+    </div>
+
+    <div class="changelog-entry upcoming">
+      <div class="changelog-date">Coming next</div>
+      <div class="changelog-items">
+        <div class="changelog-item">
+          <span class="changelog-tag">Period UI</span>
+          Year calendar view, daily logger, stats panel. Integrates the period data model already built.
+        </div>
+        <div class="changelog-item">
+          <span class="changelog-tag">Calendar</span>
+          Week view (Mon-Sun grid, daily spending per category). Year view (monthly overview, goals, age display).
+        </div>
+        <div class="changelog-item">
+          <span class="changelog-tag">Finance</span>
+          Income and expense tracking. Country-adaptive fields (Japan: salary, health insurance, pension, resident tax). Daily spending flows in from the calendar automatically.
+        </div>
+        <div class="changelog-item">
+          <span class="changelog-tag">Bank & savings</span>
+          Multi-country, multi-currency account balances. Fixed deposits, bonds, NISA (Japan), pension contributions.
+        </div>
+        <div class="changelog-item">
+          <span class="changelog-tag">Currency & FX</span>
+          Lot tracking, exchange rate logging, P&L in base currency.
+        </div>
+        <div class="changelog-item">
+          <span class="changelog-tag">Import</span>
+          Clue JSON, Natural Cycles CSV, Flo JSON, LifeOS v1 JSON.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>v1 — the original</h2>
+    <p>The first version of LifeOS. A single-file app built for personal use — not for sharing, not for general use. It worked and it proved the concept. v2 is a clean rewrite of everything v1 got right, with the things it got wrong fixed from the start.</p>
+    <p>v1 features: calendar with events and daily spending, period tracker, finance, bank accounts, savings and deposits (NISA, bonds), currency lot tracking with FX rates, notes sidebar. All in one ~2,500-line JS file.</p>
+  </div>
+
+</div>
+
+<footer class="page-footer">
+  <span>© 2026 <a href="https://github.com/jesdonut" target="_blank">@jesdonut</a>. Free for personal use.</span>
+  <div class="page-footer-links">
+    <a href="about.html">About</a>
+    <a href="changelog.html">Changelog</a>
+    <a href="download.html">Download</a>
+    <a href="license.html">License</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+  </div>
+</footer>
+
+</body>
+</html>

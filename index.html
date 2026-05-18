@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LifeOS: Built for 100 years</title>
+  <title>LifeOS: Yours for 100 years</title>
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
   <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
   <link rel="stylesheet" href="style/base.css" />
@@ -142,7 +142,7 @@
 
 <!-- Philosophy -->
 <section class="philosophy">
-  <h2 class="philosophy-title reveal">Built to last.<br>Not to grow.</h2>
+  <h2 class="philosophy-title reveal">Yours to keep.<br>Nobody else's.</h2>
   <div class="philosophy-list">
     <div class="philosophy-item reveal">
       <div class="philosophy-marker"></div>
@@ -179,7 +179,7 @@
 
     <div>
       <div class="footer-brand-name">LifeOS</div>
-      <p class="footer-brand-desc">A personal life OS built to last 100 years. Free for personal use. Your data stays yours.</p>
+      <p class="footer-brand-desc">A personal life OS, yours for 100 years. Free for personal use. Your data stays yours.</p>
       <div class="footer-social">
         <a href="https://github.com/jesdonut" target="_blank">@jesdonut on GitHub</a>
       </div>
@@ -189,7 +189,7 @@
       <div class="footer-col-title">Get started</div>
       <div class="footer-links">
         <a href="#" onclick="return false" style="opacity:0.45;cursor:not-allowed;pointer-events:none">Create your profile</a>
-        <a href="https://github.com/jesdonut/lifeOS2.0" target="_blank">Fork on GitHub</a>
+        <a href="download.html">Download</a>
         <a href="import-data.html">Import data</a>
       </div>
     </div>
@@ -210,9 +210,9 @@
     <div>
       <div class="footer-col-title">Project</div>
       <div class="footer-links">
-        <a href="https://github.com/jesdonut/lifeOS2.0" target="_blank">GitHub</a>
+        <a href="about.html">About</a>
+        <a href="changelog.html">Changelog</a>
         <a href="https://github.com/jesdonut/lifeOS2.0/issues" target="_blank">Report a bug</a>
-        <a href="https://github.com/jesdonut/lifeOS2.0/issues" target="_blank">Request a feature</a>
         <a href="license.html">License</a>
         <a href="privacy.html">Privacy</a>
         <a href="terms.html">Terms of use</a>
@@ -368,7 +368,7 @@
       floatTimer = setTimeout(() => {
         if (card.matches(':hover')) {
           card.style.transition = '';
-          card.style.animation = 'card-float 5s ease-in-out infinite';
+          card.style.animation = 'card-float 0.2s ease-in-out infinite';
         }
       }, 280);
     });
@@ -442,6 +442,7 @@
         }
         dots.push({ x: inkPos.x, y: inkPos.y, age: 0 });
         lastInkPos = { x: inkPos.x, y: inkPos.y };
+        inkPos = null; // consume — new dots only appear on actual mouse movement
       }
 
       const col = inkCol();
@@ -461,7 +462,7 @@
       }
       ictx.globalAlpha = 1;
 
-      if (inkPos || alive) inkFrame = requestAnimationFrame(runInk);
+      if (alive) inkFrame = requestAnimationFrame(runInk);
     }
 
     periodSec.addEventListener('mousemove', e => {

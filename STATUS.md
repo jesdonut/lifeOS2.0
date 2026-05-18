@@ -28,6 +28,16 @@
 - [x] `import-data.html` — browser-based data import tool: Apple Health XML parser (flow, spotting, BBT, mucus, ovulation, contraceptive), coming soon cards for Clue/Flo/Natural Cycles/v1. Parsed locally, JSON download only, no data leaves device — *18 May*
 - [x] `vercel.json` — redirects app.html and setup.html to coming-soon.html on production — *18 May*
 - [x] `index.html` → landing page, `app.html` → app shell (renamed so Vercel serves landing at `/`) — *18 May*
+- [x] `download.html` — plain-language guide: use in browser (no setup), offline ZIP download (Mac/Windows steps), fork for developers — *18 May*
+- [x] `style/import.css` — CSS extracted from import-data.html; centered layout (640px max-width), panel/tab structure, drop zone, results, coming-soon panel — *18 May*
+- [x] `style/pages.css` — `.nav-right`, `.nav-theme-btn` (min-width: 76px, stable), `.doc-page h3`, `ol/ul/li`, `.highlight p`, `.page-footer`, `.page-footer-links` — *18 May*
+- [x] Landing page polish — feature grid 3×2, card jiggle (0.2s cycle, ±1deg, slow zoom separate), ink trail stationary fix, philosophy heading, tagline "yours for 100 years", footer cleanup — *18 May*
+- [x] Theme toggle on all sub-pages (privacy, terms, license, coming-soon, import-data, download) — stable min-width, consistent IIFE pattern — *18 May*
+- [x] Consistent footer across all sub-pages — 5 identical links: Download, License, Privacy, Terms, Import data — *18 May*
+- [x] `privacy.html` — expanded import section (all sources), em dash fixes — *18 May*
+- [x] `license.html` — em dash fixes — *18 May*
+- [x] `changelog.html` — public feature history page: v1 origin, v2 milestones by date — *18 May*
+- [x] Mobile responsive landing — preview carousel 2-col on ≤640px, features grid 2-col/1-col, period stats — *18 May*
 
 ## In progress
 

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeOS: About</title>
+  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
+  <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
+  <link rel="stylesheet" href="style/base.css" />
+  <link rel="stylesheet" href="style/pages.css" />
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">LifeOS</a>
+  <div class="nav-right">
+    <button class="nav-theme-btn" id="theme-toggle">☀︎ Light</button>
+    <a class="nav-back" href="index.html">← Back</a>
+  </div>
+</nav>
+<script>
+  (function() {
+    const btn = document.getElementById('theme-toggle');
+    let t = localStorage.getItem('lifeOS_landing_theme') || 'dark';
+    function apply(v) { t = v; document.documentElement.setAttribute('data-theme', v === 'light' ? 'light' : ''); btn.textContent = v === 'light' ? '☾ Dark' : '☀︎ Light'; localStorage.setItem('lifeOS_landing_theme', v); }
+    apply(t);
+    btn.addEventListener('click', () => apply(t === 'dark' ? 'light' : 'dark'));
+  })();
+</script>
+
+<div class="doc-page">
+
+  <p class="eyebrow">Creator</p>
+  <h1>About</h1>
+  <p class="intro">LifeOS is a personal project. One person, one tool, built to last.</p>
+
+  <div class="about-portrait" aria-label="Portrait placeholder">
+    <pre class="ascii-art">
+· · · · · · · · · · · · · · · · · · ·
+· · · · · · · · · · · · · · · · · · ·
+· · · · · · · · · · · · · · · · · · ·
+· · · · · · · · · · · · · · · · · · ·
+· · · · · · · · · · · · · · · · · · ·
+· · · · ·   [ portrait ]   · · · · ·
+· · · · · · · · · · · · · · · · · · ·
+· · · · · · · · · · · · · · · · · · ·
+· · · · · · · · · · · · · · · · · · ·
+· · · · · · · · · · · · · · · · · · ·
+· · · · · · · · · · · · · · · · · · ·</pre>
+  </div>
+
+  <div class="section">
+    <h2>Who made this</h2>
+    <p>LifeOS is made by <a href="https://github.com/jesdonut" target="_blank" style="color:var(--accent)">@jesdonut</a>. It is not a product. There is no team, no company, no roadmap driven by investors. It is a personal tool that happens to be public.</p>
+  </div>
+
+  <div class="section">
+    <h2>Where it started</h2>
+    <p>It started with a Google Sheet. That gave way to a calendar app, then bullet journaling, then a paper planner. Paper felt right until the editing problem showed up: something changes, you cross it out, you rewrite, the page gets messy. An erasable pen helped for a while. Then the pen ran out, the planner got redesigned, the sheet grew columns again.</p>
+    <p>At some point the question became: is there one app that does all of this? Calendar, health, money, plans, all in the same place? Not four apps that talk to each other badly. One thing.</p>
+    <p>There wasn't. So this got built instead. It is still primarily a personal tool, but the feeling that someone else out there is trying to track their savings and their cycle and their calendar in the same place, and failing, is part of why it is public.</p>
+  </div>
+
+  <div class="section">
+    <h2>Why it works this way</h2>
+    <p>Most life-tracking apps make the same trade: your data for their convenience. They store it on their servers, lock it to their format, and disappear or pivot when they run out of funding. LifeOS is the opposite. Everything stays in your browser. You export it yourself. The code is open so you can run it forever even if this site goes away.</p>
+    <p>The calendar runs from your birthday and ends 100 years later. Not because life can be neatly contained, but because 100 years is already beyond the life most people get. It is a human-scale horizon: long enough to plan a life, finite enough to feel real.</p>
+    <p>Even in Japan, one of the longest-lived countries in the world, reaching 100 is still uncommon rather than normal.</p>
+    <div class="about-refs">
+      <p class="about-refs-label">References</p>
+      <ul>
+        <li>Human Mortality Database, <em>Japan period life table 2024</em> — survival-to-age-100 and life expectancy figures.</li>
+        <li>OECD, <em>Health at a Glance 2025: Life expectancy at birth</em> — OECD average life expectancy comparison.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Tech</h2>
+    <p>Vanilla JS. No framework, no build step, no dependencies except one drag-and-drop library. Runs in any modern browser. Works offline. Built with the intention that it should still open in a browser in 2050.</p>
+    <p>Built with <a href="https://claude.ai" target="_blank" style="color:var(--accent)">Claude</a> by Anthropic. Every module, every line of CSS, every design decision: written in conversation. Claude is listed as a co-author on every commit.</p>
+    <p>Special thanks to <a href="https://github.com/rafsandwich" target="_blank" style="color:var(--accent)">@rafsandwich</a>, consultant and the reason Claude was affordable.</p>
+    <p>Source code: <a href="https://github.com/jesdonut/lifeOS2.0" target="_blank" style="color:var(--accent)">github.com/jesdonut/lifeOS2.0</a></p>
+  </div>
+
+</div>
+
+<footer class="page-footer">
+  <span>© 2026 <a href="https://github.com/jesdonut" target="_blank">@jesdonut</a>. Free for personal use.</span>
+  <div class="page-footer-links">
+    <a href="about.html">About</a>
+    <a href="changelog.html">Changelog</a>
+    <a href="download.html">Download</a>
+    <a href="license.html">License</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+  </div>
+</footer>
+
+</body>
+</html>

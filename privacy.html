@@ -13,8 +13,20 @@
 
 <nav>
   <a class="nav-logo" href="index.html">LifeOS</a>
-  <a class="nav-back" href="index.html">← Back</a>
+  <div class="nav-right">
+    <button class="nav-theme-btn" id="theme-toggle">☀︎ Light</button>
+    <a class="nav-back" href="index.html">← Back</a>
+  </div>
 </nav>
+<script>
+  (function() {
+    const btn = document.getElementById('theme-toggle');
+    let t = localStorage.getItem('lifeOS_landing_theme') || 'dark';
+    function apply(v) { t = v; document.documentElement.setAttribute('data-theme', v === 'light' ? 'light' : ''); btn.textContent = v === 'light' ? '☾ Dark' : '☀︎ Light'; localStorage.setItem('lifeOS_landing_theme', v); }
+    apply(t);
+    btn.addEventListener('click', () => apply(t === 'dark' ? 'light' : 'dark'));
+  })();
+</script>
 
 <div class="doc-page">
 
@@ -28,18 +40,17 @@
 
   <div class="section">
     <h2>How your data is stored</h2>
-    <p>When you use LifeOS, all your information — your name, dates, finances, health data, notes — is saved to your browser's <strong>localStorage</strong>. This is a storage area that lives entirely on your device, like a file on your computer. It is not sent anywhere.</p>
-    <p>If you clear your browser data, your LifeOS data clears with it. That's why we give you the option to export a backup file. That file also stays on your device — we never see it.</p>
+    <p>When you use LifeOS, all your information (your name, dates, finances, health data, notes) is saved to your browser's <strong>localStorage</strong>. This is a storage area that lives entirely on your device, like a file on your computer. It is not sent anywhere.</p>
+    <p>If you clear your browser data, your LifeOS data clears with it. That's why we give you the option to export a backup file. That file also stays on your device. We never see it.</p>
   </div>
 
   <hr class="divider" />
 
   <div class="section">
-    <h2>Apple Health import</h2>
-    <p>LifeOS can help you import data from Apple Health. Here is exactly how that works:</p>
-    <p>1. You export your data from the Health app on your iPhone. Apple gives you a zip file that goes directly to your device — not to us.</p>
-    <p>2. You open that file in LifeOS. The conversion happens <strong>entirely in your browser</strong>. The file is read locally, processed locally, and the result is saved to your localStorage.</p>
-    <p>The file never leaves your device. We never receive it, never touch it, never store it.</p>
+    <h2>Importing data from other apps</h2>
+    <p>LifeOS can import data from Apple Health, with support for Clue, Natural Cycles, Flo, and LifeOS v1 coming soon. The same privacy guarantee applies to all of them.</p>
+    <p>You export your data from the source app directly to your device. You then open that file in the <a href="import-data.html" style="color:var(--accent)">LifeOS import tool</a>. The file is read and converted <strong>entirely in your browser</strong>. Nothing is uploaded. Nothing is sent anywhere.</p>
+    <p>The result is a JSON file that downloads to your computer for you to review. You decide what to import and when. We never receive the original file, the converted file, or any of its contents.</p>
   </div>
 
   <hr class="divider" />
@@ -54,7 +65,7 @@
 
   <div class="section">
     <h2>Your backup file</h2>
-    <p>You can export your data as a <strong>JSON file</strong> at any time. This file contains everything you've entered. You can keep it, move it to another device, or import it back into LifeOS. It is your file — we never see it or receive a copy.</p>
+    <p>You can export your data as a <strong>JSON file</strong> at any time. This file contains everything you've entered. You can keep it, move it to another device, or import it back into LifeOS. It is your filewe never see it or receive a copy.</p>
   </div>
 
   <hr class="divider" />
@@ -75,6 +86,17 @@
 
 </div>
 
+<footer class="page-footer">
+  <span>© 2026 <a href="https://github.com/jesdonut" target="_blank">@jesdonut</a>. Free for personal use.</span>
+  <div class="page-footer-links">
+    <a href="about.html">About</a>
+    <a href="changelog.html">Changelog</a>
+    <a href="download.html">Download</a>
+    <a href="license.html">License</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+  </div>
+</footer>
 
 </body>
 </html>
