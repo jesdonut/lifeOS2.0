@@ -449,8 +449,92 @@ function renderAppearance(el) {
 
 // ── Data ───────────────────────────────────────────────────────────
 
+function showLogoutModal() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = [
+    'position:fixed', 'inset:0', 'background:rgba(0,0,0,0.7)',
+    'z-index:2000', 'display:flex', 'align-items:center',
+    'justify-content:center', 'padding:var(--s4)',
+  ].join(';');
+
+  const box = document.createElement('div');
+  box.style.cssText = [
+    'background:var(--surface)', 'border:1px solid var(--border)',
+    'border-radius:var(--radius-lg)', 'padding:var(--s6)',
+    'max-width:380px', 'width:100%',
+    'display:flex', 'flex-direction:column', 'gap:var(--s4)',
+  ].join(';');
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:var(--fs-lg);font-weight:600;color:var(--text)';
+  title.textContent = 'Log out';
+
+  const body = document.createElement('p');
+  body.style.cssText = 'font-size:var(--fs-sm);color:var(--text-2);line-height:1.7;margin:0';
+  body.textContent = 'This will clear all your data from this browser. Download a backup first so you can pick up where you left off.';
+
+  const dlBtn = document.createElement('button');
+  dlBtn.className = 'sp-data-btn';
+  dlBtn.style.cssText = 'width:100%;padding:var(--s3)';
+  dlBtn.textContent = 'Download backup';
+  dlBtn.addEventListener('click', () => {
+    exportBackup();
+    dlBtn.textContent = 'Downloaded';
+    dlBtn.style.opacity = '0.5';
+  });
+
+  const hr = document.createElement('hr');
+  hr.style.cssText = 'border:none;border-top:1px solid var(--border-dim)';
+
+  const actions = document.createElement('div');
+  actions.style.cssText = 'display:flex;gap:var(--s3);align-items:center';
+
+  const logoutBtn = document.createElement('button');
+  logoutBtn.className = 'sp-data-btn danger';
+  logoutBtn.style.cssText = 'flex:1;padding:var(--s3);opacity:0.4;pointer-events:none';
+  let secs = 5;
+  logoutBtn.textContent = `Log out (${secs})`;
+
+  const timer = setInterval(() => {
+    secs--;
+    if (secs > 0) {
+      logoutBtn.textContent = `Log out (${secs})`;
+    } else {
+      clearInterval(timer);
+      logoutBtn.textContent = 'Log out';
+      logoutBtn.style.opacity = '';
+      logoutBtn.style.pointerEvents = '';
+    }
+  }, 1000);
+
+  logoutBtn.addEventListener('click', () => {
+    clearInterval(timer);
+    ['lifeOS_data', 'lifeOS_landing_theme', 'lifeOS_sidebar'].forEach(k =>
+      localStorage.removeItem(k)
+    );
+    window.location.href = 'index.html';
+  });
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'sp-data-btn';
+  cancelBtn.style.cssText = 'padding:var(--s3) var(--s4)';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', () => { clearInterval(timer); overlay.remove(); });
+
+  overlay.addEventListener('click', e => { if (e.target === overlay) { clearInterval(timer); overlay.remove(); } });
+
+  actions.append(logoutBtn, cancelBtn);
+  box.append(title, body, dlBtn, hr, actions);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
 function renderData(el) {
   sectionLabel(el, 'Your data');
+
+  el.appendChild(dataRow('Log out', 'Clear this browser session and return to the start.', 'Log out', true,
+    () => showLogoutModal()
+  ));
 
   el.appendChild(dataRow('Export backup', 'Download all your data as a JSON file.', 'Export', false,
     () => exportBackup()
