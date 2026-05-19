@@ -542,6 +542,12 @@ footer {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Mobile nav ── */
+@media (max-width: 600px) {
+  nav .brand-pill   { display: none; }
+  nav #theme-toggle { display: none; }
+}
+
 /* ── Mobile ── */
 @media (max-width: 640px) {
   .preview-body {

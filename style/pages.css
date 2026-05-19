@@ -329,4 +329,5 @@ nav {
   .changelog-entry { grid-template-columns: 1fr; gap: var(--s2); }
   .changelog-date { padding-bottom: var(--s1); }
   .page-footer-links { flex-wrap: wrap; gap: var(--s3); }
+  nav .brand-pill { display: none; }
 }
