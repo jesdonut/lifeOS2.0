@@ -456,6 +456,7 @@ function buildWeek(scroll) {
     const daySpend = (calData().spendEntries ?? {})[key] ?? [];
     const spendSec = document.createElement('div');
     spendSec.className = 'cal-spend-section';
+    spendSec.addEventListener('click', e => e.stopPropagation());
 
     const spendHdr = document.createElement('div');
     spendHdr.className = 'cal-spend-hdr';
