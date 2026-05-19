@@ -254,13 +254,22 @@ function renderGrid() {
 }
 
 function initSortable(scroll) {
+  // Event lists also accept spend chips — onEnd detects and reroutes them
   scroll.querySelectorAll('.cal-evt-list').forEach(list => {
     Sortable.create(list, {
-      group:     'cal-events',
+      group:     { name: 'cal-events', put: ['cal-events', 'cal-spend'] },
       animation: 120,
       onEnd(evt) {
-        if (evt.from === evt.to) renderGrid();
-        else moveEvent(evt.item.dataset.id, evt.to.dataset.date);
+        if (evt.item.classList.contains('cal-spend-chip')) {
+          // Spend chip dropped on events area → route to that column's spend list
+          const fromDate = evt.item.dataset.from;
+          const toDate   = evt.to.closest('.cal-week-day')?.querySelector('.cal-spend-list')?.dataset.date ?? fromDate;
+          if (fromDate !== toDate) moveSpendEntry(evt.item.dataset.id, fromDate, toDate);
+          else render();
+        } else {
+          if (evt.from === evt.to) renderGrid();
+          else moveEvent(evt.item.dataset.id, evt.to.dataset.date);
+        }
       },
     });
   });
