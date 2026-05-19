@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Seratus: Changelog</title>
+  <title>Seratus: Roadmap</title>
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
   <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
   <link rel="stylesheet" href="style/base.css" />
@@ -30,85 +30,136 @@
 
 <div class="doc-page">
 
-  <p class="eyebrow">History</p>
-  <h1>Changelog</h1>
-  <p class="intro">A record of what has been built and when. No patch notes or minor fixes — only things that meaningfully changed what Seratus can do.</p>
+  <p class="eyebrow">Development</p>
+  <h1>Roadmap</h1>
+  <p class="intro">What Seratus can do now, what is being built, and what comes next. A personal project moves at its own pace.</p>
 
-  <div class="section">
-    <h2>v2 — in development</h2>
-    <p>A full rewrite. Modular, clean, built to last. Replaces the v1 monolith entirely.</p>
+  <div class="rm-track">
 
-    <div class="changelog-entry">
-      <div class="changelog-date">May 2026</div>
-      <div class="changelog-items">
-        <div class="changelog-item">
-          <span class="changelog-tag">Landing</span>
-          Public landing page with hero, app preview carousel, feature cards, period section, philosophy. Dark and light theme. Scroll reveal animations.
+    <!-- ── Live ── -->
+    <div class="rm-block live">
+      <div class="rm-aside">
+        <div class="rm-dot"></div>
+        <div class="rm-line"></div>
+      </div>
+      <div class="rm-body">
+        <div class="rm-hdr">
+          <span class="rm-badge live">Live</span>
+          <span class="rm-when">2026</span>
         </div>
-        <div class="changelog-item">
-          <span class="changelog-tag">Calendar</span>
-          Month view with 9 built-in categories. Add, edit, and delete events. Drag events between days. Park events for later in the notes sidebar. Week and year views in progress.
-        </div>
-        <div class="changelog-item">
-          <span class="changelog-tag">Notes</span>
-          Collapsible sidebar available from every screen. Parking lot for unscheduled events. Free-form notes with inline editing.
-        </div>
-        <div class="changelog-item">
-          <span class="changelog-tag">Period data</span>
-          Full period data model: cycle merging, EWMA-weighted predictions, fertile window, BBT, discharge, symptoms, birth control logging. Works across irregular cycles, long cycles (up to 90 days), and gaps.
-        </div>
-        <div class="changelog-item">
-          <span class="changelog-tag">Import</span>
-          Browser-based Apple Health XML importer: extracts period flow, spotting, BBT, discharge, ovulation, and contraceptive records. Parsed entirely on your device. Output is a JSON file you download and review before importing.
-        </div>
-        <div class="changelog-item">
-          <span class="changelog-tag">Settings</span>
-          Profile (name, birthday, timezone, nationalities, locations, currencies, period toggle), calendar category editor (rename, recolor, add, delete), appearance, and data management (export, import, clear).
-        </div>
-        <div class="changelog-item">
-          <span class="changelog-tag">Core</span>
-          localStorage-based storage with no download-per-save. JSON export and import for full backups. Horizontal swipe navigation between tabs. Day-change detection. Module contract enforced across all features.
+        <div class="rm-items">
+          <div class="rm-item">
+            <span class="rm-tag">Calendar</span>
+            Month and week views. Events with 9 built-in categories and drag-and-drop between days. Daily spend tracked per category. Park unscheduled events to the notes sidebar for later.
+          </div>
+          <div class="rm-item">
+            <span class="rm-tag">Period tracker</span>
+            Year overview with 12 month calendars. Daily logger for flow, symptoms, and BBT. Cycle stats with EWMA-weighted predictions, fertile window, and ovulation estimates. Month detail panel with BBT chart and symptom summary.
+          </div>
+          <div class="rm-item">
+            <span class="rm-tag">Notes</span>
+            Collapsible sidebar available from every screen. Free-form notes and a parking lot for unscheduled events.
+          </div>
+          <div class="rm-item">
+            <span class="rm-tag">Import</span>
+            Apple Health XML parser: extracts period flow, spotting, BBT, discharge, ovulation, and contraceptive records. Parsed entirely on your device.
+          </div>
+          <div class="rm-item">
+            <span class="rm-tag">Settings</span>
+            Profile, timezone, calendar category editor, appearance, full data export and import, log out.
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="changelog-entry upcoming">
-      <div class="changelog-date">Coming next</div>
-      <div class="changelog-items">
-        <div class="changelog-item">
-          <span class="changelog-tag">Period UI</span>
-          Year calendar view, daily logger, stats panel. Integrates the period data model already built.
+    <!-- ── In progress ── -->
+    <div class="rm-block active">
+      <div class="rm-aside">
+        <div class="rm-dot"></div>
+        <div class="rm-line"></div>
+      </div>
+      <div class="rm-body">
+        <div class="rm-hdr">
+          <span class="rm-badge active">In progress</span>
         </div>
-        <div class="changelog-item">
-          <span class="changelog-tag">Calendar</span>
-          Week view (Mon-Sun grid, daily spending per category). Year view (monthly overview, goals, age display).
-        </div>
-        <div class="changelog-item">
-          <span class="changelog-tag">Finance</span>
-          Income and expense tracking. Country-adaptive fields (Japan: salary, health insurance, pension, resident tax). Daily spending flows in from the calendar automatically.
-        </div>
-        <div class="changelog-item">
-          <span class="changelog-tag">Bank & savings</span>
-          Multi-country, multi-currency account balances. Fixed deposits, bonds, NISA (Japan), pension contributions.
-        </div>
-        <div class="changelog-item">
-          <span class="changelog-tag">Currency & FX</span>
-          Lot tracking, exchange rate logging, P&L in base currency.
-        </div>
-        <div class="changelog-item">
-          <span class="changelog-tag">Import</span>
-          Clue JSON, Natural Cycles CSV, Flo JSON, Seratus v1 JSON.
+        <div class="rm-items">
+          <div class="rm-item">
+            <span class="rm-tag">Calendar</span>
+            Year view with monthly overviews, goals, and age display. Week start day setting.
+          </div>
+          <div class="rm-item">
+            <span class="rm-tag">Finance</span>
+            Income and expense tracking. Country-adaptive fields for Japan: salary, health insurance, pension, resident tax. Daily calendar spending flows in automatically.
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <hr class="divider" />
+    <!-- ── Next ── -->
+    <div class="rm-block next">
+      <div class="rm-aside">
+        <div class="rm-dot"></div>
+        <div class="rm-line"></div>
+      </div>
+      <div class="rm-body">
+        <div class="rm-hdr">
+          <span class="rm-badge next">Next</span>
+        </div>
+        <div class="rm-items">
+          <div class="rm-item">
+            <span class="rm-tag">Bank and savings</span>
+            Multi-country, multi-currency account balances. Fixed deposits, bonds, NISA (Japan), and pension contributions tracked in one place.
+          </div>
+          <div class="rm-item">
+            <span class="rm-tag">Currency and FX</span>
+            Lot tracking for JPY and IDR. Exchange rate logging and P&L in base currency.
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <div class="section">
-    <h2>v1 — the original</h2>
-    <p>The first version of Seratus. A single-file app built for personal use — not for sharing, not for general use. It worked and it proved the concept. v2 is a clean rewrite of everything v1 got right, with the things it got wrong fixed from the start.</p>
-    <p>v1 features: calendar with events and daily spending, period tracker, finance, bank accounts, savings and deposits (NISA, bonds), currency lot tracking with FX rates, notes sidebar. All in one ~2,500-line JS file.</p>
+    <!-- ── Later ── -->
+    <div class="rm-block later">
+      <div class="rm-aside">
+        <div class="rm-dot"></div>
+        <div class="rm-line"></div>
+      </div>
+      <div class="rm-body">
+        <div class="rm-hdr">
+          <span class="rm-badge later">Later</span>
+        </div>
+        <div class="rm-items">
+          <div class="rm-item">
+            <span class="rm-tag">Import</span>
+            Clue JSON, Natural Cycles CSV, Flo JSON, and Seratus v1 JSON.
+          </div>
+          <div class="rm-item">
+            <span class="rm-tag">Period</span>
+            Birth control logging. Travel date adjustments for cycle predictions.
+          </div>
+          <div class="rm-item">
+            <span class="rm-tag">Calendar</span>
+            Recurring events. Goals with progress tracking.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── v1 ── -->
+    <div class="rm-block history">
+      <div class="rm-aside">
+        <div class="rm-dot"></div>
+        <div class="rm-line"></div>
+      </div>
+      <div class="rm-body">
+        <div class="rm-hdr">
+          <span class="rm-badge history">v1, the original</span>
+          <span class="rm-when">2023 – 2025</span>
+        </div>
+        <p class="rm-history-desc">The first version: a single-file app, never shared, never meant to be. Calendar, period tracker, finance, bank, savings, deposits, NISA, bonds, currency lot tracking, notes. All in one ~2,500-line JS file. It worked. v2 is a clean rewrite of everything it got right, with what it got wrong fixed from the start.</p>
+      </div>
+    </div>
+
   </div>
 
 </div>
@@ -117,7 +168,7 @@
   <span>© 2026 <a href="https://github.com/jesdonut" target="_blank">@jesdonut</a>. Free for personal use.</span>
   <div class="page-footer-links">
     <a href="about.html">About</a>
-    <a href="changelog.html">Changelog</a>
+    <a href="changelog.html">Roadmap</a>
     <a href="download.html">Download</a>
     <a href="license.html">License</a>
     <a href="privacy.html">Privacy</a>
