@@ -433,7 +433,11 @@ function buildWeek(scroll) {
     // Column body
     const body = document.createElement('div');
     body.className = 'cal-week-day-body';
-    body.addEventListener('click', () => openModal(key));
+
+    // ── Events area (top) ──
+    const evtArea = document.createElement('div');
+    evtArea.className = 'cal-evt-area';
+    evtArea.addEventListener('click', () => openModal(key));
 
     const evtList = document.createElement('div');
     evtList.className = 'cal-evt-list';
@@ -451,14 +455,16 @@ function buildWeek(scroll) {
       evtList.appendChild(chip);
     });
 
-    body.appendChild(evtList);
+    evtArea.appendChild(evtList);
+    body.appendChild(evtArea);
 
-    // Spend entries section
+    // ── Spend area (bottom) ──
     const daySpend = (calData().spendEntries ?? {})[key] ?? [];
     const spendSec = document.createElement('div');
     spendSec.className = 'cal-spend-section';
     spendSec.addEventListener('click', e => e.stopPropagation());
 
+    // Divider header: ─── Spend ─── +
     const spendHdr = document.createElement('div');
     spendHdr.className = 'cal-spend-hdr';
     const spendLabel = document.createElement('span');
@@ -471,14 +477,14 @@ function buildWeek(scroll) {
     spendHdr.append(spendLabel, addSpendBtn);
     spendSec.appendChild(spendHdr);
 
-    // Individual spend chips (draggable)
+    // Draggable spend chips
     const spendList = document.createElement('div');
     spendList.className = 'cal-spend-list';
     spendList.dataset.date = key;
 
     daySpend.forEach(entry => {
-      const cat   = spendCatById(entry.categoryId);
-      const chip  = document.createElement('div');
+      const cat  = spendCatById(entry.categoryId);
+      const chip = document.createElement('div');
       chip.className = 'cal-spend-chip';
       chip.dataset.id   = entry.id;
       chip.dataset.from = key;
@@ -499,9 +505,6 @@ function buildWeek(scroll) {
     spendSec.appendChild(spendList);
 
     if (daySpend.length > 0) {
-      const divEl = document.createElement('div');
-      divEl.className = 'cal-week-spend-divider';
-      spendSec.appendChild(divEl);
       const totalRow = document.createElement('div');
       totalRow.className = 'cal-week-spend-total';
       const total = daySpend.reduce((s, e) => s + Number(e.amount), 0);
