@@ -389,6 +389,14 @@ nav {
   line-height: 1.7;
 }
 
+.rm-item-date {
+  display: block;
+  font-size: 10px;
+  color: var(--text-3);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
 .rm-tag {
   display: inline-block;
   font-size: var(--fs-xs);
