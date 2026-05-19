@@ -104,8 +104,9 @@ function buildModal() {
   const content = modal.querySelector('#stcontent');
 
   const SECTIONS = [
-    { id: 'profile',    icon: 'person',        label: 'Profile' },
+    { id: 'profile',    icon: 'person',         label: 'Profile' },
     { id: 'calendar',   icon: 'calendar_month', label: 'Calendar' },
+    { id: 'spending',   icon: 'payments',       label: 'Spending' },
     { id: 'appearance', icon: 'palette',        label: 'Appearance' },
     { id: 'data',       icon: 'storage',        label: 'Data' },
   ];
@@ -132,6 +133,7 @@ function renderSection(el, id) {
   el.innerHTML = '';
   if      (id === 'profile')    renderProfile(el);
   else if (id === 'calendar')   renderCalendar(el);
+  else if (id === 'spending')   renderSpending(el);
   else if (id === 'appearance') renderAppearance(el);
   else if (id === 'data')       renderData(el);
 }
@@ -412,6 +414,239 @@ function renderCalendar(el) {
 
 function saveCats(cats) {
   _onSave({ settings: { ..._data.settings, categories: cats } });
+}
+
+// ── Spending categories ────────────────────────────────────────────
+
+const DEFAULT_SPEND_CATS = [
+  { id: 'food',          name: 'Food',              color: '#e8824a', sub: ['Breakfast', 'Lunch', 'Dinner', 'Others'],                                        isCustom: false },
+  { id: 'bills',         name: 'Bills',             color: '#5b8fce', sub: ['Gas', 'Water', 'Electricity', 'Internet', 'Mobile'],                            isCustom: false },
+  { id: 'commute',       name: 'Commute',           color: '#4aae8f', sub: ['Work', 'Bus', 'Train', 'Airplane', 'Taxi', 'Ship', 'Car'],                      isCustom: false },
+  { id: 'entertainment', name: 'Entertainment',     color: '#a06fd8', sub: ['Game', 'Movie', 'Clothes', 'Gadget'],                                           isCustom: false },
+  { id: 'beauty',        name: 'Beauty',            color: '#e06b9a', sub: ['Pedicure', 'Manicure', 'Hair cut', 'Hair color', 'Eyebrow', 'Eyelash'],         isCustom: false },
+  { id: 'paperwork',     name: 'Paperwork',         color: '#c9a84c', sub: ['Visa', 'Government', 'Ward office'],                                            isCustom: false },
+  { id: 'medical',       name: 'Medical',           color: '#e06060', sub: ['Hospital', 'Clinic', 'Pharmacy'],                                               isCustom: false },
+  { id: 'necessities',   name: 'Daily necessities', color: '#7aab7a', sub: ['Shampoo', 'Body soap', 'Conditioner', 'Toothbrush', 'Detergent', 'Dish soap'], isCustom: false },
+];
+
+function renderSpending(el) {
+  const cats = (_data.settings?.spendCategories ?? DEFAULT_SPEND_CATS).map(c => ({ ...c, sub: [...(c.sub ?? [])] }));
+  let editingId    = null;
+  let editingSub   = null; // 'add' | index number
+  let newSubValue  = '';
+
+  sectionLabel(el, 'Spending categories');
+
+  const listEl = document.createElement('div');
+  listEl.className = 'sp-cat-list';
+  el.appendChild(listEl);
+
+  function saveSpendCats(updated) {
+    _onSave({ settings: { ..._data.settings, spendCategories: updated } });
+  }
+
+  function renderCats() {
+    listEl.innerHTML = '';
+
+    cats.forEach((cat, ci) => {
+      const block = document.createElement('div');
+      block.className = 'sp-spend-block';
+
+      // Category row
+      const row = document.createElement('div');
+      row.className = 'sp-cat-row';
+
+      const swatch = document.createElement('div');
+      swatch.className = 'sp-cat-swatch';
+      swatch.style.background = cat.color;
+
+      if (editingId === cat.id) {
+        const inp = document.createElement('input');
+        inp.className = 'sp-cat-input';
+        inp.value = cat.name;
+        inp.autocomplete = 'off';
+
+        const colorPick = document.createElement('input');
+        colorPick.type = 'color';
+        colorPick.className = 'sp-color-input';
+        colorPick.value = cat.color;
+        colorPick.addEventListener('input', () => { swatch.style.background = colorPick.value; });
+
+        const okBtn = document.createElement('button');
+        okBtn.className = 'sp-cat-btn';
+        okBtn.textContent = 'Save';
+        okBtn.addEventListener('click', () => {
+          const val = inp.value.trim();
+          if (val) { cats[ci].name = val; cats[ci].color = colorPick.value; }
+          editingId = null;
+          saveSpendCats(cats);
+          renderCats();
+        });
+        inp.addEventListener('keydown', e => {
+          if (e.key === 'Enter')  { e.preventDefault(); okBtn.click(); }
+          if (e.key === 'Escape') { editingId = null; renderCats(); }
+        });
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'sp-cat-btn';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.addEventListener('click', () => { editingId = null; renderCats(); });
+
+        row.append(swatch, colorPick, inp, okBtn, cancelBtn);
+      } else {
+        const name = document.createElement('span');
+        name.className = 'sp-cat-name';
+        name.textContent = cat.name;
+
+        const renameBtn = document.createElement('button');
+        renameBtn.className = 'sp-cat-btn';
+        renameBtn.textContent = 'Rename';
+        renameBtn.addEventListener('click', () => { editingId = cat.id; editingSub = null; renderCats(); });
+
+        row.append(swatch, name, renameBtn);
+
+        if (cat.isCustom) {
+          const delBtn = document.createElement('button');
+          delBtn.className = 'sp-cat-btn del';
+          delBtn.textContent = 'Delete';
+          delBtn.addEventListener('click', () => {
+            cats.splice(ci, 1);
+            saveSpendCats(cats);
+            renderCats();
+          });
+          row.appendChild(delBtn);
+        }
+      }
+      block.appendChild(row);
+
+      // Subcategories
+      const subWrap = document.createElement('div');
+      subWrap.className = 'sp-sub-wrap';
+
+      cat.sub.forEach((s, si) => {
+        const subRow = document.createElement('div');
+        subRow.className = 'sp-sub-row';
+
+        if (editingSub === `${cat.id}:${si}`) {
+          const inp = document.createElement('input');
+          inp.className = 'sp-cat-input';
+          inp.value = s;
+          inp.autocomplete = 'off';
+          const okBtn = document.createElement('button');
+          okBtn.className = 'sp-cat-btn';
+          okBtn.textContent = 'Save';
+          okBtn.addEventListener('click', () => {
+            const val = inp.value.trim();
+            if (val) cats[ci].sub[si] = val;
+            editingSub = null;
+            saveSpendCats(cats);
+            renderCats();
+          });
+          inp.addEventListener('keydown', e => {
+            if (e.key === 'Enter')  { e.preventDefault(); okBtn.click(); }
+            if (e.key === 'Escape') { editingSub = null; renderCats(); }
+          });
+          const cancelBtn = document.createElement('button');
+          cancelBtn.className = 'sp-cat-btn';
+          cancelBtn.textContent = 'Cancel';
+          cancelBtn.addEventListener('click', () => { editingSub = null; renderCats(); });
+          subRow.append(inp, okBtn, cancelBtn);
+        } else {
+          const chip = document.createElement('span');
+          chip.className = 'sp-sub-chip';
+          chip.textContent = s;
+          chip.style.setProperty('--chip-color', cat.color);
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'sp-sub-edit-btn';
+          editBtn.textContent = 'Edit';
+          editBtn.addEventListener('click', () => { editingSub = `${cat.id}:${si}`; editingId = null; renderCats(); });
+
+          const delBtn = document.createElement('button');
+          delBtn.className = 'sp-sub-del-btn';
+          delBtn.textContent = '×';
+          delBtn.addEventListener('click', () => {
+            cats[ci].sub.splice(si, 1);
+            saveSpendCats(cats);
+            renderCats();
+          });
+          subRow.append(chip, editBtn, delBtn);
+        }
+        subWrap.appendChild(subRow);
+      });
+
+      // Add subcategory row
+      if (editingSub === `${cat.id}:add`) {
+        const addInpRow = document.createElement('div');
+        addInpRow.className = 'sp-sub-row';
+        const inp = document.createElement('input');
+        inp.className = 'sp-cat-input';
+        inp.placeholder = 'New subcategory';
+        inp.autocomplete = 'off';
+        inp.value = newSubValue;
+        inp.addEventListener('input', () => { newSubValue = inp.value; });
+        const okBtn = document.createElement('button');
+        okBtn.className = 'sp-cat-btn';
+        okBtn.textContent = 'Add';
+        okBtn.addEventListener('click', () => {
+          const val = inp.value.trim();
+          if (val) cats[ci].sub.push(val);
+          editingSub = null;
+          newSubValue = '';
+          saveSpendCats(cats);
+          renderCats();
+        });
+        inp.addEventListener('keydown', e => {
+          if (e.key === 'Enter')  { e.preventDefault(); okBtn.click(); }
+          if (e.key === 'Escape') { editingSub = null; newSubValue = ''; renderCats(); }
+        });
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'sp-cat-btn';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.addEventListener('click', () => { editingSub = null; newSubValue = ''; renderCats(); });
+        addInpRow.append(inp, okBtn, cancelBtn);
+        subWrap.appendChild(addInpRow);
+        requestAnimationFrame(() => inp.focus());
+      } else {
+        const addSubBtn = document.createElement('button');
+        addSubBtn.className = 'sp-sub-add-btn';
+        addSubBtn.textContent = '+ subcategory';
+        addSubBtn.addEventListener('click', () => { editingSub = `${cat.id}:add`; editingId = null; renderCats(); });
+        subWrap.appendChild(addSubBtn);
+      }
+
+      block.appendChild(subWrap);
+      listEl.appendChild(block);
+    });
+
+    // Add new category row
+    const addRow = document.createElement('div');
+    addRow.className = 'sp-add-cat-row';
+    const colorPicker = document.createElement('input');
+    colorPicker.type = 'color';
+    colorPicker.className = 'sp-color-input';
+    colorPicker.value = '#9b5cd4';
+    const newName = document.createElement('input');
+    newName.className = 'sp-input';
+    newName.style.flex = '1';
+    newName.placeholder = 'New category name';
+    newName.autocomplete = 'off';
+    const addBtn = document.createElement('button');
+    addBtn.className = 'sp-cat-btn';
+    addBtn.textContent = '+ Add';
+    addBtn.addEventListener('click', () => {
+      const name = newName.value.trim();
+      if (!name) { newName.focus(); return; }
+      cats.push({ id: 'custom_' + Math.random().toString(36).slice(2, 7), name, color: colorPicker.value, sub: [], isCustom: true });
+      saveSpendCats(cats);
+      newName.value = '';
+      renderCats();
+    });
+    newName.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addBtn.click(); } });
+    addRow.append(colorPicker, newName, addBtn);
+    listEl.appendChild(addRow);
+  }
+
+  renderCats();
 }
 
 // ── Appearance ─────────────────────────────────────────────────────

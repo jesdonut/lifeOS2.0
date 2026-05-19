@@ -433,3 +433,59 @@
   padding-left: var(--s3);
   border-left: 2px solid var(--border-dim);
 }
+
+/* ── Spending categories ── */
+.sp-spend-block {
+  margin-bottom: var(--s4);
+  padding-bottom: var(--s4);
+  border-bottom: 1px solid var(--border-dim);
+}
+.sp-spend-block:last-of-type { border-bottom: none; }
+
+.sp-sub-wrap {
+  padding-left: calc(var(--s3) + 10px + var(--s3));
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: var(--s2);
+}
+
+.sp-sub-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.sp-sub-chip {
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  background: color-mix(in srgb, var(--chip-color, var(--accent)) 10%, transparent);
+  border-radius: 100px;
+  padding: 2px 8px;
+  flex: 1;
+}
+
+.sp-sub-edit-btn,
+.sp-sub-del-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding: 2px 4px;
+  transition: color var(--dur-fast);
+}
+.sp-sub-edit-btn:hover { color: var(--text-2); }
+.sp-sub-del-btn:hover  { color: var(--red, #e06060); }
+
+.sp-sub-add-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding: 2px 0;
+  text-align: left;
+  transition: color var(--dur-fast);
+}
+.sp-sub-add-btn:hover { color: var(--accent); }
