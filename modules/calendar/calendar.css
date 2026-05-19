@@ -733,20 +733,23 @@
 }
 
 .cal-spend-add-btn {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-3);
-  font-size: 13px;
-  line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  flex-shrink: 0;
   transition: border-color var(--dur-fast), color var(--dur-fast);
+}
+.cal-spend-add-btn .material-symbols-outlined {
+  font-size: 13px;
+  font-variation-settings: 'opsz' 20, 'wght' 300, 'FILL' 0, 'GRAD' 0;
 }
 .cal-spend-add-btn:hover { border-color: var(--accent); color: var(--accent); }
 

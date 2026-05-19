@@ -40,7 +40,13 @@ export function load() {
   if (_data) return _data;
   try {
     const raw = localStorage.getItem(KEY);
-    _data = raw ? { ...defaultData(), ...JSON.parse(raw) } : defaultData();
+    if (raw) {
+      const defaults = defaultData();
+      const stored   = JSON.parse(raw);
+      _data = { ...defaults, ...stored, settings: { ...defaults.settings, ...(stored.settings ?? {}) } };
+    } else {
+      _data = defaultData();
+    }
   } catch {
     _data = defaultData();
   }

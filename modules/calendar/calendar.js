@@ -465,7 +465,7 @@ function buildWeek(scroll) {
     spendLabel.textContent = 'Spend';
     const addSpendBtn = document.createElement('button');
     addSpendBtn.className = 'cal-spend-add-btn';
-    addSpendBtn.textContent = '+';
+    addSpendBtn.innerHTML = '<span class="material-symbols-outlined">add</span>';
     addSpendBtn.addEventListener('click', e => { e.stopPropagation(); openSpendModal(key); });
     spendHdr.append(spendLabel, addSpendBtn);
     spendSec.appendChild(spendHdr);
