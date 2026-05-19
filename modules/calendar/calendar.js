@@ -259,11 +259,18 @@ function initSortable(scroll) {
       group:     'cal-events',
       animation: 120,
       onEnd(evt) {
-        if (evt.from === evt.to) {
-          renderGrid(); // snap back — no within-day reordering
-        } else {
-          moveEvent(evt.item.dataset.id, evt.to.dataset.date);
-        }
+        if (evt.from === evt.to) renderGrid();
+        else moveEvent(evt.item.dataset.id, evt.to.dataset.date);
+      },
+    });
+  });
+  scroll.querySelectorAll('.cal-spend-list').forEach(list => {
+    Sortable.create(list, {
+      group:     'cal-spend',
+      animation: 120,
+      onEnd(evt) {
+        if (evt.from === evt.to) { renderGrid(); return; }
+        moveSpendEntry(evt.item.dataset.id, evt.item.dataset.from, evt.to.dataset.date);
       },
     });
   });
@@ -440,12 +447,6 @@ function buildWeek(scroll) {
       if (bg) { chip.style.background = bg; chip.style.color = catColor(catId); }
       chip.dataset.id = evt.id;
       chip.textContent = evt.title;
-      if (evt.spend) {
-        const amt = document.createElement('span');
-        amt.className = 'cal-evt-spend';
-        amt.textContent = fmtSpend(evt.spend);
-        chip.appendChild(amt);
-      }
       chip.addEventListener('click', e => { e.stopPropagation(); openModal(key, evt.id); });
       evtList.appendChild(chip);
     });
@@ -470,31 +471,37 @@ function buildWeek(scroll) {
     spendHdr.append(spendLabel, addSpendBtn);
     spendSec.appendChild(spendHdr);
 
-    if (daySpend.length > 0) {
-      const catTotals = {};
-      daySpend.forEach(e => {
-        catTotals[e.categoryId] = (catTotals[e.categoryId] ?? 0) + Number(e.amount);
-      });
-      Object.entries(catTotals).forEach(([catId, total]) => {
-        const cat = spendCatById(catId);
-        const row = document.createElement('div');
-        row.className = 'cal-week-spend-row';
-        const dot = document.createElement('span');
-        dot.className = 'cal-week-spend-dot';
-        dot.style.background = cat?.color ?? 'var(--text-3)';
-        const nameEl = document.createElement('span');
-        nameEl.textContent = cat?.name ?? catId;
-        const amtEl = document.createElement('span');
-        amtEl.textContent = fmtSpend(total);
-        row.append(dot, nameEl, amtEl);
-        row.addEventListener('click', e => { e.stopPropagation(); openSpendModal(key, null, catId); });
-        spendSec.appendChild(row);
-      });
+    // Individual spend chips (draggable)
+    const spendList = document.createElement('div');
+    spendList.className = 'cal-spend-list';
+    spendList.dataset.date = key;
 
+    daySpend.forEach(entry => {
+      const cat   = spendCatById(entry.categoryId);
+      const chip  = document.createElement('div');
+      chip.className = 'cal-spend-chip';
+      chip.dataset.id   = entry.id;
+      chip.dataset.from = key;
+      const dot = document.createElement('span');
+      dot.className = 'cal-week-spend-dot';
+      dot.style.background = cat?.color ?? 'var(--text-3)';
+      const label = document.createElement('span');
+      label.className = 'cal-spend-chip-label';
+      label.textContent = entry.subcategory || cat?.name || entry.categoryId;
+      const amt = document.createElement('span');
+      amt.className = 'cal-spend-chip-amt';
+      amt.textContent = fmtSpend(entry.amount);
+      chip.append(dot, label, amt);
+      chip.addEventListener('click', e => { e.stopPropagation(); openSpendModal(key, entry.id); });
+      spendList.appendChild(chip);
+    });
+
+    spendSec.appendChild(spendList);
+
+    if (daySpend.length > 0) {
       const divEl = document.createElement('div');
       divEl.className = 'cal-week-spend-divider';
       spendSec.appendChild(divEl);
-
       const totalRow = document.createElement('div');
       totalRow.className = 'cal-week-spend-total';
       const total = daySpend.reduce((s, e) => s + Number(e.amount), 0);
@@ -651,10 +658,9 @@ function buildYear(scroll) {
 function openModal(date, editId = null) {
   closeModal();
 
-  const dayEvts  = events().filter(e => e.date === date);
-  const editing  = editId ? dayEvts.find(e => e.id === editId) : null;
+  const dayEvts = events().filter(e => e.date === date);
+  const editing = editId ? dayEvts.find(e => e.id === editId) : null;
 
-  // Format date display without timezone ambiguity
   const [y, mo, d] = date.split('-').map(Number);
   const dayLabel = new Date(y, mo - 1, d).toLocaleDateString('en', {
     weekday: 'long', month: 'long', day: 'numeric',
@@ -683,163 +689,245 @@ function openModal(date, editId = null) {
   if (dayEvts.length > 0) {
     const list = document.createElement('div');
     list.className = 'cal-modal-list';
-
     dayEvts.forEach(evt => {
       const row = document.createElement('div');
       row.className = 'cal-modal-row';
-
       const dot = document.createElement('span');
       dot.className = 'cal-modal-dot';
       dot.style.background = catColor(evt.category ?? 'personal');
-
       const title = document.createElement('span');
       title.className = 'cal-modal-evt-title';
       title.textContent = evt.title;
-
       const cat = document.createElement('span');
       cat.className = 'cal-modal-cat';
       cat.textContent = evt.category ?? '';
-
       const editBtn = document.createElement('button');
       editBtn.className = 'cal-modal-edit-btn';
       editBtn.textContent = 'edit';
       editBtn.addEventListener('click', () => openModal(date, evt.id));
-
       const delBtn = document.createElement('button');
       delBtn.className = 'cal-modal-del-row';
       delBtn.textContent = '✕';
-      delBtn.addEventListener('click', () => {
-        removeEvent(evt.id);
-        openModal(date);
-      });
-
+      delBtn.addEventListener('click', () => { removeEvent(evt.id); openModal(date); });
       row.append(dot, title, cat, editBtn, delBtn);
       list.appendChild(row);
     });
-
     card.appendChild(list);
   }
 
-  // Form
-  const form = document.createElement('div');
-  form.className = 'cal-modal-form';
+  // Toggle (new entry only)
+  const formArea = document.createElement('div');
+  let formMode = 'event'; // 'event' | 'spend'
 
-  const input = document.createElement('input');
-  input.className = 'cal-modal-input';
-  input.type = 'text';
-  input.placeholder = editing ? 'Event title' : 'New event title';
-  input.value = editing?.title ?? '';
-  input.autocomplete = 'off';
-  form.appendChild(input);
-
-  // Category chips
-  let selectedCat = editing?.category ?? 'personal';
-  const catGrid = document.createElement('div');
-  catGrid.className = 'cal-cat-grid';
-  cats().forEach(c => {
-    const bg   = catBg(c.id);
-    const chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = `cal-cat-chip${bg ? '' : ` evt-${c.id}`}${selectedCat === c.id ? ' selected' : ''}`;
-    chip.dataset.cat = c.id;
-    chip.textContent = c.name;
-    if (bg) {
-      chip.style.background = bg;
-      chip.style.color = catColor(c.id);
-      if (selectedCat === c.id) chip.style.borderColor = catColor(c.id);
-    }
-    chip.addEventListener('click', () => {
-      selectedCat = c.id;
-      catGrid.querySelectorAll('.cal-cat-chip').forEach(b => {
-        const isSelected = b.dataset.cat === c.id;
-        b.classList.toggle('selected', isSelected);
-        const bcat = cats().find(x => x.id === b.dataset.cat);
-        if (bcat?.isCustom && bcat.color) {
-          b.style.borderColor = isSelected ? bcat.color : '';
-        }
+  if (!editing) {
+    const toggle = document.createElement('div');
+    toggle.className = 'cal-modal-toggle';
+    ['event', 'spend'].forEach(mode => {
+      const btn = document.createElement('button');
+      btn.className = 'cal-modal-toggle-btn' + (mode === formMode ? ' active' : '');
+      btn.textContent = mode === 'event' ? 'Event' : 'Spend';
+      btn.addEventListener('click', () => {
+        formMode = mode;
+        toggle.querySelectorAll('.cal-modal-toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderFormArea();
       });
+      toggle.appendChild(btn);
     });
-    catGrid.appendChild(chip);
-  });
-  form.appendChild(catGrid);
-
-  // Spend
-  const spendRow = document.createElement('div');
-  spendRow.className = 'cal-modal-spend-row';
-  const spendLbl = document.createElement('div');
-  spendLbl.className = 'cal-form-label';
-  spendLbl.textContent = 'Amount spent';
-  const spendWrap = document.createElement('div');
-  spendWrap.className = 'cal-modal-spend-wrap';
-  const spendSym = document.createElement('span');
-  spendSym.className = 'cal-modal-spend-sym';
-  spendSym.textContent = currencySymbol();
-  const spendInput = document.createElement('input');
-  spendInput.className = 'cal-modal-spend-input';
-  spendInput.type = 'number';
-  spendInput.min = '0';
-  spendInput.step = '1';
-  spendInput.placeholder = '0';
-  spendInput.value = editing?.spend ?? '';
-  spendInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter')  { e.preventDefault(); saveBtn.click(); }
-    if (e.key === 'Escape') closeModal();
-  });
-  spendWrap.append(spendSym, spendInput);
-  spendRow.append(spendLbl, spendWrap);
-  form.appendChild(spendRow);
-
-  // Actions
-  const actions = document.createElement('div');
-  actions.className = 'cal-modal-actions';
-
-  if (editing) {
-    const parkBtn = document.createElement('button');
-    parkBtn.className = 'cal-park-btn';
-    parkBtn.textContent = 'Park for later';
-    parkBtn.title = 'Move to unscheduled — find it in the Notes sidebar';
-    parkBtn.addEventListener('click', () => {
-      saveEvent({ ...editing, date: null });
-      closeModal();
-    });
-
-    const delBtn = document.createElement('button');
-    delBtn.className = 'cal-del-btn';
-    delBtn.textContent = 'Delete';
-    delBtn.addEventListener('click', () => {
-      removeEvent(editing.id);
-      openModal(date);
-    });
-
-    actions.append(parkBtn, delBtn);
+    card.appendChild(toggle);
   }
 
-  const saveBtn = document.createElement('button');
-  saveBtn.className = 'cal-save-btn';
-  saveBtn.textContent = editing ? 'Save' : 'Add';
-  saveBtn.addEventListener('click', () => {
-    const title = input.value.trim();
-    if (!title) { input.focus(); return; }
-    const spend = parseFloat(spendInput.value) || undefined;
-    saveEvent({ id: editing?.id ?? uid(), date, title, category: selectedCat, ...(spend !== undefined ? { spend } : {}) });
-    openModal(date);
-  });
-  actions.appendChild(saveBtn);
-  form.appendChild(actions);
-
-  card.appendChild(form);
+  card.appendChild(formArea);
   _modal.appendChild(card);
   _container.appendChild(_modal);
-
-  // Close on backdrop click
   _modal.addEventListener('click', e => { if (e.target === _modal) closeModal(); });
 
-  // Keyboard
-  input.focus();
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter')  { e.preventDefault(); saveBtn.click(); }
-    if (e.key === 'Escape') closeModal();
-  });
+  function renderFormArea() {
+    formArea.innerHTML = '';
+    if (formMode === 'event') renderEventForm();
+    else renderSpendForm();
+  }
+
+  function renderEventForm() {
+    const form = document.createElement('div');
+    form.className = 'cal-modal-form';
+
+    const input = document.createElement('input');
+    input.className = 'cal-modal-input';
+    input.type = 'text';
+    input.placeholder = editing ? 'Event title' : 'New event title';
+    input.value = editing?.title ?? '';
+    input.autocomplete = 'off';
+    form.appendChild(input);
+
+    let selectedCat = editing?.category ?? 'personal';
+    const catGrid = document.createElement('div');
+    catGrid.className = 'cal-cat-grid';
+    cats().forEach(c => {
+      const bg   = catBg(c.id);
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = `cal-cat-chip${bg ? '' : ` evt-${c.id}`}${selectedCat === c.id ? ' selected' : ''}`;
+      chip.dataset.cat = c.id;
+      chip.textContent = c.name;
+      if (bg) {
+        chip.style.background = bg;
+        chip.style.color = catColor(c.id);
+        if (selectedCat === c.id) chip.style.borderColor = catColor(c.id);
+      }
+      chip.addEventListener('click', () => {
+        selectedCat = c.id;
+        catGrid.querySelectorAll('.cal-cat-chip').forEach(b => {
+          const isSelected = b.dataset.cat === c.id;
+          b.classList.toggle('selected', isSelected);
+          const bcat = cats().find(x => x.id === b.dataset.cat);
+          if (bcat?.isCustom && bcat.color) b.style.borderColor = isSelected ? bcat.color : '';
+        });
+      });
+      catGrid.appendChild(chip);
+    });
+    form.appendChild(catGrid);
+
+    const actions = document.createElement('div');
+    actions.className = 'cal-modal-actions';
+
+    if (editing) {
+      const parkBtn = document.createElement('button');
+      parkBtn.className = 'cal-park-btn';
+      parkBtn.textContent = 'Park for later';
+      parkBtn.addEventListener('click', () => { saveEvent({ ...editing, date: null }); closeModal(); });
+      const delBtn = document.createElement('button');
+      delBtn.className = 'cal-del-btn';
+      delBtn.textContent = 'Delete';
+      delBtn.addEventListener('click', () => { removeEvent(editing.id); openModal(date); });
+      actions.append(parkBtn, delBtn);
+    }
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'cal-save-btn';
+    saveBtn.textContent = editing ? 'Save' : 'Add';
+    saveBtn.addEventListener('click', () => {
+      const title = input.value.trim();
+      if (!title) { input.focus(); return; }
+      saveEvent({ id: editing?.id ?? uid(), date, title, category: selectedCat });
+      openModal(date);
+    });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter')  { e.preventDefault(); saveBtn.click(); }
+      if (e.key === 'Escape') closeModal();
+    });
+    actions.appendChild(saveBtn);
+    form.appendChild(actions);
+    formArea.appendChild(form);
+    requestAnimationFrame(() => input.focus());
+  }
+
+  function renderSpendForm() {
+    const form = document.createElement('div');
+    form.className = 'cal-modal-form';
+
+    const catLbl = document.createElement('div');
+    catLbl.className = 'cal-form-label';
+    catLbl.textContent = 'Category';
+    form.appendChild(catLbl);
+
+    const catGrid = document.createElement('div');
+    catGrid.className = 'cal-spend-cat-grid';
+
+    let selectedCat = null;
+    let selectedSub = null;
+
+    const subRow = document.createElement('div');
+    subRow.className = 'cal-spend-sub-row';
+
+    function renderSubs() {
+      subRow.innerHTML = '';
+      const cat = spendCatById(selectedCat);
+      if (!cat?.sub?.length) return;
+      const subLbl = document.createElement('div');
+      subLbl.className = 'cal-form-label';
+      subLbl.style.marginTop = 'var(--s3)';
+      subLbl.textContent = 'Subcategory';
+      subRow.appendChild(subLbl);
+      const subGrid = document.createElement('div');
+      subGrid.className = 'cal-spend-cat-grid';
+      cat.sub.forEach(s => {
+        const chip = document.createElement('button');
+        chip.className = 'cal-spend-sub-chip' + (selectedSub === s ? ' active' : '');
+        chip.textContent = s;
+        chip.style.setProperty('--chip-color', cat.color);
+        chip.addEventListener('click', () => {
+          selectedSub = selectedSub === s ? null : s;
+          subGrid.querySelectorAll('.cal-spend-sub-chip').forEach(b => b.classList.remove('active'));
+          if (selectedSub === s) chip.classList.add('active');
+        });
+        subGrid.appendChild(chip);
+      });
+      subRow.appendChild(subGrid);
+    }
+
+    spendCats().forEach(cat => {
+      const chip = document.createElement('button');
+      chip.className = 'cal-spend-cat-chip' + (selectedCat === cat.id ? ' active' : '');
+      chip.style.setProperty('--chip-color', cat.color);
+      const dot = document.createElement('span');
+      dot.className = 'cal-spend-chip-dot';
+      dot.style.background = cat.color;
+      chip.append(dot, cat.name);
+      chip.addEventListener('click', () => {
+        selectedCat = cat.id;
+        selectedSub = null;
+        catGrid.querySelectorAll('.cal-spend-cat-chip').forEach(b => b.classList.remove('active'));
+        chip.classList.add('active');
+        renderSubs();
+      });
+      catGrid.appendChild(chip);
+    });
+    form.appendChild(catGrid);
+    form.appendChild(subRow);
+
+    const amtLbl = document.createElement('div');
+    amtLbl.className = 'cal-form-label';
+    amtLbl.style.marginTop = 'var(--s3)';
+    amtLbl.textContent = 'Amount';
+    const amtWrap = document.createElement('div');
+    amtWrap.className = 'cal-modal-spend-wrap';
+    const amtSym = document.createElement('span');
+    amtSym.className = 'cal-modal-spend-sym';
+    amtSym.textContent = currencySymbol();
+    const amtInput = document.createElement('input');
+    amtInput.className = 'cal-modal-spend-input';
+    amtInput.type = 'number';
+    amtInput.min = '0';
+    amtInput.step = '1';
+    amtInput.placeholder = '0';
+    amtWrap.append(amtSym, amtInput);
+    form.append(amtLbl, amtWrap);
+
+    const actions = document.createElement('div');
+    actions.className = 'cal-modal-actions';
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'cal-save-btn';
+    saveBtn.textContent = 'Add';
+    saveBtn.addEventListener('click', () => {
+      if (!selectedCat) return;
+      const amount = parseFloat(amtInput.value);
+      if (!amount || amount <= 0) { amtInput.focus(); return; }
+      saveSpendEntry(date, { id: spendUid(), categoryId: selectedCat, subcategory: selectedSub ?? null, amount });
+      closeModal();
+      render();
+    });
+    amtInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter')  { e.preventDefault(); saveBtn.click(); }
+      if (e.key === 'Escape') closeModal();
+    });
+    actions.appendChild(saveBtn);
+    form.appendChild(actions);
+    formArea.appendChild(form);
+    requestAnimationFrame(() => amtInput.focus());
+  }
+
+  renderFormArea();
 }
 
 function closeModal() {
@@ -1054,3 +1142,14 @@ function removeSpendEntry(dateStr, id) {
 }
 
 function spendUid() { return 'sp_' + Math.random().toString(36).slice(2, 9); }
+
+function moveSpendEntry(id, fromDate, toDate) {
+  if (fromDate === toDate) return;
+  const all  = { ...(calData().spendEntries ?? {}) };
+  const from = all[fromDate] ?? [];
+  const entry = from.find(e => e.id === id);
+  if (!entry) return;
+  all[fromDate] = from.filter(e => e.id !== id);
+  all[toDate]   = [...(all[toDate] ?? []), entry];
+  _onSave({ calendar: { ...calData(), spendEntries: all } });
+}
