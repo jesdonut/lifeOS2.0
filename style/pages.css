@@ -63,6 +63,21 @@ nav {
 }
 .nav-theme-btn:hover { color: var(--text); }
 
+.nav-lang-btn {
+  padding: 6px var(--s4);
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease;
+  min-width: 48px;
+  text-align: center;
+}
+.nav-lang-btn:hover { color: var(--text); }
+
 /* ── Document page layout (terms, privacy, license) ── */
 .doc-page {
   max-width: 640px;
@@ -268,7 +283,7 @@ nav {
 }
 
 .ascii-art {
-  font-family: var(--mono);
+  font-family: var(--font);
   font-size: var(--fs-xs);
   color: var(--text-3);
   line-height: 1.6;
@@ -430,4 +445,5 @@ nav {
   .rm-block { gap: var(--s3); }
   .page-footer-links { flex-wrap: wrap; gap: var(--s3); }
   nav .brand-pill { display: none; }
+  .nav-theme-btn { display: none; }
 }

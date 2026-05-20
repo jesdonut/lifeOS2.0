@@ -15,7 +15,8 @@
   <a href="index.html" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none"><span class="brand-pill-name">Seratus</span><span class="brand-pill"><span class="brand-pill-ver">lifeOS v2.0</span></span></a>
   <div class="nav-right">
     <button class="nav-theme-btn" id="theme-toggle">☀︎ Light</button>
-    <a class="nav-back" href="index.html">← Back</a>
+    <button id="lang-toggle" class="nav-lang-btn">ID</button>
+    <a class="nav-back" href="index.html" data-en="← Back" data-id="← Kembali">← Back</a>
   </div>
 </nav>
 <script>
@@ -37,9 +38,13 @@
   padding: var(--s7) var(--s5);
   text-align: center;
 ">
-  <p style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: var(--s4)">In development</p>
-  <h1 style="font-size: var(--fs-2xl); font-weight: 700; color: var(--text); letter-spacing: -0.5px; margin-bottom: var(--s4); line-height: 1.2">We're still building this.</h1>
-  <p style="font-size: var(--fs-base); color: var(--text-2); max-width: 420px; line-height: 1.7; margin-bottom: var(--s6)">Seratus is a personal project in active development. It isn't ready for general use yet, but it's getting there.</p>
+  <p style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: var(--s4)"
+     data-en="In development" data-id="Dalam pengembangan">In development</p>
+  <h1 style="font-size: var(--fs-2xl); font-weight: 700; color: var(--text); letter-spacing: -0.5px; margin-bottom: var(--s4); line-height: 1.2"
+      data-en="We're still building this." data-id="Kami masih membangun ini.">We're still building this.</h1>
+  <p style="font-size: var(--fs-base); color: var(--text-2); max-width: 420px; line-height: 1.7; margin-bottom: var(--s6)"
+     data-en="Seratus is a personal project in active development. It isn't ready for general use yet, but it's getting there."
+     data-id="Seratus adalah proyek pribadi yang sedang aktif dikembangkan. Belum siap untuk digunakan secara umum, tapi terus berkembang.">Seratus is a personal project in active development. It isn't ready for general use yet, but it's getting there.</p>
   <a href="index.html" style="
     display: inline-block;
     padding: var(--s2) var(--s5);
@@ -49,20 +54,23 @@
     color: var(--text-2);
     text-decoration: none;
     transition: color 150ms ease, border-color 150ms ease;
-  " onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border)'" onmouseout="this.style.color='var(--text-2)'">Back to home</a>
+  " onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border)'" onmouseout="this.style.color='var(--text-2)'"
+     data-en="Back to home" data-id="Kembali ke beranda">Back to home</a>
 </div>
 
 <footer class="page-footer">
-  <span>© 2026 <a href="https://github.com/jesdonut" target="_blank">@jesdonut</a>. Free for personal use.</span>
+  <span data-en="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;. Free for personal use."
+        data-id="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;. Gratis untuk penggunaan pribadi.">© 2026 <a href="https://github.com/jesdonut" target="_blank">@jesdonut</a>. Free for personal use.</span>
   <div class="page-footer-links">
-    <a href="about.html">About</a>
-    <a href="changelog.html">Roadmap</a>
-    <a href="download.html">Download</a>
-    <a href="license.html">License</a>
-    <a href="privacy.html">Privacy</a>
-    <a href="terms.html">Terms</a>
+    <a href="about.html" data-en="About" data-id="Tentang">About</a>
+    <a href="changelog.html" data-en="Roadmap" data-id="Peta jalan">Roadmap</a>
+    <a href="download.html" data-en="Download" data-id="Unduh">Download</a>
+    <a href="license.html" data-en="License" data-id="Lisensi">License</a>
+    <a href="privacy.html" data-en="Privacy" data-id="Privasi">Privacy</a>
+    <a href="terms.html" data-en="Terms" data-id="Syarat">Terms</a>
   </div>
 </footer>
 
+<script src="core/lang.js"></script>
 </body>
 </html>
