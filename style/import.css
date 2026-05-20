@@ -133,7 +133,7 @@ body { overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
 .step-body li { margin-bottom: 4px; }
 .step-body strong { color: var(--text); }
 .step-body code {
-  font-family: var(--mono);
+  font-family: var(--font);
   font-size: var(--fs-xs);
   background: var(--surface-2);
   padding: 1px 6px;

@@ -4,16 +4,13 @@ import { load, save, subscribe } from './store.js';
 import { initGestures } from './gestures.js';
 import { openSettings } from './settings.js';
 
-const TABS = ['calendar', 'period', 'finance', 'bank', 'currency', 'nisa', 'savings'];
+const TABS = ['calendar', 'period', 'finance', 'bank'];
 
 const MODULE_MAP = {
   calendar: () => import('../modules/calendar/calendar.js'),
   period:   () => import('../modules/period/period-ui.js'),
   finance:  () => import('../modules/finance/finance.js'),
   bank:     () => import('../modules/bank/bank.js'),
-  currency: () => import('../modules/currency/currency.js'),
-  nisa:     () => import('../modules/nisa/nisa.js'),
-  savings:  () => import('../modules/savings/savings.js'),
 };
 
 // ── DOM refs ───────────────────────────────────────────────────────
@@ -68,7 +65,7 @@ async function switchTo(index) {
       mod.init(panel, load(), partial => save(partial));
     } catch (err) {
       const panel = document.getElementById(`panel-${name}`);
-      panel.innerHTML = `<p style="color:var(--red);font-family:var(--mono);font-size:var(--fs-sm);padding:var(--s5)">${name}: ${err.message}</p>`;
+      panel.innerHTML = `<p style="color:var(--red);font-size:var(--fs-sm);padding:var(--s5)">${name}: ${err.message}</p>`;
       console.error(`[${name}]`, err);
     }
   }

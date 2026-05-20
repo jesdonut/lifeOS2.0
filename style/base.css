@@ -31,6 +31,14 @@
   --predicted:    var(--blue);
   --fertile:      var(--green);
 
+  /* Finance section colors */
+  --fin-commute: var(--blue);
+  --fin-fixed:   var(--accent);
+  --fin-food:    var(--amber);
+  --fin-nec:     var(--cat-health);
+  --fin-opt:     var(--purple);
+  --fin-saved:   var(--green);
+
   /* Calendar event categories — fixed, not user-configurable */
   --cat-work:      #B8C89A;
   --cat-personal:  #D69AA5;
@@ -146,6 +154,59 @@ input:focus, textarea:focus, select:focus {
   opacity: 0.6;
   line-height: 1;
 }
+
+/* ── Shared panel header nav (year/month < > buttons, label, today, view toggle) ── */
+.cal-year-btn {
+  color: var(--text-3);
+  font-size: var(--fs-lg);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.cal-year-btn:hover { color: var(--text); background: var(--surface-2); }
+.cal-year-btn:disabled { opacity: 0.3; pointer-events: none; }
+
+.cal-year-label {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text);
+  min-width: 110px;
+  text-align: center;
+}
+
+.cal-today-btn {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding: 5px var(--s3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-dim);
+  transition: color var(--dur-fast), border-color var(--dur-fast);
+}
+.cal-today-btn:hover { color: var(--text-2); border-color: var(--border); }
+
+.cal-view-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  margin-left: var(--s3);
+}
+
+.cal-view-btn {
+  font-size: var(--fs-xs);
+  padding: 3px var(--s3);
+  border-radius: 4px;
+  color: var(--text-3);
+  transition: color var(--dur-fast), background var(--dur-fast);
+}
+.cal-view-btn:hover { color: var(--text-2); }
+.cal-view-btn.active { background: var(--surface-3); color: var(--text); }
 
 /* ── Light theme ── */
 [data-theme="light"] {

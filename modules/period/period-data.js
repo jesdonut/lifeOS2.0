@@ -31,41 +31,46 @@ export function periodStats(entries) {
     allCycles.push(daysBetween(parseDate(entries[i - 1].start), parseDate(entries[i].start)));
   }
 
-  // Only filter < 21 days (data artifacts). Long cycles are real — do not exclude.
-  const usable = allCycles.filter(l => l >= 21);
-  if (!usable.length) return null;
+  // Exclude obvious artifacts (< 21 days). Long cycles are real — keep them.
+  const validCycles = allCycles.filter(l => l >= 21);
+  if (!validCycles.length) return null;
 
-  // Exponential weighted moving average — all cycles contribute, recent ones count more.
-  // λ=0.88: weight halves every ~5 cycles. A cycle from 5 years ago still counts, just less.
-  const lambda = 0.88;
-  let wSum = 0, wTotal = 0;
-  for (let i = 0; i < usable.length; i++) {
-    const w = Math.pow(lambda, usable.length - 1 - i);
-    wSum   += usable[i] * w;
-    wTotal += w;
-  }
-  const avg = wSum / wTotal;
+  // Use most recent 12 valid completed cycles for all calculations.
+  const recent = validCycles.slice(-12);
 
-  // Weighted stdev
-  let wVarSum = 0;
-  for (let i = 0; i < usable.length; i++) {
-    const w = Math.pow(lambda, usable.length - 1 - i);
-    wVarSum += w * Math.pow(usable[i] - avg, 2);
-  }
-  const stdev = Math.sqrt(wVarSum / wTotal);
+  const avg   = Math.round(recent.reduce((s, v) => s + v, 0) / recent.length);
+  const mean  = recent.reduce((s, v) => s + v, 0) / recent.length;
+  const stdev = Math.round(Math.sqrt(recent.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / recent.length) * 10) / 10;
+  const sorted = [...recent].sort((a, b) => a - b);
 
-  const sorted = [...usable].sort((a, b) => a - b);
+  const shortestCycle = sorted[0];
+  const longestCycle  = sorted[sorted.length - 1];
+  const variationDays = longestCycle - shortestCycle;
+
+  // Length pattern: classify based on where most cycles fall.
+  const shortCount   = recent.filter(d => d >= 21 && d <= 23).length;
+  const typicalCount = recent.filter(d => d >= 24 && d <= 38).length;
+  const longCount    = recent.filter(d => d >= 39).length;
+  let lengthPattern  = 'Mixed length';
+  if      (typicalCount / recent.length >= 0.7) lengthPattern = 'Typical length';
+  else if (shortCount   / recent.length >= 0.5) lengthPattern = 'Short / frequent';
+  else if (longCount    / recent.length >= 0.5) lengthPattern = 'Long / infrequent';
 
   return {
-    avg:       Math.round(avg),
-    med:       sorted[Math.floor(sorted.length / 2)],
-    min:       sorted[0],
-    max:       sorted[sorted.length - 1],
-    stdev:     Math.round(stdev * 10) / 10,
-    count:     usable.length,
-    windowMin: Math.round(avg - stdev),
-    windowMax: Math.round(avg + stdev),
-    irregular: stdev > 9,
+    avg,
+    med:           sorted[Math.floor(sorted.length / 2)],
+    min:           shortestCycle,
+    max:           longestCycle,
+    stdev,
+    count:         recent.length,
+    windowMin:     Math.round(avg - stdev),
+    windowMax:     Math.round(avg + stdev),
+    shortestCycle,
+    longestCycle,
+    variationDays,
+    irregular:     recent.length >= 3 && variationDays > 9,
+    notEnoughData: recent.length < 3,
+    lengthPattern,
   };
 }
 

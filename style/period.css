@@ -11,30 +11,49 @@
 }
 
 .pr-root {
-  min-height: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--flow-heavy)  12%, var(--bg)),
-    color-mix(in srgb, var(--flow-medium) 8%,  var(--bg)),
-    color-mix(in srgb, var(--purple)      10%, var(--bg)),
-    color-mix(in srgb, var(--flow-light)  6%,  var(--bg))
+    color-mix(in srgb, var(--flow-heavy)  10%, var(--bg)),
+    color-mix(in srgb, var(--flow-medium)  6%, var(--bg)),
+    var(--bg) 55%,
+    color-mix(in srgb, var(--flow-light)   5%, var(--bg))
   );
   background-size: 400% 400%;
   animation: pr-gradient-shift 20s ease infinite;
 }
 
+.pr-top {
+  flex-shrink: 0;
+}
+
 .pr-content {
-  padding: var(--s5) var(--s5) var(--s7);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s3) var(--s5) var(--s4);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Tab override: pink tint in period panel ── */
+#panel-period .cal-view-btn.active {
+  background: color-mix(in srgb, var(--flow-medium) 14%, var(--surface));
+  color: var(--flow-light);
 }
 
 /* ── Top bar ── */
 .pr-top {
   display: flex;
   align-items: center;
-  gap: var(--s4);
-  padding: var(--s4) var(--s5);
+  gap: var(--s2);
+  padding: 0 var(--s5);
+  height: 48px;
   border-bottom: 1px solid var(--border-dim);
-  flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .pr-brand {
@@ -115,19 +134,22 @@
 
 /* ── Overview headline ── */
 .pr-headline {
-  padding-top: var(--s2);
-  margin-bottom: var(--s4);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s5);
+  flex-wrap: wrap;
+  margin-bottom: var(--s3);
 }
 
+.pr-hl-text { flex: 1; min-width: 200px; }
+
 .pr-h1 {
-  font-family: var(--brand-serif);
-  font-variation-settings: "opsz" 144;
-  font-size: clamp(26px, 4vw, 38px);
+  font-size: clamp(16px, 2vw, 22px);
   font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: -0.5px;
+  line-height: 1.25;
+  letter-spacing: -0.3px;
   color: var(--text);
-  margin-bottom: var(--s2);
+  margin-bottom: 3px;
 }
 
 .pr-em {
@@ -136,10 +158,9 @@
 }
 
 .pr-hl-sub {
-  font-size: var(--fs-sm);
-  color: var(--text-2);
-  line-height: 1.6;
-  margin-bottom: var(--s4);
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  line-height: 1.5;
 }
 
 /* ── Status pills ── */
@@ -147,6 +168,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--s2);
+  align-items: flex-start;
+  padding-top: 2px;
+  flex-shrink: 0;
 }
 
 .pr-status-pill {
@@ -171,59 +195,46 @@
 
 /* ── Year section ── */
 .pr-year-section {
-  margin-top: var(--s4);
-}
-
-.pr-year-hdr {
+  flex: 1;
+  min-height: 0;
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--s3);
-  margin-bottom: var(--s4);
-  flex-wrap: wrap;
+  flex-direction: column;
 }
 
-.pr-year-title {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--text);
-}
 
-.pr-year-hint {
-  font-size: var(--fs-xs);
-  color: var(--text-3);
-}
 
 .pr-year-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--s3);
+  grid-template-rows: repeat(3, 1fr);
+  gap: var(--s2);
+  flex: 1;
+  min-height: 0;
 }
 
 /* ── Month card (mini) ── */
 .pr-month-card {
-  background: color-mix(in srgb, var(--surface) 70%, transparent);
-  border: 1px solid var(--border-dim);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   padding: var(--s3);
   cursor: pointer;
-  transition: border-color 150ms ease, background 150ms ease, transform 120ms ease;
-  backdrop-filter: blur(8px);
+  transition: background var(--dur-fast);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid transparent;
 }
 
 .pr-month-card:hover {
-  border-color: var(--border);
-  background: color-mix(in srgb, var(--surface) 90%, transparent);
-  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--flow-light) 10%, var(--surface));
 }
 
 .pr-month-card.current {
-  border-color: color-mix(in srgb, var(--flow-medium) 40%, var(--border));
-}
-
-.pr-month-card.selected {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+  background:
+    linear-gradient(160deg,
+      color-mix(in srgb, var(--flow-light) 10%, var(--surface)) 0%,
+      var(--surface) 65%) padding-box,
+    linear-gradient(135deg, var(--flow-light), var(--flow-heavy)) border-box;
+  border: 1.5px solid transparent;
 }
 
 /* ── Month card header ── */
@@ -231,13 +242,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--s2);
+  margin-bottom: 3px;
+  flex-shrink: 0;
 }
 
 .pr-month-name {
   font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--text);
+  font-weight: 400;
+  color: var(--text-3);
 }
 
 .pr-month-badge {
@@ -263,12 +275,7 @@
   background: color-mix(in srgb, var(--flow-medium) 12%, transparent);
 }
 
-.pr-month-snippet {
-  font-size: 9px;
-  color: var(--text-3);
-  margin-top: var(--s2);
-  line-height: 1.4;
-}
+.pr-month-snippet { display: none; }
 
 /* ── Calendar grid (shared: mini + detail) ── */
 .pr-cal-row {
@@ -278,11 +285,10 @@
 }
 
 .pr-cal-dow .pr-cal-cell {
-  font-size: 8px;
+  font-size: 9px;
   color: var(--text-3);
   text-align: center;
   padding-bottom: 3px;
-  font-weight: 500;
 }
 
 .pr-cal-cell {
@@ -293,17 +299,33 @@
 
 /* ── Day circle ── */
 .pr-day {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 8px;
+  font-size: 9px;
   color: var(--text-2);
   position: relative;
   transition: background 150ms ease;
   box-sizing: border-box;
+  cursor: pointer;
+}
+.pr-day:hover { background: var(--surface-3); }
+
+.pr-sym-dot {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: var(--flow-medium);
+  opacity: 0.7;
+  pointer-events: none;
+  font-style: normal;
 }
 
 .pr-day-lg {
@@ -339,28 +361,20 @@
   color: var(--text-2);
 }
 
-/* Spotting: small dot below */
-.pr-day.spotting::after {
-  content: '';
-  position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--flow-medium);
+/* Spotting: faint fill like a lighter-than-light flow */
+.pr-day.spotting {
+  background: color-mix(in srgb, var(--flow-light) 22%, transparent);
 }
 
 /* Predicted: dashed border */
 .pr-day.predicted {
-  border: 1.5px dashed color-mix(in srgb, var(--flow-medium) 50%, transparent);
+  border: 1.5px dashed color-mix(in srgb, var(--flow-medium) 65%, transparent);
   color: var(--text-3);
 }
 
-/* Ovulation: purple ring */
+/* Ovulation: thin accent ring */
 .pr-day.ovulation {
-  box-shadow: 0 0 0 2px var(--purple);
+  box-shadow: 0 0 0 1.5px var(--accent);
   color: var(--text);
 }
 
@@ -374,30 +388,19 @@
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--purple) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
-/* ── Month detail panel ── */
-.pr-detail {
-  margin-top: var(--s5);
-  background: color-mix(in srgb, var(--surface) 80%, transparent);
-  border: 1px solid var(--border);
-  border-radius: calc(var(--radius) + 2px);
-  padding: var(--s5);
-  backdrop-filter: blur(12px);
-}
-
-.pr-detail-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--s4);
-}
-
-.pr-detail-title {
-  font-size: var(--fs-base);
-  font-weight: 600;
-  color: var(--text);
+/* Travel: amber dot top-right */
+.pr-day.travel::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--cat-travel);
 }
 
 .pr-detail-close {
@@ -419,228 +422,7 @@
 
 .pr-detail-close:hover { background: var(--surface); color: var(--text); }
 
-.pr-detail-body {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--s5);
-}
-
-.pr-detail-left,
-.pr-detail-right {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s4);
-}
-
-.pr-detail-label {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-3);
-  margin-bottom: var(--s2);
-}
-
-.pr-detail-section {
-  display: flex;
-  flex-direction: column;
-}
-
-.pr-detail-cal {
-  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
-  border-radius: var(--radius);
-  padding: var(--s3);
-}
-
-.pr-detail-empty {
-  font-size: var(--fs-xs);
-  color: var(--text-3);
-  line-height: 1.6;
-  padding: var(--s3) 0;
-}
-
-/* ── Cycle block ── */
-.pr-cycle-block {
-  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
-  border: 1px solid var(--border-dim);
-  border-radius: var(--radius);
-  padding: var(--s3) var(--s4);
-}
-
-.pr-cycle-label {
-  font-family: var(--brand-serif);
-  font-variation-settings: "opsz" 144;
-  font-size: var(--fs-base);
-  font-weight: 500;
-  color: var(--text);
-  line-height: 1.3;
-}
-
-.pr-cycle-sub {
-  font-size: var(--fs-xs);
-  color: var(--text-3);
-  margin-top: 4px;
-}
-
-/* ── BBT card ── */
-.pr-bbt-card {
-  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
-  border: 1px solid var(--border-dim);
-  border-radius: var(--radius);
-  padding: var(--s4);
-  overflow: hidden;
-}
-
-.pr-bbt-card-hl {
-  font-size: var(--fs-sm);
-  font-weight: 500;
-  color: var(--text);
-  line-height: 1.4;
-  margin-bottom: var(--s1);
-}
-
-.pr-bbt-card-sub {
-  font-size: var(--fs-xs);
-  color: var(--text-3);
-  line-height: 1.6;
-  margin-bottom: var(--s3);
-}
-
-.pr-bbt-stats {
-  display: flex;
-  gap: var(--s4);
-  margin-top: var(--s3);
-  flex-wrap: wrap;
-}
-
-.pr-bbt-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.pr-bbt-stat-lbl {
-  font-size: 9px;
-  color: var(--text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.pr-bbt-stat-val {
-  font-family: var(--brand-serif);
-  font-variation-settings: "opsz" 144;
-  font-size: var(--fs-base);
-  font-weight: 500;
-  color: var(--flow-medium);
-  line-height: 1.2;
-}
-
-.pr-bbt-stat-val.post { color: var(--purple); }
-.pr-bbt-stat-val.jump { color: var(--green); }
-
-.pr-bbt-stat-deg {
-  font-size: 0.65em;
-  opacity: 0.7;
-}
-
-/* ── Symptoms list (detail) ── */
-.pr-sym-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s2);
-}
-
-.pr-sym-row {
-  display: flex;
-  align-items: center;
-  gap: var(--s3);
-}
-
-.pr-sym-emoji {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--surface-2) 80%, transparent);
-  border: 1px solid var(--border-dim);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  flex-shrink: 0;
-}
-
-.pr-sym-text {
-  flex: 1;
-  font-size: var(--fs-xs);
-  color: var(--text-2);
-  line-height: 1.4;
-}
-
-.pr-sym-name {
-  font-weight: 500;
-  color: var(--text);
-}
-
-.pr-sym-count {
-  font-size: var(--fs-xs);
-  color: var(--text-3);
-  font-variant-numeric: tabular-nums;
-  flex-shrink: 0;
-}
-
 /* ── Today view ── */
-.pr-today-hdr {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--s3);
-  margin-bottom: var(--s4);
-  flex-wrap: wrap;
-}
-
-.pr-today-title {
-  font-family: var(--brand-serif);
-  font-variation-settings: "opsz" 144;
-  font-size: clamp(22px, 3vw, 30px);
-  font-weight: 500;
-  color: var(--text);
-}
-
-.pr-today-hint {
-  font-size: var(--fs-xs);
-  color: var(--text-3);
-}
-
-/* ── Log card ── */
-.pr-log-card {
-  background: color-mix(in srgb, var(--surface) 75%, transparent);
-  border: 1px solid var(--border-dim);
-  border-radius: calc(var(--radius) + 2px);
-  padding: var(--s5);
-  backdrop-filter: blur(12px);
-  margin-bottom: var(--s4);
-}
-
-.pr-log-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s3);
-  margin-bottom: var(--s4);
-  flex-wrap: wrap;
-}
-
-.pr-log-card-title {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--text);
-}
-
-.pr-autosave {
-  font-size: var(--fs-xs);
-  color: var(--text-3);
-}
-
 .pr-log-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -740,7 +522,7 @@
 }
 
 .pr-bbt-val {
-  font-family: var(--brand-serif);
+  font-family: var(--font);
   font-variation-settings: "opsz" 144;
   font-size: var(--fs-xl);
   font-weight: 500;
@@ -772,82 +554,220 @@
 
 .pr-bbt-clr:hover { color: var(--text-2); }
 
-/* ── Insights ── */
-.pr-insights {
-  background: color-mix(in srgb, var(--surface) 60%, transparent);
-  border: 1px solid var(--border-dim);
-  border-radius: calc(var(--radius) + 2px);
-  padding: var(--s5);
-  backdrop-filter: blur(12px);
+/* ── Day tooltip ── */
+.pr-tip {
+  position: fixed;
+  z-index: 9999;
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  pointer-events: none;
+  display: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
-.pr-insights-hdr {
+/* ── Cycles tab ── */
+.pr-cyc-stats {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--s3);
-  margin-bottom: var(--s4);
+  gap: var(--s2);
+  padding: var(--s5) var(--s5) var(--s3);
   flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  margin: 0 calc(-1 * var(--s5));
+  padding-left: var(--s5);
+  padding-right: var(--s5);
 }
 
-.pr-insights-title {
-  font-size: var(--fs-sm);
+.pr-cyc-stat {
+  flex: 1;
+  min-width: 80px;
+  background: color-mix(in srgb, var(--flow-light) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--flow-light) 20%, var(--border-dim));
+  border-radius: var(--radius-sm);
+  padding: var(--s3) var(--s4);
+}
+
+.pr-cyc-stat-val {
+  font-size: var(--fs-lg);
   font-weight: 600;
   color: var(--text);
+  line-height: 1.1;
 }
 
-.pr-insights-sub {
+.pr-cyc-stat-lbl {
   font-size: var(--fs-xs);
   color: var(--text-3);
+  margin-top: 4px;
 }
 
-.pr-insights-empty {
-  font-size: var(--fs-xs);
+.pr-cyc-empty {
+  padding: var(--s5);
   color: var(--text-3);
-  line-height: 1.6;
+  font-size: var(--fs-sm);
 }
 
-.pr-insights-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.pr-cyc-chart {
+  padding: var(--s4) var(--s5) var(--s7);
+  overflow-x: auto;
+}
+
+.pr-cyc-row {
+  display: flex;
+  align-items: center;
   gap: var(--s3);
+  min-height: 38px;
 }
 
-.pr-insight-card {
-  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
-  border: 1px solid var(--border-dim);
-  border-radius: var(--radius);
-  padding: var(--s4);
-}
-
-.pr-insight-eyebrow {
-  font-size: 9px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-3);
+.pr-cyc-axis {
+  min-height: 22px;
+  border-bottom: 1px solid var(--border);
   margin-bottom: var(--s2);
+  align-items: flex-end;
+  padding-bottom: 4px;
 }
 
-.pr-insight-hl {
+.pr-cyc-lbl-col {
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.pr-cyc-name {
   font-size: var(--fs-sm);
   font-weight: 500;
   color: var(--text);
-  line-height: 1.4;
-  margin-bottom: var(--s2);
+  line-height: 1.2;
 }
 
-.pr-insight-hl em {
-  font-style: italic;
-  font-family: var(--brand-serif);
-  font-variation-settings: "opsz" 144;
-  color: var(--flow-light);
-}
-
-.pr-insight-body {
+.pr-cyc-date {
   font-size: var(--fs-xs);
   color: var(--text-3);
-  line-height: 1.6;
+  line-height: 1.3;
+}
+
+.pr-cyc-bar-zone {
+  flex: 1;
+  position: relative;
+  height: 18px;
+  min-width: 0;
+  overflow: visible;
+}
+
+.pr-cyc-refline {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 1px;
+  background: var(--border);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.pr-cyc-ref-label {
+  position: absolute;
+  bottom: 0;
+  font-size: 10px;
+  color: var(--text-3);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.pr-cyc-bar {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 14px;
+  border-radius: 4px;
+  min-width: 3px;
+}
+
+.pr-cyc-bar--completed {
+  background: var(--flow-medium);
+}
+
+.pr-cyc-bar--current {
+  background: color-mix(in srgb, var(--flow-medium) 35%, transparent);
+  border: 1px solid var(--flow-medium);
+}
+
+.pr-cyc-bar--predicted {
+  background: transparent;
+  border: 1.5px dashed var(--text-3);
+  opacity: 0.7;
+}
+
+.pr-cyc-today-marker {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transform: translateX(-50%);
+}
+
+.pr-cyc-num-col {
+  width: 38px;
+  flex-shrink: 0;
+  text-align: right;
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.pr-cyc-num-col.dim {
+  color: var(--text-3);
+}
+
+/* ── Day log modal ── */
+.pr-day-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pr-day-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: min(640px, 92vw);
+  max-height: 82vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.pr-day-modal-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s4) var(--s5);
+  border-bottom: 1px solid var(--border-dim);
+  flex-shrink: 0;
+}
+
+.pr-day-modal-date {
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pr-day-modal-body {
+  padding: var(--s4) var(--s5) var(--s5);
+  overflow-y: auto;
 }
 
 /* ── Responsive ── */
@@ -857,9 +777,7 @@
 
 @media (max-width: 700px) {
   .pr-year-grid       { grid-template-columns: repeat(2, 1fr); }
-  .pr-detail-body     { grid-template-columns: 1fr; }
   .pr-log-grid        { grid-template-columns: 1fr; }
-  .pr-insights-grid   { grid-template-columns: 1fr; }
   .pr-meta            { display: none; }
 }
 
