@@ -445,5 +445,4 @@ nav {
   .rm-block { gap: var(--s3); }
   .page-footer-links { flex-wrap: wrap; gap: var(--s3); }
   nav .brand-pill { display: none; }
-  .nav-theme-btn { display: none; }
 }
