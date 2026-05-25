@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seratus: Calendar</title>
+  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
+  <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
+  <link rel="stylesheet" href="style/base.css" />
+  <link rel="stylesheet" href="style/pages.css" />
+</head>
+<body>
+
+<nav>
+  <a href="index.html" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none"><span class="brand-pill-name">Seratus</span><span class="brand-pill"><span class="brand-pill-ver">lifeOS v2.0</span></span></a>
+  <div class="nav-right">
+    <button class="nav-theme-btn" id="theme-toggle">☀︎ Light</button>
+    <button id="lang-toggle" class="nav-lang-btn">ID</button>
+    <a class="nav-back" href="index.html" data-en="← Back" data-id="← Kembali" data-jp="← 戻る">← Back</a>
+  </div>
+</nav>
+<script>
+  (function() {
+    const btn = document.getElementById('theme-toggle');
+    let t = localStorage.getItem('lifeOS_landing_theme') || 'dark';
+    function apply(v) { t = v; document.documentElement.setAttribute('data-theme', v === 'light' ? 'light' : ''); btn.textContent = v === 'light' ? '☾ Dark' : '☀︎ Light'; localStorage.setItem('lifeOS_landing_theme', v); }
+    apply(t);
+    btn.addEventListener('click', () => apply(t === 'dark' ? 'light' : 'dark'));
+  })();
+</script>
+
+<div class="doc-page">
+
+  <p class="eyebrow" data-en="Calendar" data-id="Kalender" data-jp="カレンダー">Calendar</p>
+  <h1 data-en="See your week, month, and year at a glance." data-id="Lihat minggu, bulan, dan tahunmu sekaligus." data-jp="週・月・年を、ひとつの画面で。">See your week, month, and year at a glance.</h1>
+  <p class="intro"
+     data-en="Log what you did, what you spent, and what is coming up, all tied to the day it happened."
+     data-id="Catat apa yang kamu lakukan, apa yang kamu habiskan, dan apa yang akan datang, semuanya terikat ke hari yang sesuai."
+     data-jp="何をしたか、何を使ったか、これからの予定を、その日に紐付けて記録します。">Log what you did, what you spent, and what is coming up, all tied to the day it happened.</p>
+
+  <div class="section">
+    <h2>
+      <span data-en="Weekly view" data-id="Tampilan mingguan" data-jp="週表示">Weekly view</span>
+      &nbsp;<span class="rm-badge live" data-en="Live" data-id="Tersedia" data-jp="利用可能">Live</span>
+    </h2>
+    <p data-en="A focused look at the current week. Daily spending totals, events by category, and your notes sidebar always one tap away. Good for staying on top of the day-to-day."
+       data-id="Tampilan terfokus untuk minggu ini. Total pengeluaran harian, acara per kategori, dan sidebar catatan selalu ada satu ketukan dari mana saja. Bagus untuk memantau hari per hari."
+       data-jp="今週のことに集中できる表示。日別の支出合計、カテゴリ別のイベント、ノートサイドバーもワンタップですぐ開けます。日々の管理に最適です。">A focused look at the current week. Daily spending totals, events by category, and your notes sidebar always one tap away. Good for staying on top of the day-to-day.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>
+      <span data-en="Monthly view" data-id="Tampilan bulanan" data-jp="月表示">Monthly view</span>
+      &nbsp;<span class="rm-badge live" data-en="Live" data-id="Tersedia" data-jp="利用可能">Live</span>
+    </h2>
+    <p data-en="The full month on one page. Spending by category, events at a glance, and a tap to any day for detail. Drag and drop events between days directly on the grid."
+       data-id="Bulan penuh dalam satu halaman. Pengeluaran per kategori, acara sekilas pandang, dan ketuk hari mana pun untuk melihat detailnya. Seret dan lepas acara antar hari langsung di grid."
+       data-jp="一ヶ月をまるごと一画面で。カテゴリ別の支出、イベントの一覧、どの日にもワンタップでアクセス。グリッド上で直接ドラッグ&ドロップして予定を移動できます。">The full month on one page. Spending by category, events at a glance, and a tap to any day for detail. Drag and drop events between days directly on the grid.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>
+      <span data-en="Yearly view" data-id="Tampilan tahunan" data-jp="年表示">Yearly view</span>
+      &nbsp;<span class="rm-badge active" data-en="In progress" data-id="Sedang dibangun" data-jp="開発中">In progress</span>
+    </h2>
+    <p data-en="A bird's-eye view of your year. Monthly summaries, spending patterns, and milestones on one page."
+       data-id="Gambaran besar tahunmu. Ringkasan per bulan, pola pengeluaran, dan pencapaian dalam satu halaman."
+       data-jp="年間の流れを俯瞰できるビュー。月別サマリー、支出の傾向、マイルストーンをひとつのページで確認できます。">A bird's-eye view of your year. Monthly summaries, spending patterns, and milestones on one page.</p>
+  </div>
+
+</div>
+
+<footer class="page-footer">
+  <span data-en="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;. Free for personal use."
+        data-id="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;. Gratis untuk penggunaan pribadi."
+        data-jp="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;。個人利用は無料。">© 2026 <a href="https://github.com/jesdonut" target="_blank">@jesdonut</a>. Free for personal use.</span>
+  <div class="page-footer-links">
+    <a href="about.html" data-en="About" data-id="Tentang" data-jp="このアプリについて">About</a>
+    <a href="download.html" data-en="Download" data-id="Download" data-jp="ダウンロード">Download</a>
+    <a href="privacy.html" data-en="Privacy" data-id="Privasi" data-jp="プライバシー">Privacy</a>
+  </div>
+</footer>
+
+<script src="core/lang.js"></script>
+</body>
+</html>

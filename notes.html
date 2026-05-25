@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seratus: Notes</title>
+  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
+  <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
+  <link rel="stylesheet" href="style/base.css" />
+  <link rel="stylesheet" href="style/pages.css" />
+</head>
+<body>
+
+<nav>
+  <a href="index.html" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none"><span class="brand-pill-name">Seratus</span><span class="brand-pill"><span class="brand-pill-ver">lifeOS v2.0</span></span></a>
+  <div class="nav-right">
+    <button class="nav-theme-btn" id="theme-toggle">☀︎ Light</button>
+    <button id="lang-toggle" class="nav-lang-btn">ID</button>
+    <a class="nav-back" href="index.html" data-en="← Back" data-id="← Kembali" data-jp="← 戻る">← Back</a>
+  </div>
+</nav>
+<script>
+  (function() {
+    const btn = document.getElementById('theme-toggle');
+    let t = localStorage.getItem('lifeOS_landing_theme') || 'dark';
+    function apply(v) { t = v; document.documentElement.setAttribute('data-theme', v === 'light' ? 'light' : ''); btn.textContent = v === 'light' ? '☾ Dark' : '☀︎ Light'; localStorage.setItem('lifeOS_landing_theme', v); }
+    apply(t);
+    btn.addEventListener('click', () => apply(t === 'dark' ? 'light' : 'dark'));
+  })();
+</script>
+
+<div class="doc-page">
+
+  <p class="eyebrow" data-en="Notes" data-id="Catatan" data-jp="ノート">Notes</p>
+  <h1 data-en="Always one tap away." data-id="Selalu satu ketukan dari mana saja." data-jp="どこからでも、すぐ開ける。">Always one tap away.</h1>
+  <p class="intro"
+     data-en="A collapsible sidebar available from every screen. Write fast, pin what matters, and park events you are not ready to schedule yet."
+     data-id="Sidebar yang bisa diciutkan dan tersedia dari layar mana pun. Tulis cepat, sematkan yang penting, dan parkir acara yang belum siap dijadwalkan."
+     data-jp="アプリのどの画面にいても、ワンタップで開けるサイドバーです。素早くメモして、大事なものはピン留め。まだスケジュールに入れたくないものは一時保存しておけます。">A collapsible sidebar available from every screen. Write fast, pin what matters, and park events you are not ready to schedule yet.</p>
+
+  <div class="section">
+    <h2>
+      <span data-en="Sidebar notes" data-id="Catatan sidebar" data-jp="サイドバーメモ">Sidebar notes</span>
+      &nbsp;<span class="rm-badge live" data-en="Live" data-id="Tersedia" data-jp="利用可能">Live</span>
+    </h2>
+    <p data-en="Free-form notes that live alongside your calendar, finance, and period views. Pin the ones you need to find quickly, and use the parking lot for events waiting to be scheduled."
+       data-id="Catatan bebas yang hidup berdampingan dengan kalender, keuangan, dan tampilan siklusmu. Sematkan yang perlu cepat ditemukan, dan gunakan area parkir untuk acara yang menunggu untuk dijadwalkan."
+       data-jp="カレンダー、家計管理、生理トラッカーと並んで常駐するメモ。すぐ見つけたいものはピン留め。まだ日程が決まっていないイベントは、一時置き場として使えます。">Free-form notes that live alongside your calendar, finance, and period views. Pin the ones you need to find quickly, and use the parking lot for events waiting to be scheduled.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>
+      <span data-en="Markdown" data-id="Markdown" data-jp="Markdown">Markdown</span>
+      &nbsp;<span class="rm-badge active" data-en="In progress" data-id="Sedang dibangun" data-jp="開発中">In progress</span>
+    </h2>
+    <p data-en="Write with light formatting: headers, bold, lists, links. Stays readable in both light and dark mode."
+       data-id="Tulis dengan format ringan: heading, tebal, daftar, tautan. Tetap mudah dibaca di mode terang maupun gelap."
+       data-jp="見出し、太字、リスト、リンクなど、軽いフォーマットで書けます。ライト・ダークどちらのモードでも読みやすく表示されます。">Write with light formatting: headers, bold, lists, links. Stays readable in both light and dark mode.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>
+      <span data-en="Full note-taking mode" data-id="Mode tulis penuh" data-jp="全画面執筆モード">Full note-taking mode</span>
+      &nbsp;<span class="rm-badge next" data-en="Coming soon" data-id="Segera hadir" data-jp="近日公開">Coming soon</span>
+    </h2>
+    <p data-en="An optional full-screen writing mode, toggleable from settings. Draft posts for your blog without leaving the app."
+       data-id="Mode tulis layar penuh yang opsional, bisa diaktifkan dari pengaturan. Tulis draft untuk blogmu tanpa keluar dari aplikasi."
+       data-jp="設定からオン・オフできる、全画面の執筆モード。アプリを離れずにブログの下書きも書けます。">An optional full-screen writing mode, toggleable from settings. Draft posts for your blog without leaving the app.</p>
+  </div>
+
+</div>
+
+<footer class="page-footer">
+  <span data-en="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;. Free for personal use."
+        data-id="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;. Gratis untuk penggunaan pribadi."
+        data-jp="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;。個人利用は無料。">© 2026 <a href="https://github.com/jesdonut" target="_blank">@jesdonut</a>. Free for personal use.</span>
+  <div class="page-footer-links">
+    <a href="about.html" data-en="About" data-id="Tentang" data-jp="このアプリについて">About</a>
+    <a href="download.html" data-en="Download" data-id="Download" data-jp="ダウンロード">Download</a>
+    <a href="privacy.html" data-en="Privacy" data-id="Privasi" data-jp="プライバシー">Privacy</a>
+  </div>
+</footer>
+
+<script src="core/lang.js"></script>
+</body>
+</html>

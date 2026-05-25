@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seratus: Finance</title>
+  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lifeOS_landing_theme')==='light'?'light':'');</script>
+  <style>html{background:#131110}html[data-theme="light"]{background:#f2ede8}</style>
+  <link rel="stylesheet" href="style/base.css" />
+  <link rel="stylesheet" href="style/pages.css" />
+</head>
+<body>
+
+<nav>
+  <a href="index.html" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none"><span class="brand-pill-name">Seratus</span><span class="brand-pill"><span class="brand-pill-ver">lifeOS v2.0</span></span></a>
+  <div class="nav-right">
+    <button class="nav-theme-btn" id="theme-toggle">☀︎ Light</button>
+    <button id="lang-toggle" class="nav-lang-btn">ID</button>
+    <a class="nav-back" href="index.html" data-en="← Back" data-id="← Kembali" data-jp="← 戻る">← Back</a>
+  </div>
+</nav>
+<script>
+  (function() {
+    const btn = document.getElementById('theme-toggle');
+    let t = localStorage.getItem('lifeOS_landing_theme') || 'dark';
+    function apply(v) { t = v; document.documentElement.setAttribute('data-theme', v === 'light' ? 'light' : ''); btn.textContent = v === 'light' ? '☾ Dark' : '☀︎ Light'; localStorage.setItem('lifeOS_landing_theme', v); }
+    apply(t);
+    btn.addEventListener('click', () => apply(t === 'dark' ? 'light' : 'dark'));
+  })();
+</script>
+
+<div class="doc-page">
+
+  <p class="eyebrow" data-en="Finance" data-id="Keuangan" data-jp="家計管理">Finance</p>
+  <h1 data-en="Your money, all of it." data-id="Uangmu, semuanya." data-jp="お金のすべてを、ひとつに。">Your money, all of it.</h1>
+  <p class="intro"
+     data-en="Expenses and income, foreign currency holdings, and investments. Three sub-modules, one place."
+     data-id="Pengeluaran dan pemasukan, kepemilikan mata uang asing, dan investasi. Tiga sub-modul, satu tempat."
+     data-jp="収支の記録、外貨の管理、資産の把握。3つのサブモジュールが、ひとつの場所に。">Expenses and income, foreign currency holdings, and investments. Three sub-modules, one place.</p>
+
+  <div class="section">
+    <h2>
+      <span data-en="Expenses" data-id="Pengeluaran" data-jp="収支">Expenses</span>
+      &nbsp;<span class="rm-badge active" data-en="In progress" data-id="Sedang dibangun" data-jp="開発中">In progress</span>
+    </h2>
+    <p data-en="Track income and spending month by month. Fields adapt to your country's tax and deduction structure: salary, transport reimbursements, insurance, pension, and more. Daily spending from your calendar flows in automatically."
+       data-id="Lacak pemasukan dan pengeluaran bulan per bulan. Kolom menyesuaikan dengan struktur pajak dan potongan di negaramu: gaji, reimbursement transportasi, asuransi, pensiun, dan lainnya. Pengeluaran harian dari kalendermu masuk otomatis."
+       data-jp="月ごとの収入と支出を管理。税金、交通費精算、保険料、年金など、国ごとの項目に対応。カレンダーの日々の支出も自動で反映されます。">Track income and spending month by month. Fields adapt to your country's tax and deduction structure: salary, transport reimbursements, insurance, pension, and more. Daily spending from your calendar flows in automatically.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>
+      <span data-en="Currency" data-id="Mata uang" data-jp="通貨">Currency</span>
+      &nbsp;<span class="rm-badge active" data-en="In progress" data-id="Sedang dibangun" data-jp="開発中">In progress</span>
+    </h2>
+    <p data-en="Log foreign currency lots and track exchange rates from any source, manual entry or automatic. See your gain or loss in your base currency at a glance. Built around JPY and IDR, but not limited to them."
+       data-id="Catat lot mata uang asing dan pantau nilai tukar dari sumber mana pun, entri manual atau otomatis. Lihat keuntungan atau kerugianmu dalam mata uang utama sekilas pandang. Dibangun dengan JPY dan IDR dalam pikiran, tapi tidak terbatas pada keduanya."
+       data-jp="外貨の購入記録と為替レートを、手入力または自動で管理。基準通貨での損益もひと目で確認できます。JPYとIDRを中心に設計していますが、他の通貨にも対応します。">Log foreign currency lots and track exchange rates from any source, manual entry or automatic. See your gain or loss in your base currency at a glance. Built around JPY and IDR, but not limited to them.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <h2>
+      <span data-en="Investments" data-id="Investasi" data-jp="投資">Investments</span>
+      &nbsp;<span class="rm-badge next" data-en="Coming soon" data-id="Segera hadir" data-jp="近日公開">Coming soon</span>
+    </h2>
+    <p data-en="Savings accounts, fixed deposits, bonds, and pension contributions across banks and countries, all in one view. Country-specific products like NISA (Japan) and Reksadana (Indonesia) are tracked under the same roof."
+       data-id="Tabungan, deposito, obligasi, dan kontribusi pensiun lintas bank dan negara, semuanya dalam satu tampilan. Produk spesifik per negara seperti NISA (Jepang) dan Reksadana (Indonesia) dicatat di bawah satu atap yang sama."
+       data-jp="普通預金、定期預金、債券、年金。複数の銀行や国にまたがる資産をひとつの画面で管理。NISA（日本）やReksadana（インドネシア）など、国ごとの金融商品にも対応します。">Savings accounts, fixed deposits, bonds, and pension contributions across banks and countries, all in one view. Country-specific products like NISA (Japan) and Reksadana (Indonesia) are tracked under the same roof.</p>
+  </div>
+
+</div>
+
+<footer class="page-footer">
+  <span data-en="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;. Free for personal use."
+        data-id="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;. Gratis untuk penggunaan pribadi."
+        data-jp="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;。個人利用は無料。">© 2026 <a href="https://github.com/jesdonut" target="_blank">@jesdonut</a>. Free for personal use.</span>
+  <div class="page-footer-links">
+    <a href="about.html" data-en="About" data-id="Tentang" data-jp="このアプリについて">About</a>
+    <a href="download.html" data-en="Download" data-id="Download" data-jp="ダウンロード">Download</a>
+    <a href="privacy.html" data-en="Privacy" data-id="Privasi" data-jp="プライバシー">Privacy</a>
+  </div>
+</footer>
+
+<script src="core/lang.js"></script>
+</body>
+</html>
