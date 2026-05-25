@@ -15,7 +15,8 @@
   <a href="index.html" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none"><span class="brand-pill-name">Seratus</span><span class="brand-pill"><span class="brand-pill-ver">lifeOS v2.0</span></span></a>
   <div class="nav-right">
     <button class="nav-theme-btn" id="theme-toggle">☀︎ Light</button>
-    <a class="nav-back" href="index.html">← Back</a>
+    <button id="lang-toggle" class="nav-lang-btn">ID</button>
+    <a class="nav-back" href="index.html" data-en="← Back" data-id="← Kembali" data-jp="← 戻る">← Back</a>
   </div>
 </nav>
 <script>
@@ -30,9 +31,12 @@
 
 <div class="doc-page">
 
-  <p class="eyebrow">License</p>
-  <h1>PolyForm Noncommercial 1.0.0</h1>
-  <p class="intro">Seratus is free to use, fork, and adapt for personal, non-commercial purposes. This is the full license text. The short version is in <a href="terms.html" style="color:var(--accent)">Terms of use</a>.</p>
+  <p class="eyebrow" data-en="License" data-id="Lisensi" data-jp="ライセンス">License</p>
+  <h1 data-en="PolyForm Noncommercial 1.0.0" data-id="PolyForm Noncommercial 1.0.0" data-jp="PolyForm Noncommercial 1.0.0">PolyForm Noncommercial 1.0.0</h1>
+  <p class="intro"
+     data-en="Seratus is free to use, fork, and adapt for personal, non-commercial purposes. This is the full license text. The short version is in &lt;a href='terms.html' style='color:var(--accent)'&gt;Terms of use&lt;/a&gt;."
+     data-id="Seratus boleh digunakan, di-fork, dan diadaptasi untuk keperluan pribadi dan non-komersial. Ini adalah teks lisensi lengkap. Versi singkatnya ada di &lt;a href='terms.html' style='color:var(--accent)'&gt;Syarat Penggunaan&lt;/a&gt;."
+     data-jp="Seratusは個人的・非商業的な目的で使用、フォーク、改変が無料でできます。これはライセンスの全文です。要約版は &lt;a href='terms.html' style='color:var(--accent)'&gt;利用規約&lt;/a&gt; に記載されています。">Seratus is free to use, fork, and adapt for personal, non-commercial purposes. This is the full license text. The short version is in <a href="terms.html" style="color:var(--accent)">Terms of use</a>.</p>
 
   <div class="notice-block">
     Copyright 2026 @jesdonut (https://github.com/jesdonut)<br>
@@ -112,21 +116,25 @@
     <p><strong>Trademark</strong> means trademarks, service marks, and similar rights.</p>
   </div>
 
-  <p class="updated">PolyForm Noncommercial License 1.0.0 · <a href="https://polyformproject.org/licenses/noncommercial/1.0.0" target="_blank" style="color:var(--accent)">polyformproject.org</a></p>
+  <p class="updated" data-en="PolyForm Noncommercial License 1.0.0 · &lt;a href='https://polyformproject.org/licenses/noncommercial/1.0.0' target='_blank' style='color:var(--accent)'&gt;polyformproject.org&lt;/a&gt;"
+     data-id="PolyForm Noncommercial License 1.0.0 · &lt;a href='https://polyformproject.org/licenses/noncommercial/1.0.0' target='_blank' style='color:var(--accent)'&gt;polyformproject.org&lt;/a&gt;"
+     data-jp="PolyForm Noncommercial License 1.0.0 · &lt;a href='https://polyformproject.org/licenses/noncommercial/1.0.0' target='_blank' style='color:var(--accent)'&gt;polyformproject.org&lt;/a&gt;">PolyForm Noncommercial License 1.0.0 · <a href="https://polyformproject.org/licenses/noncommercial/1.0.0" target="_blank" style="color:var(--accent)">polyformproject.org</a></p>
 
 </div>
 
 <footer class="page-footer">
-  <span>© 2026 <a href="https://github.com/jesdonut" target="_blank">@jesdonut</a>. Free for personal use.</span>
+  <span data-en="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;. Free for personal use."
+        data-id="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;. Gratis untuk penggunaan pribadi."
+        data-jp="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank'&gt;@jesdonut&lt;/a&gt;。個人利用は無料。">© 2026 <a href="https://github.com/jesdonut" target="_blank">@jesdonut</a>. Free for personal use.</span>
   <div class="page-footer-links">
-    <a href="about.html">About</a>
-    <a href="changelog.html">Roadmap</a>
-    <a href="download.html">Download</a>
-    <a href="license.html">License</a>
-    <a href="privacy.html">Privacy</a>
-    <a href="terms.html">Terms</a>
+    <a href="about.html" data-en="About" data-id="Tentang" data-jp="このアプリについて">About</a>
+    <a href="download.html" data-en="Download" data-id="Download" data-jp="ダウンロード">Download</a>
+    <a href="license.html" data-en="License" data-id="Lisensi" data-jp="ライセンス">License</a>
+    <a href="privacy.html" data-en="Privacy" data-id="Privasi" data-jp="プライバシー">Privacy</a>
+    <a href="terms.html" data-en="Terms" data-id="Syarat Penggunaan" data-jp="利用規約">Terms</a>
   </div>
 </footer>
 
+<script src="core/lang.js"></script>
 </body>
 </html>

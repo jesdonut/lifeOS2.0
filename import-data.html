@@ -17,15 +17,16 @@
   <a href="index.html" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none"><span class="brand-pill-name">Seratus</span><span class="brand-pill"><span class="brand-pill-ver">lifeOS v2.0</span></span></a>
   <div class="nav-right">
     <button class="nav-theme-btn" id="theme-toggle">☀︎ Light</button>
-    <a class="nav-back" href="index.html">← Back</a>
+    <button id="lang-toggle" class="nav-lang-btn">ID</button>
+    <a class="nav-back" href="index.html" data-en="← Back" data-id="← Kembali" data-jp="← 戻る">← Back</a>
   </div>
 </nav>
 
 <div class="import-shell">
 
   <div class="import-hdr">
-    <p class="import-eyebrow">Tools</p>
-    <h1 class="import-title">Import data</h1>
+    <p class="import-eyebrow" data-en="Tools" data-id="Alat" data-jp="ツール">Tools</p>
+    <h1 class="import-title" data-en="Import data" data-id="Impor data" data-jp="データのインポート">Import data</h1>
   </div>
 
   <!-- Source tab bar -->
@@ -404,5 +405,6 @@
   themeBtn.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
 </script>
 
+<script src="core/lang.js"></script>
 </body>
 </html>

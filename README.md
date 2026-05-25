@@ -14,6 +14,15 @@ Month view with 9 built-in event categories (customizable in settings). Click an
 **Notes sidebar**
 Always one swipe away. Holds parked (unscheduled) events and free-form notes. Collapsible. Inline editing.
 
+**Period tracker**
+Year calendar with color-coded flow, predictions, and fertile window. Day logger for flow, mood, symptoms, and BBT. Stats panel with cycle averages and EWMA-weighted predictions.
+
+**Finance**
+Monthly income ledger with Japan-specific salary breakdown (salary, transport allowance, social insurance, taxes). Spend totals pulled from calendar by category. Sub-view tabs for Savings, Currency, and Investment (in progress).
+
+**Language**
+EN/ID toggle on all public pages. Indonesian translations throughout.
+
 **Settings**
 Full settings modal accessible from the top bar.
 - Profile: name, date of birth, timezone, nationalities, locations, currencies, period tracker toggle
@@ -26,17 +35,16 @@ A guided setup page on first visit. Collects name, birth date, timezone, nationa
 
 ---
 
-## In progress
+## Planned
 
-| Module | Status |
+| Module | Notes |
 |---|---|
-| Period tracker | Data layer done, UI in progress |
-| Finance | Planned |
-| Bank & e-money | Planned |
-| Currency & FX | Planned |
-| Savings (NISA, bonds, deposits) | Planned |
-| Calendar: week view | Planned |
-| Calendar: year view | Planned |
+| Debug panel | Hidden key-combo panel: localStorage inspector, store dump, date override |
+| Bank & e-money | Account balances, multi-country, multi-currency |
+| Savings | Fixed deposits, bonds, NISA (Japan), pension |
+| Calendar: week view | Mon-Sun grid with daily spend per category |
+| Calendar: year view | Monthly overview, goals, age display |
+| Import: Clue, Flo, Natural Cycles | Browser-based parsers, JSON download only |
 
 ---
 

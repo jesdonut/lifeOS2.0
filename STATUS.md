@@ -38,6 +38,10 @@
 - [x] `license.html` — em dash fixes — *18 May*
 - [x] `changelog.html` — public feature history page: v1 origin, v2 milestones by date — *18 May*
 - [x] Mobile responsive landing — preview carousel 2-col on ≤640px, features grid 2-col/1-col, period stats — *18 May*
+- [x] `modules/period/period-ui.js` — period module UI: year calendar, day logger, stats panel, mood/symptom/BBT tracking, flow logging, cycle predictions — *22 May*
+- [x] `modules/finance/finance.js` + `currency-view.js` + `finance.css` — sub-view tabs (Finance/Savings/Currency/Investment), income ledger with Japan salary breakdown (salary, transport allowance, health/care/pension/employment insurance, income tax, resident tax), spend totals from calendar by category — *22 May*
+- [x] EN/ID language toggle on all public pages — `core/lang.js`, translations inline, stable button sizing, mobile fix — *23 May*
+- [x] Indonesian translations for all public pages — *23 May*
 
 ## In progress
 
@@ -45,13 +49,11 @@
 
 ## Next
 
-- [ ] `modules/period/period-ui.js` — period module UI (integrates period-data.js): year calendar, day logger, stats panel
+- [ ] `core/debug.js` — hidden debug panel (secret key combo): localStorage inspector, store state dump, simulate day change, date override for testing
 - [ ] `modules/calendar/` — week view (Mon-Sun grid, daily spending per category, day totals)
 - [ ] `modules/calendar/` — year view (monthly overview, goals, age display)
-- [ ] `modules/finance/` — income and expenses, country-adaptive fields (Japan: salary/health insurance/pension/resident tax), links to calendar daily spend
 - [ ] `modules/bank/` — account balances, multi-country, multi-currency
 - [ ] `modules/savings/` — fixed deposits, bonds, NISA (JP only), pension contributions
-- [ ] `modules/currency/` — lot tracking, FX rates, P&L in base currency
 - [ ] `import-data.html` — Clue JSON parser
 - [ ] `import-data.html` — Natural Cycles CSV parser
 - [ ] `import-data.html` — Flo JSON parser

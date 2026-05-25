@@ -38,6 +38,9 @@ nav {
   color: var(--text-2);
   text-decoration: none;
   transition: color 150ms ease;
+  min-width: 100px;
+  justify-content: center;
+  white-space: nowrap;
 }
 .nav-back:hover { color: var(--text); }
 
@@ -58,8 +61,9 @@ nav {
   background: var(--surface-2);
   cursor: pointer;
   transition: color 150ms ease, border-color 150ms ease;
-  min-width: 76px;
+  min-width: 82px;
   text-align: center;
+  white-space: nowrap;
 }
 .nav-theme-btn:hover { color: var(--text); }
 
@@ -75,6 +79,7 @@ nav {
   transition: color 150ms ease, border-color 150ms ease;
   min-width: 52px;
   text-align: center;
+  white-space: nowrap;
 }
 .nav-lang-btn:hover { color: var(--text); }
 

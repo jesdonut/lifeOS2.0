@@ -26,7 +26,7 @@ function defaultData() {
     calendar: { events: [], spendEntries: {} },
     finance:  { months: {} },
     bank:     { accounts: [] },
-    currency: { lots: [], rates: {} },
+    currency: { holdings: [], reference: 'IDR', rates: null, ratesAt: null },
     nisa:     { contributions: [] },
     savings:  { accounts: [], bonds: [], deposits: [] },
     notes:    { items: [] },

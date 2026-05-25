@@ -30,7 +30,7 @@
   <div style="display:flex;align-items:center;gap:var(--s3)">
     <button id="theme-toggle" class="nav-theme-btn" style="padding:7px var(--s4);border-radius:100px;border:1px solid var(--border);color:var(--text-2);font-size:var(--fs-sm);font-weight:600;background:var(--surface-2);cursor:pointer;transition:all 150ms ease" title="Toggle theme">☀︎ Light</button>
     <button id="lang-toggle" class="nav-lang-btn">ID</button>
-    <a class="nav-cta" href="coming-soon.html" data-en="Get started" data-id="Mulai">Get started</a>
+    <a class="nav-cta" href="coming-soon.html" data-en="Get started" data-id="Mulai" data-jp="はじめる">Get started</a>
   </div>
 </nav>
 
@@ -38,14 +38,14 @@
 <section class="hero">
   <p class="brand-pill-name hero-brand">Seratus</p>
   <div class="hero-copy">
-    <p class="hero-title" data-en="The OS for your &lt;span&gt;whole life&lt;/span&gt;." data-id="OS untuk &lt;span&gt;seluruh hidupmu&lt;/span&gt;.">The OS for your <span>whole life</span>.</p>
-    <p class="hero-sub" data-en="Health, finances, calendar, and habits. In one place you actually own. Works offline. No subscription. No lock-in." data-id="Kesehatan, keuangan, kalender, dan kebiasaan. Di satu tempat yang benar-benar milikmu. Bisa offline. Tanpa langganan. Tanpa ketergantungan.">Health, finances, calendar, and habits. In one place you actually own. Works offline. No subscription. No lock-in.</p>
+    <p class="hero-title" data-en="The OS for your &lt;span&gt;whole life&lt;/span&gt;." data-id="OS untuk &lt;span&gt;seluruh hidupmu&lt;/span&gt;." data-jp="暮らしをまるごと整える、&lt;span&gt;あなたのための&lt;/span&gt;OS。">The OS for your <span>whole life</span>.</p>
+    <p class="hero-sub" data-en="Health, finances, calendar, and habits. In one place you actually own. Works offline. No subscription. No lock-in." data-id="Kesehatan, keuangan, kalender, dan kebiasaan. Di satu tempat yang benar-benar milikmu. Bisa offline. Tanpa langganan. Tanpa ketergantungan." data-jp="健康、家計、カレンダー、習慣をひとつに。オフラインで使えて、サブスクなし。ロックインもありません。">Health, finances, calendar, and habits. In one place you actually own. Works offline. No subscription. No lock-in.</p>
   </div>
   <div class="hero-actions">
-    <a class="btn-primary" href="coming-soon.html" data-en="Get started" data-id="Mulai sekarang">Get started</a>
-    <a class="btn-ghost" href="#features" data-en="See what's inside" data-id="Lihat isinya">See what's inside</a>
+    <a class="btn-primary" href="coming-soon.html" data-en="Get started" data-id="Mulai sekarang" data-jp="はじめる">Get started</a>
+    <a class="btn-ghost" href="#features" data-en="See what's inside" data-id="Lihat isinya" data-jp="機能を見る">See what's inside</a>
   </div>
-  <p class="hero-hint" data-en="Open source · Runs in your browser · Your data stays yours" data-id="Open source · Berjalan di browsermu · Datamu tetap milikmu">Open source · Runs in your browser · Your data stays yours</p>
+  <p class="hero-hint" data-en="Open source · Runs in your browser · Your data stays yours" data-id="Open source · Berjalan di browsermu · Datamu tetap milikmu" data-jp="オープンソース・ブラウザで動作・データはあなたの手元に">Open source · Runs in your browser · Your data stays yours</p>
 </section>
 
 <!-- App preview -->
@@ -59,7 +59,7 @@
         <div class="preview-tab active">Calendar</div>
         <div class="preview-tab">Period</div>
         <div class="preview-tab">Finance</div>
-        <div class="preview-tab">Bank</div>
+        <div class="preview-tab">Notes</div>
       </div>
     </div>
     <div class="preview-body">
@@ -88,97 +88,96 @@
 
 <!-- Features -->
 <section class="features" id="features">
-  <h2 class="features-title reveal" data-en="Everything in one place." data-id="Semua dalam satu tempat.">Everything in one place.</h2>
+  <h2 class="features-title reveal" data-en="Everything in one place." data-id="Semua dalam satu tempat." data-jp="暮らしの記録を、ひとつの場所に。">Everything in one place.</h2>
   <div class="features-grid">
-    <div class="feature-card reveal">
+    <a class="feature-card reveal" href="calendar.html">
       <div class="feature-icon"><span class="material-symbols-outlined">calendar_month</span></div>
-      <div class="feature-name" data-en="Calendar" data-id="Kalender">Calendar</div>
-      <div class="feature-desc" data-en="Events and daily spending in one place. Log what you did and what you spent, itemized with running totals. Weekly, monthly, and yearly views. Start day is yours to set." data-id="Acara dan pengeluaran harian dalam satu tempat. Catat apa yang kamu lakukan dan apa yang kamu belanjakan, terperinci dengan total berjalan. Tampilan mingguan, bulanan, dan tahunan. Hari mulai bisa kamu atur sendiri.">Events and daily spending in one place. Log what you did and what you spent, itemized with running totals. Weekly, monthly, and yearly views. Start day is yours to set.</div>
-    </div>
-    <div class="feature-card reveal">
+      <div class="feature-name" data-en="Calendar" data-id="Kalender" data-jp="カレンダー">Calendar</div>
+      <div class="feature-subs">
+        <span class="feature-sub" data-en="Weekly" data-id="Mingguan" data-jp="週">Weekly</span>
+        <span class="feature-sub" data-en="Monthly" data-id="Bulanan" data-jp="月">Monthly</span>
+        <span class="feature-sub" data-en="Yearly" data-id="Tahunan" data-jp="年">Yearly</span>
+      </div>
+    </a>
+    <a class="feature-card reveal" href="period.html">
       <div class="feature-icon"><span class="material-symbols-outlined">water_drop</span></div>
-      <div class="feature-name" data-en="Period tracker" data-id="Pelacak siklus">Period tracker</div>
-      <div class="feature-desc" data-en="Built for irregular cycles. Set your baseline first, then predictions sharpen with every cycle logged. Tracks flow, symptoms, BBT, discharge, and birth control." data-id="Dibuat untuk siklus tidak teratur. Atur baseline-mu terlebih dahulu, lalu prediksi semakin akurat setiap siklus tercatat. Melacak aliran, gejala, BBT, keputihan, dan KB.">Built for irregular cycles. Set your baseline first, then predictions sharpen with every cycle logged. Tracks flow, symptoms, BBT, discharge, and birth control.</div>
-    </div>
-    <div class="feature-card reveal">
+      <div class="feature-name" data-en="Period tracker" data-id="Pelacak siklus" data-jp="生理トラッカー">Period tracker</div>
+    </a>
+    <a class="feature-card reveal" href="finance.html">
       <div class="feature-icon"><span class="material-symbols-outlined">receipt_long</span></div>
-      <div class="feature-name" data-en="Finance" data-id="Keuangan">Finance</div>
-      <div class="feature-desc" data-en="Income fields that adapt to your country's tax and deduction structure: salary, reimbursements, insurance, pension, taxes. Daily spending flows in from your calendar automatically." data-id="Kolom pemasukan yang menyesuaikan dengan struktur pajak dan potongan di negaramu: gaji, reimbursement, asuransi, pensiun, pajak. Pengeluaran harian masuk otomatis dari kalendermu.">Income fields that adapt to your country's tax and deduction structure: salary, reimbursements, insurance, pension, taxes. Daily spending flows in from your calendar automatically.</div>
-    </div>
-    <div class="feature-card reveal">
-      <div class="feature-icon"><span class="material-symbols-outlined">account_balance</span></div>
-      <div class="feature-name" data-en="Bank &amp; savings" data-id="Bank &amp; tabungan">Bank & savings</div>
-      <div class="feature-desc" data-en="Balances across banks in multiple countries. Savings accounts, fixed deposits, investment accounts, and pension funds, all in one view across currencies." data-id="Saldo dari berbagai bank di beberapa negara. Rekening tabungan, deposito, rekening investasi, dan dana pensiun, semuanya dalam satu tampilan lintas mata uang.">Balances across banks in multiple countries. Savings accounts, fixed deposits, investment accounts, and pension funds, all in one view across currencies.</div>
-    </div>
-    <div class="feature-card reveal">
-      <div class="feature-icon"><span class="material-symbols-outlined">currency_exchange</span></div>
-      <div class="feature-name" data-en="Currency &amp; FX" data-id="Currency &amp; FX">Currency & FX</div>
-      <div class="feature-desc" data-en="Log currency lots and track exchange rates from any source, manual entry or automatic. See your gain or loss in your base currency at a glance." data-id="Catat lot mata uang dan pantau nilai tukar dari sumber mana pun, entri manual atau otomatis. Lihat keuntungan atau kerugianmu dalam mata uang utama sekilas pandang.">Log currency lots and track exchange rates from any source, manual entry or automatic. See your gain or loss in your base currency at a glance.</div>
-    </div>
-    <div class="feature-card reveal">
+      <div class="feature-name" data-en="Finance" data-id="Keuangan" data-jp="家計管理">Finance</div>
+      <div class="feature-subs">
+        <span class="feature-sub" data-en="Expenses" data-id="Pengeluaran" data-jp="収支">Expenses</span>
+        <span class="feature-sub" data-en="Currency" data-id="Mata uang" data-jp="通貨">Currency</span>
+        <span class="feature-sub" data-en="Investments" data-id="Investasi" data-jp="投資">Investments</span>
+      </div>
+    </a>
+    <a class="feature-card reveal" href="notes.html">
       <div class="feature-icon"><span class="material-symbols-outlined">sticky_note_2</span></div>
-      <div class="feature-name" data-en="Notes" data-id="Catatan">Notes</div>
-      <div class="feature-desc" data-en="Always one swipe away from any screen. Write fast, pin what matters." data-id="Selalu satu geser dari layar mana pun. Tulis cepat, sematkan yang penting.">Always one swipe away from any screen. Write fast, pin what matters.</div>
-    </div>
+      <div class="feature-name" data-en="Notes" data-id="Catatan" data-jp="ノート">Notes</div>
+      <div class="feature-subs">
+        <span class="feature-sub" data-en="Markdown" data-id="Markdown" data-jp="Markdown">Markdown</span>
+      </div>
+    </a>
   </div>
 </section>
 
 <!-- Period highlight -->
 <section class="period-section">
-  <p class="period-eyebrow reveal" data-en="Period tracker" data-id="Pelacak siklus">Period tracker</p>
-  <h2 class="period-title reveal" data-en="Not for 28-day cycles. For &lt;span&gt;yours&lt;/span&gt;." data-id="Bukan untuk siklus 28 hari. Untuk &lt;span&gt;siklusmu&lt;/span&gt;.">Not for 28-day cycles. For <span>yours</span>.</h2>
-  <p class="period-sub reveal" data-en="Most apps assume a 28-day cycle. Seratus doesn't. Long cycles, short cycles, gaps, irregularity: all of it is valid data, not an error to correct. Predictions are weighted toward your recent history, not a textbook average. And if you're on birth control or not cycling at all, that's tracked too." data-id="Kebanyakan aplikasi mengasumsikan siklus 28 hari. Seratus tidak. Siklus panjang, siklus pendek, jeda, ketidakteraturan: semua itu adalah data yang valid, bukan kesalahan yang harus diperbaiki. Prediksi dibobotkan berdasarkan riwayat terbarumu, bukan rata-rata dari buku teks. Dan kalau kamu pakai KB atau sedang tidak haid sama sekali, itu pun tercatat.">Most apps assume a 28-day cycle. Seratus doesn't. Long cycles, short cycles, gaps, irregularity: all of it is valid data, not an error to correct. Predictions are weighted toward your recent history, not a textbook average. And if you're on birth control or not cycling at all, that's tracked too.</p>
+  <p class="period-eyebrow reveal" data-en="Period tracker" data-id="Pelacak siklus" data-jp="生理トラッカー">Period tracker</p>
+  <h2 class="period-title reveal" data-en="Not for 28-day cycles. For &lt;span&gt;yours&lt;/span&gt;." data-id="Bukan untuk siklus 28 hari. Untuk &lt;span&gt;siklusmu&lt;/span&gt;." data-jp="28日周期に合わせるのではなく、&lt;span&gt;あなたの&lt;/span&gt;周期に寄り添うトラッカー。">Not for 28-day cycles. For <span>yours</span>.</h2>
+  <p class="period-sub reveal" data-en="Not every cycle is 28 days.&lt;br&gt;&lt;br&gt;Seratus is designed for the cycle you actually have. Long cycles, short cycles, gaps, irregular timing, birth control, and times when you are not cycling can all be tracked without being treated as data errors.&lt;br&gt;&lt;br&gt;Predictions are weighted toward your recent history, so the app adapts to your pattern instead of forcing a textbook average onto it." data-id="Tidak semua siklus itu 28 hari.&lt;br&gt;&lt;br&gt;Seratus dirancang untuk siklusmu yang sebenarnya. Siklus panjang, pendek, tidak teratur, pakai KB, atau saat kamu sedang tidak haid — semuanya dicatat apa adanya, bukan dianggap salah.&lt;br&gt;&lt;br&gt;Prediksi mengutamakan riwayat terbarumu, jadi aplikasinya menyesuaikan diri dengan polamu, bukan rata-rata buku teks." data-jp="周期は、いつも一定とは限りません。&lt;br&gt;&lt;br&gt;長い周期、短い周期、不規則なタイミング、避妊薬の使用、生理のない時期も、Seratusではそのまま記録できます。&lt;br&gt;&lt;br&gt;予測は、一般的な平均値ではなく、あなたの直近の記録を重視して調整されます。使うほど、あなた自身のパターンに近づいていきます。">Not every cycle is 28 days.<br><br>Seratus is designed for the cycle you actually have. Long cycles, short cycles, gaps, irregular timing, birth control, and times when you are not cycling can all be tracked without being treated as data errors.<br><br>Predictions are weighted toward your recent history, so the app adapts to your pattern instead of forcing a textbook average onto it.</p>
   <div class="period-stats reveal">
     <div class="period-stat">
-      <div class="period-stat-value" data-en="21–90d" data-id="21–90 hari">21–90d</div>
-      <div class="period-stat-label" data-en="full cycle range" data-id="rentang siklus penuh">full cycle range</div>
+      <div class="period-stat-value" data-en="21–90 days" data-id="21–90 hari" data-jp="21〜90日">21–90 days</div>
+      <div class="period-stat-label" data-en="supported cycle range" data-id="mendukung berbagai panjang siklus" data-jp="長い周期にも対応">supported cycle range</div>
     </div>
     <div class="period-stat">
-      <div class="period-stat-value" data-en="weighted" data-id="berbobot">weighted</div>
-      <div class="period-stat-label" data-en="recent cycles count more" data-id="siklus terbaru lebih diprioritaskan">recent cycles count more</div>
+      <div class="period-stat-value" data-en="recent cycles" data-id="siklus terkini" data-jp="直近の記録">recent cycles</div>
+      <div class="period-stat-label" data-en="weighted more" data-id="lebih diprioritaskan dalam prediksi" data-jp="予測に反映">weighted more</div>
     </div>
     <div class="period-stat">
-      <div class="period-stat-value" data-en="meds" data-id="KB">meds</div>
-      <div class="period-stat-label" data-en="birth control logging" data-id="pencatatan kontrasepsi">birth control logging</div>
+      <div class="period-stat-value" data-en="birth control" data-id="kontrasepsi" data-jp="避妊薬">birth control</div>
+      <div class="period-stat-label" data-en="optional tracking" data-id="pencatatan opsional" data-jp="使用状況を記録">optional tracking</div>
     </div>
     <div class="period-stat">
-      <div class="period-stat-value" data-en="optional" data-id="opsional">optional</div>
-      <div class="period-stat-label" data-en="enable only if you need it" data-id="aktifkan hanya jika perlu">enable only if you need it</div>
+      <div class="period-stat-value" data-en="hide anytime" data-id="sembunyikan kapan saja" data-jp="必要な人だけ">hide anytime</div>
+      <div class="period-stat-label" data-en="turn off this module" data-id="matikan modul ini kapan saja" data-jp="いつでも非表示">turn off this module</div>
     </div>
   </div>
 </section>
 
 <!-- Philosophy -->
 <section class="philosophy">
-  <h2 class="philosophy-title reveal" data-en="Yours to keep.&lt;br&gt;Nobody else's." data-id="Milikmu. Hanya milikmu.">Yours to keep.<br>Nobody else's.</h2>
+  <h2 class="philosophy-title reveal" data-en="Yours to keep.&lt;br&gt;Nobody else's." data-id="Milikmu. Hanya milikmu." data-jp="あなただけのもの。&lt;br&gt;誰のものでもない。">Yours to keep.<br>Nobody else's.</h2>
   <div class="philosophy-list">
     <div class="philosophy-item reveal">
       <div class="philosophy-marker"></div>
-      <p class="philosophy-text" data-en="&lt;strong&gt;Your data is yours.&lt;/strong&gt; Everything lives in your browser. Export to JSON anytime. No account, no server, no one else can read it." data-id="&lt;strong&gt;Datamu adalah milikmu.&lt;/strong&gt; Semua tersimpan di browsermu. Ekspor ke JSON kapan saja. Tanpa akun, tanpa server, tidak ada yang bisa membacanya selain kamu."><strong>Your data is yours.</strong> Everything lives in your browser. Export to JSON anytime. No account, no server, no one else can read it.</p>
+      <p class="philosophy-text" data-en="&lt;strong&gt;Your data is yours.&lt;/strong&gt; Everything lives in your browser. Export to JSON anytime. No account, no server, no one else can read it." data-id="&lt;strong&gt;Datamu adalah milikmu.&lt;/strong&gt; Semua tersimpan di browsermu. Ekspor ke JSON kapan saja. Tanpa akun, tanpa server, tidak ada yang bisa membacanya selain kamu." data-jp="&lt;strong&gt;データはあなたのもの。&lt;/strong&gt; すべてブラウザに保存されます。JSONでいつでもエクスポート可能。アカウントなし、サーバーなし、誰も読めません。"><strong>Your data is yours.</strong> Everything lives in your browser. Export to JSON anytime. No account, no server, no one else can read it.</p>
     </div>
     <div class="philosophy-item reveal">
       <div class="philosophy-marker"></div>
-      <p class="philosophy-text" data-en="&lt;strong&gt;Works offline.&lt;/strong&gt; Load it once and it runs without internet. Nothing breaks when your connection does." data-id="&lt;strong&gt;Bisa dipakai offline.&lt;/strong&gt; Muat sekali, jalan tanpa internet. Tidak ada yang rusak saat koneksimu putus."><strong>Works offline.</strong> Load it once and it runs without internet. Nothing breaks when your connection does.</p>
+      <p class="philosophy-text" data-en="&lt;strong&gt;Works offline.&lt;/strong&gt; Load it once and it runs without internet. Nothing breaks when your connection does." data-id="&lt;strong&gt;Bisa dipakai offline.&lt;/strong&gt; Muat sekali, jalan tanpa internet. Tidak ada yang rusak saat koneksimu putus." data-jp="&lt;strong&gt;オフラインで動作。&lt;/strong&gt; 一度読み込めば、インターネットなしで使えます。接続が切れても何も壊れません。"><strong>Works offline.</strong> Load it once and it runs without internet. Nothing breaks when your connection does.</p>
     </div>
     <div class="philosophy-item reveal">
       <div class="philosophy-marker"></div>
-      <p class="philosophy-text" data-en="&lt;strong&gt;No subscription. Ever.&lt;/strong&gt; Free to use, free to keep. No credit card, no trial, no plan to monetize you later." data-id="&lt;strong&gt;Tanpa langganan. Selamanya.&lt;/strong&gt; Gratis dipakai, gratis disimpan. Tanpa kartu kredit, tanpa masa percobaan, tanpa niat mengambil keuntungan darimu nanti."><strong>No subscription. Ever.</strong> Free to use, free to keep. No credit card, no trial, no plan to monetize you later.</p>
+      <p class="philosophy-text" data-en="&lt;strong&gt;No subscription. Ever.&lt;/strong&gt; Free to use, free to keep. No credit card, no trial, no plan to monetize you later." data-id="&lt;strong&gt;Tanpa langganan. Selamanya.&lt;/strong&gt; Gratis dipakai, gratis disimpan. Tanpa kartu kredit, tanpa masa percobaan, tanpa niat mengambil keuntungan darimu nanti." data-jp="&lt;strong&gt;サブスクは永遠にありません。&lt;/strong&gt; 無料で使え、ずっと無料のまま。クレジットカード不要、試用期間なし、後から課金する予定もありません。"><strong>No subscription. Ever.</strong> Free to use, free to keep. No credit card, no trial, no plan to monetize you later.</p>
     </div>
     <div class="philosophy-item reveal">
       <div class="philosophy-marker"></div>
-      <p class="philosophy-text" data-en="&lt;strong&gt;Open source, noncommercial.&lt;/strong&gt; Fork it, adapt it, build on top of it for personal use. Attribution required. Selling it or using it commercially is not permitted." data-id="&lt;strong&gt;Open source, nonkomersial.&lt;/strong&gt; Fork, adaptasi, bangun di atasnya untuk kebutuhan pribadi. Atribusi wajib dicantumkan. Menjual atau menggunakannya secara komersial tidak diizinkan."><strong>Open source, noncommercial.</strong> Fork it, adapt it, build on top of it for personal use. Attribution required. Selling it or using it commercially is not permitted.</p>
+      <p class="philosophy-text" data-en="&lt;strong&gt;Open source, noncommercial.&lt;/strong&gt; Fork it, adapt it, build on top of it for personal use. Attribution required. Selling it or using it commercially is not permitted." data-id="&lt;strong&gt;Open source, nonkomersial.&lt;/strong&gt; Fork, adaptasi, bangun di atasnya untuk kebutuhan pribadi. Atribusi wajib dicantumkan. Menjual atau menggunakannya secara komersial tidak diizinkan." data-jp="&lt;strong&gt;オープンソース、非商業。&lt;/strong&gt; 個人利用を目的としたフォーク、改変、追加開発は可能です。クレジット表記が必要です。商業利用や販売は禁止。"><strong>Open source, noncommercial.</strong> Fork it, adapt it, build on top of it for personal use. Attribution required. Selling it or using it commercially is not permitted.</p>
     </div>
     <div class="philosophy-item reveal">
       <div class="philosophy-marker"></div>
-      <p class="philosophy-text" data-en="&lt;strong&gt;100 years.&lt;/strong&gt; The calendar starts on your birthday and runs for a century. Plan slow." data-id="&lt;strong&gt;100 tahun.&lt;/strong&gt; Kalender dimulai dari hari ulang tahunmu dan berjalan selama satu abad. Rencanakan pelan-pelan."><strong>100 years.</strong> The calendar starts on your birthday and runs for a century. Plan slow.</p>
+      <p class="philosophy-text" data-en="&lt;strong&gt;100 years.&lt;/strong&gt; The calendar starts on your birthday and runs for a century. Plan slow." data-id="&lt;strong&gt;100 tahun.&lt;/strong&gt; Kalender dimulai dari hari ulang tahunmu dan berjalan selama satu abad. Rencanakan pelan-pelan." data-jp="&lt;strong&gt;100年。&lt;/strong&gt; カレンダーはあなたの誕生日から始まり、100年間続きます。ゆっくり計画しましょう。"><strong>100 years.</strong> The calendar starts on your birthday and runs for a century. Plan slow.</p>
     </div>
   </div>
 </section>
 
 <!-- Footer CTA -->
 <section class="footer-cta">
-  <h2 class="footer-title reveal" data-en="Ready to start?" data-id="Siap untuk mulai?">Ready to start?</h2>
-  <p class="footer-sub reveal" data-en="Takes two minutes to set up. No account needed." data-id="Hanya butuh dua menit untuk setup. Tidak perlu akun.">Takes two minutes to set up. No account needed.</p>
+  <h2 class="footer-title reveal" data-en="Ready to start?" data-id="Siap untuk mulai?" data-jp="始める準備はできましたか？">Ready to start?</h2>
+  <p class="footer-sub reveal" data-en="Takes two minutes to set up. No account needed." data-id="Hanya butuh dua menit untuk setup. Tidak perlu akun." data-jp="設定は2分で完了。アカウント不要。">Takes two minutes to set up. No account needed.</p>
   <a class="btn-primary reveal" href="#" onclick="return false" style="font-size:var(--fs-lg);padding:var(--s4) var(--s7);opacity:0.45;cursor:not-allowed;pointer-events:none" title="Coming soon">Coming soon</a>
 </section>
 
@@ -192,51 +191,47 @@
           <span class="brand-pill-ver">lifeOS v2.0</span>
         </span>
       </div>
-      <p class="footer-brand-desc" data-en="A personal life OS, yours for 100 years. Free for personal use. Your data stays yours." data-id="OS untuk hidupmu, selama 100 tahun. Gratis untuk penggunaan pribadi. Datamu tetap milikmu.">A personal life OS, yours for 100 years. Free for personal use. Your data stays yours.</p>
+      <p class="footer-brand-desc" data-en="A personal life OS, yours for 100 years. Free for personal use. Your data stays yours." data-id="OS untuk hidupmu, selama 100 tahun. Gratis untuk penggunaan pribadi. Datamu tetap milikmu." data-jp="あなたのための生活OS、100年使える。個人利用は無料。データはあなたのもの。">A personal life OS, yours for 100 years. Free for personal use. Your data stays yours.</p>
       <div class="footer-social">
-        <a href="https://github.com/jesdonut" target="_blank" data-en="@jesdonut on GitHub" data-id="@jesdonut di GitHub">@jesdonut on GitHub</a>
+        <a href="https://github.com/jesdonut" target="_blank" data-en="@jesdonut on GitHub" data-id="@jesdonut di GitHub" data-jp="@jesdonut（GitHub）">@jesdonut on GitHub</a>
       </div>
     </div>
 
     <div>
-      <div class="footer-col-title" data-en="Get started" data-id="Mulai sekarang">Get started</div>
+      <div class="footer-col-title" data-en="Get started" data-id="Mulai sekarang" data-jp="はじめる">Get started</div>
       <div class="footer-links">
-        <a href="#" onclick="return false" style="opacity:0.45;cursor:not-allowed;pointer-events:none" data-en="Create your profile" data-id="Buat profilmu">Create your profile</a>
-        <a href="download.html" data-en="Download" data-id="Unduh">Download</a>
-        <a href="import-data.html" data-en="Import data" data-id="Impor data">Import data</a>
+        <a href="#" onclick="return false" style="opacity:0.45;cursor:not-allowed;pointer-events:none" data-en="Create your profile" data-id="Buat profilmu" data-jp="プロフィールを作成">Create your profile</a>
+        <a href="download.html" data-en="Download" data-id="Unduh" data-jp="ダウンロード">Download</a>
+        <a href="import-data.html" data-en="Import data" data-id="Impor data" data-jp="データをインポート">Import data</a>
       </div>
     </div>
 
     <div>
-      <div class="footer-col-title" data-en="Modules" data-id="Modul">Modules</div>
+      <div class="footer-col-title" data-en="Modules" data-id="Modul" data-jp="モジュール">Modules</div>
       <div class="footer-links">
-        <span data-en="Calendar" data-id="Kalender">Calendar</span>
-        <span data-en="Period tracker" data-id="Pelacak siklus">Period tracker</span>
-        <span data-en="Finance" data-id="Keuangan">Finance</span>
-        <span data-en="Bank &amp; e-money" data-id="Bank &amp; uang digital">Bank & e-money</span>
-        <span data-en="Currency &amp; FX" data-id="Mata uang &amp; valas">Currency & FX</span>
-        <span data-en="Savings" data-id="Tabungan">Savings</span>
-        <span data-en="Notes" data-id="Catatan">Notes</span>
+        <a href="calendar.html" data-en="Calendar" data-id="Kalender" data-jp="カレンダー">Calendar</a>
+        <a href="period.html" data-en="Period tracker" data-id="Pelacak siklus" data-jp="生理トラッカー">Period tracker</a>
+        <a href="finance.html" data-en="Finance" data-id="Keuangan" data-jp="家計管理">Finance</a>
+        <a href="notes.html" data-en="Notes" data-id="Catatan" data-jp="ノート">Notes</a>
       </div>
     </div>
 
     <div>
-      <div class="footer-col-title" data-en="Project" data-id="Proyek">Project</div>
+      <div class="footer-col-title" data-en="Project" data-id="Proyek" data-jp="プロジェクト">Project</div>
       <div class="footer-links">
-        <a href="about.html" data-en="About" data-id="Tentang">About</a>
-        <a href="changelog.html" data-en="Roadmap" data-id="Peta jalan">Roadmap</a>
-        <a href="https://github.com/jesdonut/lifeOS2.0/issues" target="_blank" data-en="Report a bug" data-id="Laporkan bug">Report a bug</a>
-        <a href="license.html" data-en="License" data-id="Lisensi">License</a>
-        <a href="privacy.html" data-en="Privacy" data-id="Privasi">Privacy</a>
-        <a href="terms.html" data-en="Terms of use" data-id="Ketentuan penggunaan">Terms of use</a>
+        <a href="about.html" data-en="About" data-id="Tentang" data-jp="このアプリについて">About</a>
+        <a href="https://github.com/jesdonut/lifeOS2.0/issues" target="_blank" data-en="Report a bug" data-id="Laporkan bug" data-jp="バグを報告">Report a bug</a>
+        <a href="license.html" data-en="License" data-id="Lisensi" data-jp="ライセンス">License</a>
+        <a href="privacy.html" data-en="Privacy" data-id="Privasi" data-jp="プライバシー">Privacy</a>
+        <a href="terms.html" data-en="Terms of use" data-id="Ketentuan penggunaan" data-jp="利用規約">Terms of use</a>
       </div>
     </div>
 
   </div>
 
   <div class="footer-bottom">
-    <span data-en="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank' style='color:var(--text-3)'&gt;@jesdonut&lt;/a&gt;. Free for personal use, not for commercial use." data-id="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank' style='color:var(--text-3)'&gt;@jesdonut&lt;/a&gt;. Gratis untuk penggunaan pribadi, tidak untuk komersial.">© 2026 <a href="https://github.com/jesdonut" target="_blank" style="color:var(--text-3)">@jesdonut</a>. Free for personal use, not for commercial use.</span>
-    <span data-en="Built with vanilla JS. No tracking. No cookies. &lt;a href='privacy.html' style='color:var(--text-3)'&gt;Privacy policy&lt;/a&gt;" data-id="Dibangun dengan vanilla JS. Tanpa pelacakan. Tanpa cookies. &lt;a href='privacy.html' style='color:var(--text-3)'&gt;Kebijakan privasi&lt;/a&gt;">Built with vanilla JS. No tracking. No cookies. <a href="privacy.html" style="color:var(--text-3)">Privacy policy</a></span>
+    <span data-en="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank' style='color:var(--text-3)'&gt;@jesdonut&lt;/a&gt;. Free for personal use, not for commercial use." data-id="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank' style='color:var(--text-3)'&gt;@jesdonut&lt;/a&gt;. Gratis untuk penggunaan pribadi, tidak untuk komersial." data-jp="© 2026 &lt;a href='https://github.com/jesdonut' target='_blank' style='color:var(--text-3)'&gt;@jesdonut&lt;/a&gt;。個人利用は無料、商業利用は禁止。">© 2026 <a href="https://github.com/jesdonut" target="_blank" style="color:var(--text-3)">@jesdonut</a>. Free for personal use, not for commercial use.</span>
+    <span data-en="Built with vanilla JS. No tracking. No cookies. &lt;a href='privacy.html' style='color:var(--text-3)'&gt;Privacy policy&lt;/a&gt;" data-id="Dibangun dengan vanilla JS. Tanpa pelacakan. Tanpa cookies. &lt;a href='privacy.html' style='color:var(--text-3)'&gt;Kebijakan privasi&lt;/a&gt;" data-jp="バニラJSで構築。トラッキングなし。Cookieなし。&lt;a href='privacy.html' style='color:var(--text-3)'&gt;プライバシーポリシー&lt;/a&gt;">Built with vanilla JS. No tracking. No cookies. <a href="privacy.html" style="color:var(--text-3)">Privacy policy</a></span>
   </div>
 </footer>
 
@@ -273,6 +268,21 @@
     }
   } catch {}
 
+  // Builds May 2026 mini calendar HTML (starts Friday, period days 6-9)
+  function mkPeriodCal() {
+    let h = '<div class="pmc-hdr">May 2026</div><div class="pmc-grid">';
+    for (let i = 0; i < 4; i++) h += '<div class="pmc-cell"></div>';          // empty Mon–Thu
+    for (let i = 0; i < 5; i++) h += '<div class="pmc-cell dim"></div>';      // days 1–5
+    h += '<div class="pmc-cell period ph" style="animation-delay:500ms"></div>';  // day 6
+    h += '<div class="pmc-cell period ph" style="animation-delay:700ms"></div>';  // day 7
+    h += '<div class="pmc-cell period pm" style="animation-delay:900ms"></div>';  // day 8
+    h += '<div class="pmc-cell period pl" style="animation-delay:1100ms"></div>'; // day 9
+    for (let i = 0; i < 7; i++) h += '<div class="pmc-cell dim"></div>';      // days 10–16
+    h += '<div class="pmc-cell today"></div>';                                 // day 17
+    for (let i = 0; i < 14; i++) h += '<div class="pmc-cell dim"></div>';     // days 18–31
+    return h + '</div>';
+  }
+
   // ── Preview scenes ────────────────────────────────────────────
   const SCENES = [
     {
@@ -289,24 +299,14 @@
     {
       tab: 1,
       cards: [
-        { label:'Next period', value:'Jun 14', color:'var(--flow-light)', sub:'arrives day 28–36',
-          inner:`<div class="preview-period-row">
-            <div class="period-dot" style="background:var(--flow-heavy)"></div>
-            <div class="period-dot" style="background:var(--flow-medium)"></div>
-            <div class="period-dot" style="background:var(--flow-light)"></div>
-            <div class="period-dot" style="background:var(--flow-light)"></div>
-            <div class="period-dot" style="background:var(--surface-3)"></div>
-            <div class="period-dot" style="background:var(--surface-3)"></div>
-            <div class="period-dot" style="background:color-mix(in srgb,var(--predicted) 40%,transparent)"></div>
-            <div class="period-dot" style="background:color-mix(in srgb,var(--predicted) 40%,transparent)"></div>
+        { label:'Period log', valueHtml: mkPeriodCal(), inner:'' },
+        { label:'Day log', value:'May 8', color:'var(--flow-medium)', sub:'medium flow',
+          inner:`<div class="pfl">
+            <div class="pfl-dot pfl-light"></div>
+            <div class="pfl-dot pfl-medium"></div>
+            <div class="pfl-dot pfl-heavy"></div>
           </div>` },
-        { label:'Avg cycle', value:'32 days', color:null, sub:'last 6 cycles',
-          inner:`<div class="preview-bar-chart">
-            <div class="bar" style="height:60%"></div><div class="bar" style="height:80%"></div>
-            <div class="bar" style="height:55%"></div><div class="bar" style="height:75%"></div>
-            <div class="bar" style="height:70%"></div><div class="bar hi" style="height:65%"></div>
-          </div>` },
-        { label:'Last period', value:'May 6', color:null, sub:'4 days · medium flow', inner:'' }
+        { label:'Next period', value:'Jun 14', color:'var(--flow-light)', sub:'arrives day 28–36', inner:'' }
       ]
     },
     {
@@ -329,14 +329,9 @@
     {
       tab: 3,
       cards: [
-        { label:'Total balance', value:'¥ 1.24M', color:null, sub:'across 3 accounts', inner:'' },
-        { label:'FX gain', value:'+¥ 8,400', color:'var(--green)', sub:'JPY / IDR lot',
-          inner:`<div class="preview-bar-chart">
-            <div class="bar" style="height:35%"></div><div class="bar" style="height:50%"></div>
-            <div class="bar" style="height:45%"></div><div class="bar" style="height:65%"></div>
-            <div class="bar hi" style="height:90%"></div><div class="bar hi" style="height:75%"></div>
-          </div>` },
-        { label:'Savings deposit', value:'Rp 2.1M', color:null, sub:'IDR account · this month', inner:'' }
+        { label:'Quick note', valueHtml:`<div class="preview-note-lines"><span id="preview-typing"></span><span class="typing-cursor"></span></div>`, inner:'' },
+        { label:'Pinned', value:'Tokyo trip', color:null, sub:'5 items · last edited today', inner:'' },
+        { label:'Parked', value:'2 events', color:null, sub:'waiting to schedule', inner:'' }
       ]
     }
   ];
@@ -345,27 +340,56 @@
   const previewTabs = document.querySelectorAll('.preview-tab');
   const previewCards = previewBody.querySelectorAll('.preview-card');
   let sceneIdx = 0;
+  let typingTimer = null;
 
   function goToScene(idx) {
+    if (typingTimer) { clearTimeout(typingTimer); typingTimer = null; }
     previewBody.style.opacity = '0';
     setTimeout(() => {
       const s = SCENES[idx];
       previewTabs.forEach((t, i) => t.classList.toggle('active', i === s.tab));
       previewCards.forEach((card, i) => {
         const c = s.cards[i];
-        card.innerHTML = `<div class="preview-card-label">${c.label}</div>
-          <div class="preview-card-value"${c.color ? ` style="color:${c.color}"` : ''}>${c.value}</div>
-          <div class="preview-card-sub">${c.sub}</div>${c.inner}`;
+        if (c.valueHtml) {
+          card.innerHTML = `<div class="preview-card-label">${c.label}</div>${c.valueHtml}${c.inner}`;
+        } else {
+          card.innerHTML = `<div class="preview-card-label">${c.label}</div>
+            <div class="preview-card-value"${c.color ? ` style="color:${c.color}"` : ''}>${c.value}</div>
+            <div class="preview-card-sub">${c.sub}</div>${c.inner}`;
+        }
       });
       previewBody.style.opacity = '1';
+      if (s.tab === 3) startTyping();
     }, 350);
   }
 
-  // Auto-cycle scenes every 3 seconds
+  function startTyping() {
+    const el = document.getElementById('preview-typing');
+    if (!el) return;
+    const lines = ['call dentist friday', 'check NISA target', 'transfer IDR before—'];
+    let line = 0, char = 0;
+    function tick() {
+      const el = document.getElementById('preview-typing');
+      if (!el) return;
+      const current = lines[line];
+      if (char < current.length) {
+        el.textContent += current[char];
+        char++;
+        typingTimer = setTimeout(tick, 60 + Math.random() * 50);
+      } else if (line < lines.length - 1) {
+        el.textContent += '\n';
+        line++; char = 0;
+        typingTimer = setTimeout(tick, 300);
+      }
+    }
+    typingTimer = setTimeout(tick, 500);
+  }
+
+  // Auto-cycle scenes every 4 seconds (Notes gets extra time for typing)
   setInterval(() => {
     sceneIdx = (sceneIdx + 1) % SCENES.length;
     goToScene(sceneIdx);
-  }, 3000);
+  }, 4000);
 
   // ── Feature card float ────────────────────────────────────────
   document.querySelectorAll('.feature-card').forEach(card => {
