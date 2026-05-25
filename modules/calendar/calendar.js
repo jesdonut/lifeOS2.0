@@ -260,6 +260,13 @@ function initSortable(scroll) {
         if (evt.from === evt.to) return;
         setTimeout(() => moveEvent(evt.item.dataset.id, evt.to.dataset.date), 0);
       },
+      onAdd(evt) {
+        if (evt.item.dataset.fromParking !== 'true') return;
+        const id   = evt.item.dataset.id;
+        const date = evt.to.dataset.date;
+        evt.item.remove();
+        setTimeout(() => moveEvent(id, date), 0);
+      },
     });
   });
   scroll.querySelectorAll('.cal-spend-list').forEach(list => {

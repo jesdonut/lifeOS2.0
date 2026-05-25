@@ -70,6 +70,37 @@ const SYM_LABEL = {
   cramps:'Cramps', headache:'Headache', back_pain:'Back pain', tender_breasts:'Tender breasts',
 };
 
+const PHASE_DATA = {
+  menstrual: {
+    label: 'Menstrual',
+    color: 'var(--flow-medium)',
+    desc: 'Estrogen and progesterone are at their lowest. Your uterine lining is shedding.',
+    signals: ['Cramps', 'Fatigue', 'Lower back pain', 'Mood dips', 'Reduced energy'],
+    fertility: 'Not fertile', fertilityColor: 'var(--text-3)',
+  },
+  follicular: {
+    label: 'Follicular',
+    color: 'var(--green)',
+    desc: 'Estrogen is rising as your body matures a follicle and rebuilds the uterine lining. Energy tends to improve through this phase.',
+    signals: ['Increasing energy', 'Better mood', 'Clearer skin', 'Higher motivation'],
+    fertility: 'Low fertility', fertilityColor: 'var(--text-3)',
+  },
+  ovulatory: {
+    label: 'Ovulatory',
+    color: 'var(--purple)',
+    desc: 'Estrogen peaks and LH surges. An egg is released or about to be. This is your most fertile window.',
+    signals: ['Peak energy', 'High confidence', 'Clear stretchy discharge', 'Higher libido'],
+    fertility: 'High fertility', fertilityColor: 'var(--purple)',
+  },
+  luteal: {
+    label: 'Luteal',
+    color: 'var(--amber)',
+    desc: 'Progesterone rises to support potential implantation, then drops if no pregnancy occurs.',
+    signals: ['Bloating', 'Tender breasts', 'Mood shifts', 'Cravings', 'Fatigue'],
+    fertility: 'Not fertile', fertilityColor: 'var(--text-3)',
+  },
+};
+
 // ── Module state ───────────────────────────────────────────────────
 let _container   = null;
 let _data        = null;
@@ -183,24 +214,29 @@ function _buildTop() {
 
 // ── Overview ───────────────────────────────────────────────────────
 function _buildOverview(el) {
-  const hl = document.createElement('div');
-  hl.className = 'pr-headline';
-  const { main, italic } = _headlineText();
-  const h1 = document.createElement('h1');
-  h1.className = 'pr-h1';
-  const s = document.createElement('span'); s.textContent = main; h1.appendChild(s);
-  if (italic) { const em = document.createElement('em'); em.className = 'pr-em'; em.textContent = italic; h1.appendChild(em); }
-  const sub = document.createElement('p'); sub.className = 'pr-hl-sub'; sub.textContent = _headlineSub();
-  const textGroup = document.createElement('div'); textGroup.className = 'pr-hl-text';
-  textGroup.append(h1, sub);
-  const pills = document.createElement('div'); pills.className = 'pr-status-pills';
-  _statusPills().forEach(({ color, text }) => {
-    const pill = document.createElement('div'); pill.className = 'pr-status-pill';
-    pill.innerHTML = `<span class="pr-status-dot" style="background:${color}"></span><span>${text}</span>`;
-    pills.appendChild(pill);
-  });
-  hl.append(textGroup, pills);
-  el.appendChild(hl);
+  const phasePanel = _buildPhasePanel();
+  if (phasePanel) {
+    el.appendChild(phasePanel);
+  } else {
+    const hl = document.createElement('div');
+    hl.className = 'pr-headline';
+    const { main, italic } = _headlineText();
+    const h1 = document.createElement('h1');
+    h1.className = 'pr-h1';
+    const s = document.createElement('span'); s.textContent = main; h1.appendChild(s);
+    if (italic) { const em = document.createElement('em'); em.className = 'pr-em'; em.textContent = italic; h1.appendChild(em); }
+    const sub = document.createElement('p'); sub.className = 'pr-hl-sub'; sub.textContent = _headlineSub();
+    const textGroup = document.createElement('div'); textGroup.className = 'pr-hl-text';
+    textGroup.append(h1, sub);
+    const pills = document.createElement('div'); pills.className = 'pr-status-pills';
+    _statusPills().forEach(({ color, text }) => {
+      const pill = document.createElement('div'); pill.className = 'pr-status-pill';
+      pill.innerHTML = `<span class="pr-status-dot" style="background:${color}"></span><span>${text}</span>`;
+      pills.appendChild(pill);
+    });
+    hl.append(textGroup, pills);
+    el.appendChild(hl);
+  }
 
   const ys = document.createElement('div'); ys.className = 'pr-year-section';
 
@@ -738,6 +774,124 @@ function _statusPills() {
   }
   if (_stats && !_stats.notEnoughData) pills.push({ color: _stats.irregular ? 'var(--amber)' : 'var(--green)', text: `Cycle is <strong>${_stats.irregular ? 'variable' : 'on track'}</strong>` });
   return pills;
+}
+
+function _buildPhasePanel() {
+  const today = _todayStr();
+  const phase = getPhase(_entries, _stats, today);
+  if (!phase || !_stats) return null;
+  const info = PHASE_DATA[phase];
+  if (!info) return null;
+
+  const panel = document.createElement('div'); panel.className = 'pr-phase-panel';
+
+  // Left: badge, description, signals, disclaimer
+  const left = document.createElement('div'); left.className = 'pr-phase-left';
+
+  const nameRow = document.createElement('div'); nameRow.className = 'pr-phase-name-row';
+  const badge = document.createElement('span'); badge.className = 'pr-phase-badge';
+  badge.textContent = info.label;
+  badge.style.color       = info.color;
+  badge.style.background  = `color-mix(in srgb, ${info.color} 12%, transparent)`;
+  badge.style.borderColor = `color-mix(in srgb, ${info.color} 25%, transparent)`;
+  const phaseDay = _phaseDay(phase, today);
+  const cycDay   = _cycleDay(today);
+  const dayParts = [];
+  if (phaseDay) dayParts.push(`Day ${phaseDay} of phase`);
+  if (cycDay)   dayParts.push(`Cycle day ${cycDay}`);
+  const dayLbl = document.createElement('span'); dayLbl.className = 'pr-phase-cycle-day';
+  dayLbl.textContent = dayParts.join(' · ');
+  nameRow.append(badge, dayLbl);
+
+  const desc = document.createElement('p'); desc.className = 'pr-phase-desc';
+  desc.textContent = info.desc;
+
+  const sigWrap = document.createElement('div'); sigWrap.className = 'pr-phase-signals';
+  info.signals.forEach(s => {
+    const chip = document.createElement('span'); chip.className = 'pr-phase-signal';
+    chip.textContent = s; sigWrap.appendChild(chip);
+  });
+
+  const note = document.createElement('p'); note.className = 'pr-phase-note';
+  note.textContent = 'Estimated from your cycle history. Not medical advice.';
+
+  const { main, italic } = _headlineText();
+  const h1 = document.createElement('h1'); h1.className = 'pr-h1';
+  const mainSpan = document.createElement('span'); mainSpan.textContent = main; h1.appendChild(mainSpan);
+  if (italic) { const em = document.createElement('em'); em.className = 'pr-em'; em.textContent = italic; h1.appendChild(em); }
+  const sub = document.createElement('p'); sub.className = 'pr-hl-sub'; sub.textContent = _headlineSub();
+
+  left.append(nameRow, h1, sub, desc, sigWrap, note);
+
+  // Right: fertility + 2 contextual stats
+  const right = document.createElement('div'); right.className = 'pr-phase-right';
+  right.appendChild(_phaseStat(info.fertility, 'Fertility', info.fertilityColor));
+
+  const win = currentWindow(_entries, _stats);
+  if (win) {
+    const todayD = D(today);
+    const ovD    = D(fd(ovulationDay(win)));
+    const perD   = D(fd(win.center));
+
+    if (phase === 'menstrual') {
+      const avgDur = avgPeriodDuration(_entries);
+      if (avgDur) right.appendChild(_phaseStat(`~${avgDur}d`, 'Avg period length', 'var(--text-2)'));
+      const dToOv = diffD(todayD, ovD);
+      if (dToOv > 0) right.appendChild(_phaseStat(`~${dToOv}d`, 'Until ovulation', 'var(--purple)'));
+    } else if (phase === 'follicular') {
+      const dToOv = diffD(todayD, ovD);
+      if (dToOv > 0) right.appendChild(_phaseStat(`~${dToOv}d`, 'Until ovulation', 'var(--purple)'));
+      right.appendChild(_phaseStat(`${_stats.med}d`, 'Typical cycle', 'var(--text-2)'));
+    } else if (phase === 'ovulatory') {
+      const ovFmt = new Date(fd(ovD) + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      right.appendChild(_phaseStat(ovFmt, 'Est. ovulation', 'var(--purple)'));
+      const dToPer = diffD(todayD, perD);
+      if (dToPer >= 0) right.appendChild(_phaseStat(`~${dToPer}d`, 'Until next period', 'var(--flow-medium)'));
+    } else if (phase === 'luteal') {
+      const dToPer = diffD(todayD, perD);
+      if (dToPer >= 0) right.appendChild(_phaseStat(`~${dToPer}d`, 'Until next period', 'var(--flow-medium)'));
+      right.appendChild(_phaseStat(`${_stats.med}d`, 'Typical cycle', 'var(--text-2)'));
+    }
+  }
+
+  panel.append(left, right);
+  return panel;
+}
+
+function _phaseStat(value, label, color) {
+  const stat = document.createElement('div'); stat.className = 'pr-phase-stat';
+  const val  = document.createElement('div'); val.className  = 'pr-phase-stat-val';
+  val.textContent = value;
+  if (color) val.style.color = color;
+  const lbl  = document.createElement('div'); lbl.className  = 'pr-phase-stat-lbl';
+  lbl.textContent = label;
+  stat.append(val, lbl);
+  return stat;
+}
+
+function _phaseDay(phase, todayStr) {
+  const today = D(todayStr);
+  if (phase === 'menstrual') {
+    const entry = _entries.find(e => today >= D(e.start) && today <= D(e.end));
+    return entry ? diffD(D(entry.start), today) + 1 : null;
+  }
+  if (phase === 'follicular' && _entries.length) {
+    const days = diffD(D(_entries[_entries.length - 1].end), today);
+    return days > 0 ? days : null;
+  }
+  if (!_stats) return null;
+  const win = currentWindow(_entries, _stats);
+  if (!win) return null;
+  const ov = D(fd(ovulationDay(win)));
+  if (phase === 'ovulatory') {
+    const days = diffD(addD(ov, -4), today) + 1;
+    return days > 0 ? days : null;
+  }
+  if (phase === 'luteal') {
+    const days = diffD(addD(ov, 2), today) + 1;
+    return days > 0 ? days : null;
+  }
+  return null;
 }
 
 function _countSymptoms() {

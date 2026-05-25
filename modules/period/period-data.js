@@ -19,6 +19,28 @@ function daysBetween(a, b) {
   return Math.round((b - a) / 86400000);
 }
 
+function mean(arr) {
+  return arr.reduce((s, v) => s + v, 0) / arr.length;
+}
+
+function stdev(arr) {
+  const m = mean(arr);
+  return Math.sqrt(arr.reduce((s, v) => s + (v - m) ** 2, 0) / arr.length);
+}
+
+function median(arr) {
+  const s = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+function percentile(arr, p) {
+  const s = [...arr].sort((a, b) => a - b);
+  const i = p * (s.length - 1);
+  const lo = Math.floor(i), hi = Math.ceil(i);
+  return lo === hi ? s[lo] : s[lo] + (i - lo) * (s[hi] - s[lo]);
+}
+
 export function getPeriodEntries(data) {
   return [...(data.period?.entries ?? [])].sort((a, b) => a.start.localeCompare(b.start));
 }
@@ -31,21 +53,33 @@ export function periodStats(entries) {
     allCycles.push(daysBetween(parseDate(entries[i - 1].start), parseDate(entries[i].start)));
   }
 
-  // Exclude obvious artifacts (< 21 days). Long cycles are real — keep them.
+  // Exclude obvious artifacts (< 21 days). Long cycles are valid data, keep them.
   const validCycles = allCycles.filter(l => l >= 21);
   if (!validCycles.length) return null;
 
   // Use most recent 12 valid completed cycles for all calculations.
   const recent = validCycles.slice(-12);
 
-  const avg   = Math.round(recent.reduce((s, v) => s + v, 0) / recent.length);
-  const mean  = recent.reduce((s, v) => s + v, 0) / recent.length;
-  const stdev = Math.round(Math.sqrt(recent.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / recent.length) * 10) / 10;
+  const avg  = Math.round(mean(recent));
+  const med  = Math.round(median(recent));
+  const sd   = Math.round(stdev(recent) * 10) / 10;
   const sorted = [...recent].sort((a, b) => a - b);
 
   const shortestCycle = sorted[0];
   const longestCycle  = sorted[sorted.length - 1];
   const variationDays = longestCycle - shortestCycle;
+
+  // Prediction window: p20/p80 bounds, widened by at least 1 stdev on each side.
+  // Guarantees at least a 4-day spread so the window is never misleadingly narrow.
+  const p20 = percentile(recent, 0.20);
+  const p80 = percentile(recent, 0.80);
+  let windowMin = Math.floor(Math.min(p20, med - Math.max(2, sd)));
+  let windowMax = Math.ceil(Math.max(p80,  med + Math.max(2, sd)));
+  if (windowMax - windowMin < 4) {
+    const c = Math.round((windowMin + windowMax) / 2);
+    windowMin = c - 2;
+    windowMax = c + 2;
+  }
 
   // Length pattern: classify based on where most cycles fall.
   const shortCount   = recent.filter(d => d >= 21 && d <= 23).length;
@@ -58,17 +92,18 @@ export function periodStats(entries) {
 
   return {
     avg,
-    med:           sorted[Math.floor(sorted.length / 2)],
+    med,
     min:           shortestCycle,
     max:           longestCycle,
-    stdev,
+    stdev:         sd,
     count:         recent.length,
-    windowMin:     Math.round(avg - stdev),
-    windowMax:     Math.round(avg + stdev),
+    windowMin,
+    windowMax,
     shortestCycle,
     longestCycle,
     variationDays,
-    irregular:     recent.length >= 3 && variationDays > 9,
+    // Requires both spread > 9 days AND stdev > 4 to avoid flagging one outlier as irregular.
+    irregular:     recent.length >= 3 && variationDays > 9 && sd > 4,
     notEnoughData: recent.length < 3,
     lengthPattern,
   };
@@ -77,9 +112,10 @@ export function periodStats(entries) {
 export function currentWindow(entries, stats) {
   if (!entries.length || !stats) return null;
   const last = parseDate(entries[entries.length - 1].start);
+  const predictionCenter = stats.med ?? stats.avg;
   return {
     earliest: addDays(last, stats.windowMin),
-    center:   addDays(last, stats.avg),
+    center:   addDays(last, predictionCenter),
     latest:   addDays(last, stats.windowMax),
   };
 }
@@ -87,22 +123,29 @@ export function currentWindow(entries, stats) {
 export function futurePredictions(entries, stats, n = 5) {
   if (!entries.length || !stats) return [];
   const last = parseDate(entries[entries.length - 1].start);
-  // Uncertainty compounds: window widens honestly for further predictions
+  const predictionCenter = stats.med ?? stats.avg;
+  const baseSpread = Math.max(2, stats.stdev);
+  // Uncertainty compounds: window widens honestly for further predictions.
   return Array.from({ length: n }, (_, i) => {
     const k = i + 1;
-    const spread = Math.round(Math.sqrt(k) * stats.stdev);
+    const spread = Math.round(Math.sqrt(k) * baseSpread);
     return {
-      earliest: addDays(last, stats.avg * k - spread),
-      center:   addDays(last, stats.avg * k),
-      latest:   addDays(last, stats.avg * k + spread),
+      earliest: addDays(last, predictionCenter * k - spread),
+      center:   addDays(last, predictionCenter * k),
+      latest:   addDays(last, predictionCenter * k + spread),
     };
   });
 }
 
+// Approximate: ovulation is estimated as ~14 days before the next period.
+// Actual timing varies by person and cycle. Not medical advice.
 export function ovulationDay(window) {
   return addDays(window.center, -14);
 }
 
+// Approximate fertile window around estimated ovulation.
+// Sperm can survive ~5 days; egg viable ~1 day post-ovulation.
+// Actual fertile days vary. Not medical advice.
 export function fertileWindow(window) {
   const ov = ovulationDay(window);
   return { start: addDays(ov, -5), end: addDays(ov, 5) };
