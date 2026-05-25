@@ -47,6 +47,11 @@
   flex: 1;
   overflow: hidden;
   position: relative;
+  transition: padding-right var(--dur-base) var(--ease-out);
+}
+
+#body-row:has(#sidebar:not(.collapsed)) #viewport {
+  padding-right: var(--sidebar-w);
 }
 
 /* ── Stage — holds all module panels side by side ── */
@@ -94,27 +99,51 @@
 
 /* ── Notes sidebar ── */
 #sidebar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
   width: var(--sidebar-w);
   border-left: 1px solid var(--border-dim);
   background: var(--surface);
-  flex-shrink: 0;
   overflow: hidden;
-  transition: width var(--dur-base) var(--ease-out),
-              border-color var(--dur-base) var(--ease-out);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--dur-base) var(--ease-out);
 }
 
 #sidebar.collapsed {
-  width: 0;
-  border-left-color: transparent;
+  transform: translateX(100%);
 }
+#sidebar.collapsed #sidebar-header,
 #sidebar.collapsed #sidebar-body {
   opacity: 0;
   pointer-events: none;
 }
 
+#sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--s3) 0 var(--s4);
+  height: 44px;
+  border-bottom: 1px solid var(--border-dim);
+  flex-shrink: 0;
+}
+
+#sidebar-title {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+
 #sidebar-body {
   width: var(--sidebar-w);
-  height: 100%;
+  flex: 1;
   overflow-y: auto;
   transition: opacity var(--dur-base) var(--ease);
 }

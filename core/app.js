@@ -114,12 +114,15 @@ function initSidebar() {
   sidebarBtn.addEventListener('click', () =>
     setSidebar(!sidebar.classList.contains('collapsed'), true)
   );
+
+  const sidebarClose = document.getElementById('sidebar-close');
+  if (sidebarClose) sidebarClose.addEventListener('click', () => setSidebar(true, true));
 }
 
 function setSidebar(collapsed, persist) {
   sidebar.classList.toggle('collapsed', collapsed);
   sidebarBtn.textContent = collapsed ? '›' : '‹';
-  if (persist) localStorage.setItem(SIDEBAR_KEY, collapsed ? '0' : '1');
+if (persist) localStorage.setItem(SIDEBAR_KEY, collapsed ? '0' : '1');
 }
 
 // ── Theme ──────────────────────────────────────────────────────────

@@ -9,11 +9,17 @@ const SWITCH_THRESHOLD = 60; // px of committed horizontal drag to trigger switc
 const IDLE_MS = 120;         // ms of silence = gesture ended
 
 export function initGestures({ stage, getIndex, getCount, onSwitch }) {
-  let axis   = null;   // 'x' | 'y' | null
-  let accX   = 0;      // accumulated |deltaX| before lock
-  let accY   = 0;      // accumulated |deltaY| before lock
-  let dragX  = 0;      // live horizontal offset during gesture
-  let timer  = null;
+  let axis       = null;   // 'x' | 'y' | null
+  let accX       = 0;      // accumulated |deltaX| before lock
+  let accY       = 0;      // accumulated |deltaY| before lock
+  let dragX      = 0;      // live horizontal offset during gesture
+  let timer      = null;
+  let isJumping  = false;  // true while jumpTo transition plays
+
+  function panelWidth() {
+    // Use the panel's own offsetWidth — correct even when viewport has padding
+    return stage.firstElementChild?.offsetWidth ?? stage.parentElement.clientWidth;
+  }
 
   function reset() {
     axis = null;
@@ -44,9 +50,15 @@ export function initGestures({ stage, getIndex, getCount, onSwitch }) {
 
   function applyOffset(extra) {
     const i = getIndex();
-    const w = stage.parentElement.clientWidth;
+    const w = panelWidth();
     stage.style.transform = `translateX(${-i * w + extra}px)`;
   }
+
+  // Reposition automatically when viewport width changes (sidebar open/close, window resize)
+  const ro = new ResizeObserver(() => {
+    if (!axis && !isJumping) applyOffset(0);
+  });
+  ro.observe(stage.parentElement);
 
   stage.parentElement.addEventListener('wheel', (e) => {
     clearTimeout(timer);
@@ -86,10 +98,11 @@ export function initGestures({ stage, getIndex, getCount, onSwitch }) {
     jumpTo(index) {
       reset();
       clearTimeout(timer);
-      const w = stage.parentElement.clientWidth;
+      isJumping = true;
+      const w = panelWidth();
       stage.style.transition = `transform ${220}ms cubic-bezier(0,0,0.2,1)`;
       stage.style.transform  = `translateX(${-index * w}px)`;
-      setTimeout(() => { stage.style.transition = ''; }, 240);
+      setTimeout(() => { stage.style.transition = ''; isJumping = false; }, 240);
     },
   };
 }
