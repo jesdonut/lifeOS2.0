@@ -1,7 +1,6 @@
 // modules/finance/finance.js
 import * as CurrencyView    from './currency-view.js';
 import * as InvestmentView  from './investment-view.js';
-import * as NisaView        from './nisa-view.js';
 
 const MONTHS_S = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const MONTHS_L = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -28,7 +27,6 @@ let _subView = 'finance';
 const SUB_VIEWS = [
   { key: 'finance',    label: 'Finance'    },
   { key: 'currency',   label: 'Currency'   },
-  { key: 'nisa',       label: '新NISA'     },
   { key: 'investment', label: 'Investment' },
 ];
 
@@ -47,7 +45,6 @@ export function init(container, data, onSave) {
 export function destroy() {
   CurrencyView.unmount();
   InvestmentView.unmount();
-  NisaView.unmount();
   _container = _data = _onSave = null;
   _subView = 'finance';
 }
@@ -56,7 +53,6 @@ export function onDataChange(newData) {
   _data = newData;
   CurrencyView.update(newData);
   InvestmentView.update(newData);
-  NisaView.update(newData);
 }
 
 // ── Data helpers ───────────────────────────────────────────────────
@@ -116,14 +112,11 @@ function _render() {
   const body = document.createElement('div'); body.className = 'fin-body';
   CurrencyView.unmount();
   InvestmentView.unmount();
-  NisaView.unmount();
   if (_subView === 'finance') {
     body.appendChild(_buildHero());
     body.appendChild(_buildMain());
   } else if (_subView === 'currency') {
     CurrencyView.mount(body, _data, partial => _onSave(partial));
-  } else if (_subView === 'nisa') {
-    NisaView.mount(body, _data, partial => _onSave(partial));
   } else if (_subView === 'investment') {
     InvestmentView.mount(body, _data, partial => _onSave(partial));
   } else {
