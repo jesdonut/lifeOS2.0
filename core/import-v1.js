@@ -64,11 +64,24 @@ function _settings(v1) {
 
 // ── Calendar ───────────────────────────────────────────────────────
 
+const V1_COLOR_TO_CAT = {
+  '#8fafa2': 'education',
+  '#86afc5': 'family',
+  '#7c9ccb': 'friends',
+  '#c79a9a': 'health',
+  '#b7a6b5': 'partner',
+  '#d69aa5': 'personal',
+  '#c49a73': 'project',
+  '#d1b36a': 'travel',
+  '#b8c89a': 'work',
+};
+
 function _calendar(v1) {
   const events = [];
   for (const [date, evts] of Object.entries(v1.events ?? {})) {
     for (const e of evts) {
-      events.push({ id: e.id, title: e.text, color: e.color, date });
+      const category = V1_COLOR_TO_CAT[(e.color ?? '').toLowerCase()] ?? 'personal';
+      events.push({ id: e.id, title: e.text, color: e.color, category, date });
     }
   }
 
