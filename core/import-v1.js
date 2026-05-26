@@ -193,9 +193,9 @@ function _bonds(v1, today) {
     maturityDate:       b.maturityDate ?? null,
     interestRate:       0,
     contributionAmount: 0,
-    currentMarketValue: null,
+    currentMarketValue: b.matured ? (b.faceValue ?? 0) : null,
     taxTreatment:       'taxable',
-    notes:              '',
+    notes:              b.matured ? 'Matured' : '',
     lastUpdated:        today,
   }));
 }
