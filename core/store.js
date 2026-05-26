@@ -29,7 +29,7 @@ function defaultData() {
     currency: { holdings: [], reference: 'IDR', rates: null, ratesAt: null },
     nisa:     { contributions: [] },
     savings:  { accounts: [], bonds: [], deposits: [] },
-    notes:    { items: [] },
+    notes:    { items: [], countdowns: [] },
   };
 }
 

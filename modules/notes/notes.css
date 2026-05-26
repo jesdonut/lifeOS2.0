@@ -360,6 +360,156 @@
 }
 .note-modal-del:hover { color: var(--red); }
 
+/* ── Countdowns ── */
+.cd-empty {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding: var(--s2) var(--s4);
+}
+
+.cd-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s2) var(--s4);
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-fast);
+}
+.cd-item:hover { background: var(--surface-2); }
+
+.cd-count {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 44px;
+  text-align: right;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.cd-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cd-label {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cd-sub {
+  font-size: 10px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+.cd-actions {
+  display: flex;
+  gap: var(--s1);
+  opacity: 0;
+  transition: opacity var(--dur-fast);
+  flex-shrink: 0;
+}
+.cd-item:hover .cd-actions { opacity: 1; }
+
+.cd-action-btn {
+  font-size: 10px;
+  color: var(--text-3);
+  padding: 1px 4px;
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast);
+}
+.cd-action-btn:hover { color: var(--accent); }
+.cd-del-btn:hover { color: var(--red); }
+
+/* Countdown form */
+.cd-form {
+  padding: var(--s2) var(--s4) var(--s3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.cd-form-input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-sm);
+  padding: var(--s1) var(--s2);
+  font-size: var(--fs-xs);
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--dur-fast);
+}
+.cd-form-input:focus { border-color: var(--accent-2); }
+
+.cd-form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+}
+
+.cd-form-row-label {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+}
+
+.cd-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.cd-toggle-btn {
+  font-size: 10px;
+  padding: 2px var(--s2);
+  border-radius: 4px;
+  color: var(--text-3);
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.cd-toggle-btn.active { background: var(--surface-3); color: var(--text); }
+
+.cd-form-check {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.cd-form-btns {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s2);
+  margin-top: var(--s1);
+}
+
+.cd-form-cancel {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding: var(--s1) var(--s2);
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast);
+}
+.cd-form-cancel:hover { color: var(--text); }
+
+.cd-form-save {
+  font-size: var(--fs-xs);
+  padding: var(--s1) var(--s3);
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 600;
+  border-radius: 100px;
+  transition: background var(--dur-fast);
+}
+.cd-form-save:hover { background: var(--accent-2); }
+
 /* ── Compose area ── */
 .notes-compose {
   padding: var(--s2) var(--s3) var(--s3);

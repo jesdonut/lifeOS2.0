@@ -1,5 +1,7 @@
 // notes.js — sidebar notes + unscheduled events parking lot
 
+import * as CountdownView from './countdown-view.js';
+
 let _container, _data, _onSave;
 let _schedulingId = null; // id of parking lot item currently being scheduled
 
@@ -34,6 +36,7 @@ export function init(container, data, onSave) {
 }
 
 export function destroy() {
+  CountdownView.unmount();
   _container.innerHTML = '';
   _schedulingId = null;
 }
@@ -141,6 +144,12 @@ function render() {
   });
 
   wrap.appendChild(lot);
+  wrap.appendChild(makeDivider());
+
+  // ── Countdowns section ───────────────────────────────────────────
+  const cdSection = document.createElement('div');
+  wrap.appendChild(cdSection);
+  CountdownView.mount(cdSection, _data, _onSave);
   wrap.appendChild(makeDivider());
 
   // ── Notes section ────────────────────────────────────────────────
@@ -414,18 +423,18 @@ function toggleScheduler(item, id) {
 function addNote(text) {
   const now = new Date().toISOString();
   const items = [...notes(), { id: uid(), text, createdAt: now }];
-  _onSave({ notes: { items } });
+  _onSave({ notes: { ...(_data.notes ?? {}), items } });
 }
 
 function updateNote(id, text) {
   const items = notes().map(n =>
     n.id === id ? { ...n, text, updatedAt: new Date().toISOString() } : n
   );
-  _onSave({ notes: { items } });
+  _onSave({ notes: { ...(_data.notes ?? {}), items } });
 }
 
 function deleteNote(id) {
-  _onSave({ notes: { items: notes().filter(n => n.id !== id) } });
+  _onSave({ notes: { ...(_data.notes ?? {}), items: notes().filter(n => n.id !== id) } });
 }
 
 function scheduleFloating(id, date) {
