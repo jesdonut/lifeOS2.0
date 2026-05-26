@@ -183,10 +183,30 @@ function _bonds(v1, today) {
 
 // ── Notes ──────────────────────────────────────────────────────────
 
+function _htmlToPlain(html) {
+  if (!html) return '';
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<\/tr>/gi, '\n')
+    .replace(/<\/th>/gi, '  ')
+    .replace(/<\/td>/gi, '  ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 function _notes(v1) {
   const items = (v1.notes ?? []).map(n => ({
     id:        n.id,
-    text:      n.text ?? '',
+    text:      _htmlToPlain(n.text ?? ''),
     createdAt: n.date ?? new Date().toISOString(),
   }));
 
