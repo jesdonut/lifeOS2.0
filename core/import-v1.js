@@ -86,6 +86,25 @@ function _calendar(v1) {
   }
 
   const spendEntries = {};
+
+  // v1.spend: aggregated totals per category per day — goes back to 2021
+  for (const [date, cats] of Object.entries(v1.spend ?? {})) {
+    const day = [];
+    for (const [categoryId, amount] of Object.entries(cats)) {
+      if (amount > 0) {
+        day.push({
+          id:          'imp_' + date + '_' + categoryId,
+          categoryId,
+          subcategory: null,
+          amount,
+          currency:    'JPY',
+        });
+      }
+    }
+    if (day.length) spendEntries[date] = day;
+  }
+
+  // v1.spendLog: per-item detail — overrides spend for those dates
   for (const [date, cats] of Object.entries(v1.spendLog ?? {})) {
     const day = [];
     for (const [categoryId, items] of Object.entries(cats)) {
@@ -110,7 +129,7 @@ function _calendar(v1) {
 function _period(v1) {
   const p = v1.period ?? {};
 
-  const entries  = (p.entries ?? []).map(e => ({ id: e.id, start: e.start, length: e.length ?? 1 }));
+  const entries  = (p.entries ?? []).filter(e => e.start).map(e => ({ id: e.id, start: e.start, length: e.length ?? 1 }));
   const spotting = [];
   const symptoms = {};
 
