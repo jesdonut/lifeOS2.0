@@ -1,6 +1,7 @@
 // core/settings.js — full settings modal
 
 import { exportBackup, importBackup } from './store.js';
+import { doImportV1 } from './import-v1.js';
 
 // ── Constants ──────────────────────────────────────────────────────
 
@@ -789,6 +790,26 @@ function renderData(el) {
           location.reload();
         } catch {
           alert('Could not read that file. Make sure it is a valid LifeOS backup.');
+        }
+      });
+      fi.click();
+    }
+  ));
+
+  el.appendChild(dataRow('Import from v1', 'Convert a v1 LifeOS save file. Replaces all current data.', 'Import v1', false,
+    () => {
+      const fi = document.createElement('input');
+      fi.type   = 'file';
+      fi.accept = '.json';
+      fi.addEventListener('change', async e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          await doImportV1(file);
+          closeSettings();
+          location.reload();
+        } catch (err) {
+          alert('Import failed: ' + err.message);
         }
       });
       fi.click();
