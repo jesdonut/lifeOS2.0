@@ -29,6 +29,7 @@ function defaultData() {
     nisa:     { contributions: [] },
     savings:  { accounts: [], bonds: [], deposits: [] },
     notes:    { items: [], countdowns: [] },
+    tasks:    {},
   };
 }
 

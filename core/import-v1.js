@@ -34,7 +34,7 @@ function _convert(v1) {
     finance:  _finance(v1, today),
     notes:    _notes(v1),
     currency: _currency(v1),
-    bank:     { accounts: [] },
+    tasks:    _tasks(v1),
     nisa:     { contributions: [] },
     savings:  { accounts: [], bonds: [], deposits: [] },
   };
@@ -64,6 +64,15 @@ function _settings(v1) {
 
 // ── Calendar ───────────────────────────────────────────────────────
 
+const V1_SPEND_MAP = {
+  transport: 'commute',
+  fun:       'entertainment',
+  clothes:   'entertainment',
+  project:   'entertainment',
+  insurance: null,
+  nhi:       null,
+};
+
 const V1_COLOR_TO_CAT = {
   '#8fafa2': 'education',
   '#86afc5': 'family',
@@ -90,15 +99,14 @@ function _calendar(v1) {
   // v1.spend: aggregated totals per category per day — goes back to 2021
   for (const [date, cats] of Object.entries(v1.spend ?? {})) {
     const day = [];
-    for (const [categoryId, amount] of Object.entries(cats)) {
-      if (amount > 0) {
-        day.push({
-          id:          'imp_' + date + '_' + categoryId,
-          categoryId,
-          subcategory: null,
-          amount,
-          currency:    'JPY',
-        });
+    for (const [v1CatId, amount] of Object.entries(cats)) {
+      if (amount <= 0) continue;
+      if (v1CatId in V1_SPEND_MAP) {
+        const mapped = V1_SPEND_MAP[v1CatId];
+        if (!mapped) continue;
+        day.push({ id: 'imp_' + date + '_' + v1CatId, categoryId: mapped, subcategory: null, amount, currency: 'JPY' });
+      } else {
+        day.push({ id: 'imp_' + date + '_' + v1CatId, categoryId: v1CatId, subcategory: null, amount, currency: 'JPY' });
       }
     }
     if (day.length) spendEntries[date] = day;
@@ -107,12 +115,15 @@ function _calendar(v1) {
   // v1.spendLog: per-item detail — overrides spend for those dates
   for (const [date, cats] of Object.entries(v1.spendLog ?? {})) {
     const day = [];
-    for (const [categoryId, items] of Object.entries(cats)) {
+    for (const [v1CatId, items] of Object.entries(cats)) {
+      if (v1CatId in V1_SPEND_MAP && !V1_SPEND_MAP[v1CatId]) continue;
+      const categoryId = V1_SPEND_MAP[v1CatId] ?? v1CatId;
       for (const item of items) {
         day.push({
           id:          item.id,
           categoryId,
-          subcategory: item.label || null,
+          subcategory: null,
+          note:        item.label || null,
           amount:      item.amount,
           currency:    'JPY',
         });
@@ -182,6 +193,20 @@ function _finance(v1, today) {
     if (rows.length) months[key] = { income: rows };
   }
 
+  // Extract NHI from v1.spend: entries keyed to first of month are monthly totals
+  for (const [date, cats] of Object.entries(v1.spend ?? {})) {
+    if (!date.endsWith('-01')) continue;
+    const amount = cats['nhi'];
+    if (!amount || amount <= 0) continue;
+    const month = date.slice(0, 7);
+    if (!months[month]) months[month] = { income: [] };
+    const existing = months[month].income ?? [];
+    if (!existing.find(r => r.id === 'nhi')) {
+      existing.push({ id: 'nhi', label: '国民健康保険', amount, isNeg: true });
+      months[month].income = existing;
+    }
+  }
+
   const investments = _bonds(v1, today);
   return { months, investments };
 }
@@ -244,6 +269,18 @@ function _notes(v1) {
   }));
 
   return { items, countdowns };
+}
+
+// ── Tasks ──────────────────────────────────────────────────────────
+
+function _tasks(v1) {
+  const raw = v1.tasks ?? {};
+  const out = {};
+  for (const [date, items] of Object.entries(raw)) {
+    const list = (items ?? []).map(t => ({ id: t.id, text: t.text ?? '', done: t.done ?? false }));
+    if (list.length) out[date] = list;
+  }
+  return out;
 }
 
 // ── Currency ───────────────────────────────────────────────────────

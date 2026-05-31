@@ -498,7 +498,7 @@ function buildWeek(scroll) {
       dot.style.background = cat?.color ?? 'var(--text-3)';
       const label = document.createElement('span');
       label.className = 'cal-spend-chip-label';
-      label.textContent = entry.subcategory || cat?.name || entry.categoryId;
+      label.textContent = entry.note || entry.subcategory || cat?.name || entry.categoryId;
       const amt = document.createElement('span');
       amt.className = 'cal-spend-chip-amt';
       amt.textContent = fmtSpend(entry.amount, entry.currency);
@@ -853,8 +853,9 @@ function openSpendModal(dateStr, entryId, preselectCatId) {
   const catGrid = document.createElement('div');
   catGrid.className = 'cal-spend-cat-grid';
 
-  let selectedCat = editing?.categoryId ?? preselectCatId ?? null;
-  let selectedSub = editing?.subcategory ?? null;
+  let selectedCat  = editing?.categoryId ?? preselectCatId ?? null;
+  let selectedSub  = editing?.subcategory ?? null;
+  let selectedNote = editing?.note ?? '';
 
   const subRow = document.createElement('div');
   subRow.className = 'cal-spend-sub-row';
@@ -906,6 +907,19 @@ function openSpendModal(dateStr, entryId, preselectCatId) {
   form.appendChild(catGrid);
   form.appendChild(subRow);
   renderSubcategories();
+
+  // Note (free-text description)
+  const noteLbl = document.createElement('div');
+  noteLbl.className = 'cal-form-label';
+  noteLbl.style.marginTop = 'var(--s3)';
+  noteLbl.textContent = 'Note';
+  const noteInput = document.createElement('input');
+  noteInput.className   = 'cal-modal-note-input';
+  noteInput.type        = 'text';
+  noteInput.placeholder = 'e.g. sushi, shinkansen ticket…';
+  noteInput.value       = selectedNote;
+  noteInput.addEventListener('input', () => { selectedNote = noteInput.value; });
+  form.append(noteLbl, noteInput);
 
   // Currency toggle (only shown when user has multiple currencies)
   let selectedCurrency = editing?.currency ?? currencies()[0];
@@ -979,6 +993,7 @@ function openSpendModal(dateStr, entryId, preselectCatId) {
       id:          editing?.id ?? spendUid(),
       categoryId:  selectedCat,
       subcategory: selectedSub ?? null,
+      note:        selectedNote.trim() || null,
       amount,
       currency:    selectedCurrency,
     });

@@ -663,6 +663,21 @@
 .cal-modal-spend-input::-webkit-outer-spin-button,
 .cal-modal-spend-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
+.cal-modal-note-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--s2) var(--s3);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  font-family: var(--font);
+  outline: none;
+  transition: border-color var(--dur-fast);
+}
+.cal-modal-note-input:focus { border-color: var(--accent-2); }
+
 /* ── Spend section (week view) ── */
 .cal-spend-section {
   flex: 1 1 0;
