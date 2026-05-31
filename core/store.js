@@ -25,7 +25,6 @@ function defaultData() {
     period:   { entries: [], spotting: [], symptoms: {}, discharge: {}, bbt: {}, settings: {} },
     calendar: { events: [], spendEntries: {} },
     finance:  { months: {} },
-    bank:     { accounts: [] },
     currency: { holdings: [], reference: 'IDR', rates: null, ratesAt: null },
     nisa:     { contributions: [] },
     savings:  { accounts: [], bonds: [], deposits: [] },

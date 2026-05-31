@@ -340,6 +340,25 @@
 .sp-theme-btn:hover  { color: var(--text-2); }
 .sp-theme-btn.active { background: var(--surface-3); color: var(--text); }
 
+/* ── Accent swatches ── */
+.sp-accent-row {
+  display: flex;
+  gap: var(--s3);
+  padding: var(--s2) var(--s4) var(--s4);
+}
+
+.sp-accent-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--swatch);
+  border: 2px solid transparent;
+  transition: border-color var(--dur-fast), transform var(--dur-fast);
+  flex-shrink: 0;
+}
+.sp-accent-swatch:hover  { transform: scale(1.15); }
+.sp-accent-swatch.active { border-color: var(--text); }
+
 /* ── Data section ── */
 .sp-data-row {
   display: flex;

@@ -48,7 +48,7 @@
         <span class="material-symbols-outlined">spa</span>
         Flo
       </button>
-      <button class="source-tab soon" data-panel="v1">
+      <button class="source-tab" data-panel="v1">
         <span class="material-symbols-outlined">history</span>
         Seratus v1
       </button>
@@ -162,14 +162,42 @@
     <!-- v1 -->
     <div class="source-panel" id="panel-v1">
       <div class="panel-inner">
-        <div class="soon-panel">
-          <span class="material-symbols-outlined">history</span>
-          <h2>Seratus v1 import</h2>
-          <p>Import your data from Seratus v1. The v1 and v2 data formats are still being mapped before this is ready. In the meantime, you can export your v1 data as JSON from the v1 app and keep it safe.</p>
-          <div class="soon-format">Format: Seratus v1 JSON export</div>
-        </div><!-- /.soon-panel -->
-      </div><!-- /.panel-inner -->
-    </div><!-- /#panel-v1 -->
+
+        <div class="privacy-badge">
+          <span class="material-symbols-outlined">lock</span>
+          <p>Your file never leaves your device. All parsing happens locally in your browser. Nothing is uploaded.</p>
+        </div>
+
+        <div class="step">
+          <div class="step-label">Step 1 — Export from Seratus v1</div>
+          <div class="step-body">
+            <ol>
+              <li>Open the v1 app in your browser.</li>
+              <li>Click <strong>Export</strong> to download your data as a JSON file.</li>
+              <li>Keep the file somewhere safe — this is your backup.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="step" style="margin-bottom:0">
+          <div class="step-label">Step 2 — Import your file</div>
+          <div class="step-body" style="margin-bottom:var(--s3)">
+            This will replace all current data in Seratus v2 with your v1 data.
+          </div>
+          <div class="drop-zone" id="v1-drop-zone">
+            <input type="file" id="v1-file-input" accept=".json" />
+            <span class="material-symbols-outlined">upload_file</span>
+            <div class="drop-zone-label">Drop your v1 JSON file here, or click to choose</div>
+            <div class="drop-zone-hint">Format: Seratus v1 JSON export</div>
+          </div>
+          <div class="processing-msg" id="v1-processing-msg">Importing your data...</div>
+          <div class="error-msg" id="v1-error-msg"></div>
+        </div>
+
+      </div>
+    </div>
 
   </div><!-- /.source-panels -->
 </div><!-- /.import-shell -->
@@ -406,5 +434,45 @@
 </script>
 
 <script src="core/lang.js"></script>
+<script type="module">
+  import { doImportV1 } from './core/import-v1.js';
+
+  const dropZone  = document.getElementById('v1-drop-zone');
+  const fileInput = document.getElementById('v1-file-input');
+  const procMsg   = document.getElementById('v1-processing-msg');
+  const errMsg    = document.getElementById('v1-error-msg');
+
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    if (e.dataTransfer.files[0]) handleV1File(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', e => {
+    if (e.target.files[0]) handleV1File(e.target.files[0]);
+  });
+
+  async function handleV1File(file) {
+    if (!file.name.endsWith('.json')) {
+      showV1Error('Please choose a .json file exported from Seratus v1.');
+      return;
+    }
+    showV1Error('');
+    procMsg.style.display = 'block';
+    try {
+      await doImportV1(file);
+      window.location.href = 'app.html';
+    } catch (err) {
+      procMsg.style.display = 'none';
+      showV1Error('Import failed: ' + err.message);
+    }
+  }
+
+  function showV1Error(msg) {
+    errMsg.textContent    = msg;
+    errMsg.style.display  = msg ? 'block' : 'none';
+  }
+</script>
 </body>
 </html>

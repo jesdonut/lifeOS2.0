@@ -189,3 +189,8 @@
   opacity: 1;
   pointer-events: auto;
 }
+
+/* Stop the edge overlay from blocking sidebar content when open */
+#body-row:has(#sidebar:not(.collapsed)) #sidebar-edge {
+  pointer-events: none;
+}

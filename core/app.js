@@ -2,15 +2,14 @@
 
 import { load, save, subscribe } from './store.js';
 import { initGestures } from './gestures.js';
-import { openSettings } from './settings.js';
+import { openSettings, applyAccent } from './settings.js';
 
-const TABS = ['calendar', 'period', 'finance', 'bank'];
+const TABS = ['calendar', 'period', 'finance'];
 
 const MODULE_MAP = {
   calendar: () => import('../modules/calendar/calendar.js'),
   period:   () => import('../modules/period/period-ui.js'),
   finance:  () => import('../modules/finance/finance.js'),
-  bank:     () => import('../modules/bank/bank.js'),
 };
 
 // ── DOM refs ───────────────────────────────────────────────────────
@@ -134,6 +133,7 @@ function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : '');
   localStorage.setItem(THEME_KEY, t);
   themeBtn.innerHTML = `<span class="material-symbols-outlined">${t === 'light' ? 'dark_mode' : 'light_mode'}</span>`;
+  applyAccent(load().settings?.accentId, t);
 }
 
 // ── Settings panel ─────────────────────────────────────────────────

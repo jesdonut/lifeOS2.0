@@ -129,7 +129,13 @@ function _calendar(v1) {
 function _period(v1) {
   const p = v1.period ?? {};
 
-  const entries  = (p.entries ?? []).filter(e => e.start).map(e => ({ id: e.id, start: e.start, length: e.length ?? 1 }));
+  const entries  = (p.entries ?? []).filter(e => e.start).map(e => {
+    const len  = e.length ?? 1;
+    const d    = new Date(e.start + 'T12:00:00');
+    d.setDate(d.getDate() + len - 1);
+    const end  = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return { id: e.id, start: e.start, end };
+  });
   const spotting = [];
   const symptoms = {};
 

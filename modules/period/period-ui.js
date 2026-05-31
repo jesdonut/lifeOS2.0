@@ -118,6 +118,24 @@ export function init(container, data, onSave) {
   _onSave    = onSave;
   _loadCss();
   _container.style.cssText = 'padding:0;overflow:hidden;position:relative;display:flex;flex-direction:column;';
+
+  // Migrate v1-imported entries that have `length` but no `end`
+  const rawEntries = data.period?.entries ?? [];
+  const needsMigration = rawEntries.some(e => !e.end);
+  if (needsMigration) {
+    const fixed = rawEntries.map(e => {
+      if (e.end) return e;
+      const len = e.length ?? 1;
+      const d   = new Date(e.start + 'T12:00:00');
+      d.setDate(d.getDate() + len - 1);
+      const end = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const { length: _l, ...rest } = e;
+      return { ...rest, end };
+    });
+    data = { ...data, period: { ...(data.period ?? {}), entries: fixed } };
+    onSave({ period: data.period });
+  }
+
   _data    = data;
   _entries = getPeriodEntries(data);
   _stats   = periodStats(_entries);

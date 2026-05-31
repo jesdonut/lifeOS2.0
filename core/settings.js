@@ -15,6 +15,22 @@ const TZ_LIST = [
 
 const CURRENCIES = ['JPY','IDR','USD','EUR','GBP','SGD','AUD','CAD','KRW','THB','MYR','PHP','INR'];
 
+const ACCENT_PALETTE = [
+  { id: 'rose',     label: 'Rose',     dark: ['#c9a0b4', '#a07890'], light: ['#b07090', '#8a5070'] },
+  { id: 'sage',     label: 'Sage',     dark: ['#8fafa2', '#6a8a7d'], light: ['#4a7a6a', '#2a5a4a'] },
+  { id: 'blue',     label: 'Blue',     dark: ['#7a9cc4', '#5a7aa0'], light: ['#3a6090', '#1a4070'] },
+  { id: 'amber',    label: 'Amber',    dark: ['#c4a46a', '#a08050'], light: ['#8a6030', '#6a4010'] },
+  { id: 'lavender', label: 'Lavender', dark: ['#9b8fd4', '#7a6aaa'], light: ['#6a50a0', '#4a3080'] },
+  { id: 'clay',     label: 'Clay',     dark: ['#c48a6a', '#a06a4a'], light: ['#8a5030', '#6a3010'] },
+];
+
+export function applyAccent(accentId, theme) {
+  const entry  = ACCENT_PALETTE.find(p => p.id === accentId) ?? ACCENT_PALETTE[0];
+  const colors = theme === 'light' ? entry.light : entry.dark;
+  document.documentElement.style.setProperty('--accent',   colors[0]);
+  document.documentElement.style.setProperty('--accent-2', colors[1]);
+}
+
 const COUNTRIES = [
   'Afghanistan','Albania','Algeria','Andorra','Angola','Argentina','Armenia','Australia',
   'Austria','Azerbaijan','Bahrain','Bangladesh','Belarus','Belgium','Bolivia','Bosnia and Herzegovina',
@@ -296,7 +312,36 @@ function renderCalendar(el) {
   const cats = (_data.settings?.categories ?? DEFAULT_CATS).map(c => ({ ...c }));
   let editingId = null;
 
-  sectionLabel(el, 'Event categories');
+  sectionLabel(el, 'Week');
+
+  const wsRow = document.createElement('div');
+  wsRow.className = 'sp-toggle-row';
+
+  const wsLabel = document.createElement('div');
+  wsLabel.innerHTML = '<div class="sp-toggle-name">First day of week</div>';
+
+  const wsBtns = document.createElement('div');
+  wsBtns.className = 'sp-theme-btns';
+
+  let weekStart = _data.settings?.weekStart ?? 1;
+
+  ['Monday', 'Sunday'].forEach((label, i) => {
+    const val = i === 0 ? 1 : 0;
+    const btn = document.createElement('button');
+    btn.className = 'sp-theme-btn' + (weekStart === val ? ' active' : '');
+    btn.textContent = label;
+    btn.addEventListener('click', () => {
+      weekStart = val;
+      wsBtns.querySelectorAll('.sp-theme-btn').forEach((b, j) => b.classList.toggle('active', j === i));
+      _onSave({ settings: { ..._data.settings, weekStart } });
+    });
+    wsBtns.appendChild(btn);
+  });
+
+  wsRow.append(wsLabel, wsBtns);
+  el.appendChild(wsRow);
+
+  sectionLabel(el, 'Event categories', 'var(--s4)');
 
   const listEl = document.createElement('div');
   listEl.className = 'sp-cat-list';
@@ -672,6 +717,7 @@ function renderAppearance(el) {
     btn.addEventListener('click', () => {
       _theme = t;
       _onThemeChange(t);
+      applyAccent(_data.settings?.accentId, t);
       btns.querySelectorAll('.sp-theme-btn').forEach(b =>
         b.classList.toggle('active', b.textContent.toLowerCase() === t)
       );
@@ -681,6 +727,30 @@ function renderAppearance(el) {
 
   row.append(name, btns);
   el.appendChild(row);
+
+  sectionLabel(el, 'Accent color', 'var(--s4)');
+
+  const swatchRow = document.createElement('div');
+  swatchRow.className = 'sp-accent-row';
+
+  let currentAccentId = _data.settings?.accentId ?? 'rose';
+
+  ACCENT_PALETTE.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'sp-accent-swatch' + (currentAccentId === p.id ? ' active' : '');
+    btn.title = p.label;
+    btn.style.setProperty('--swatch', p.dark[0]);
+    btn.addEventListener('click', () => {
+      currentAccentId = p.id;
+      swatchRow.querySelectorAll('.sp-accent-swatch').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyAccent(p.id, _theme);
+      _onSave({ settings: { ..._data.settings, accentId: p.id } });
+    });
+    swatchRow.appendChild(btn);
+  });
+
+  el.appendChild(swatchRow);
 }
 
 // ── Data ───────────────────────────────────────────────────────────
