@@ -1,6 +1,1 @@
-{
-  "redirects": [
-    { "source": "/app.html",   "destination": "/coming-soon.html", "permanent": false },
-    { "source": "/setup.html", "destination": "/coming-soon.html", "permanent": false }
-  ]
-}
+{}
