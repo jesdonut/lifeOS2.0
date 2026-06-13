@@ -401,9 +401,11 @@ function _buildIncRows() {
     lbl.className = 'fin-inc-lbl';
     lbl.value = r.label;
     lbl.addEventListener('click', e => e.stopPropagation());
-    lbl.addEventListener('change', e => {
+    const saveIncLbl = e => {
       _setIncome(rows.map((x, j) => j === i ? { ...x, label: e.target.value.trim() || x.label } : x));
-    });
+    };
+    lbl.addEventListener('change', saveIncLbl);
+    lbl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); saveIncLbl(e); lbl.blur(); } });
 
     const wrap = document.createElement('div');
     wrap.className = `fin-inp-wrap${r.amount > 0 ? ' filled' : ''}${r.isNeg ? ' neg' : ''}`;
@@ -475,9 +477,11 @@ function _buildBillRows() {
     lbl.className = 'fin-inc-lbl';
     lbl.value = r.label;
     lbl.addEventListener('click', e => e.stopPropagation());
-    lbl.addEventListener('change', e => {
+    const saveBillLbl = e => {
       _setBills(rows.map((x, j) => j === i ? { ...x, label: e.target.value.trim() || x.label } : x));
-    });
+    };
+    lbl.addEventListener('change', saveBillLbl);
+    lbl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); saveBillLbl(e); lbl.blur(); } });
 
     const wrap = document.createElement('div');
     wrap.className = `fin-inp-wrap${r.amount > 0 ? ' filled' : ''} neg`;
