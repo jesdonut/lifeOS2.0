@@ -175,8 +175,11 @@ function render() {
 
       const titleEl = document.createElement('div');
       titleEl.className = 'note-text';
-      titleEl.style.cssText = 'font-size:var(--fs-xs);color:var(--text);font-weight:500;';
+      titleEl.style.cssText = 'font-size:var(--fs-xs);color:var(--text);font-weight:500;cursor:pointer;';
       titleEl.textContent = note.title || note.text?.split('\n')[0]?.replace(/^#+\s*/, '') || 'Untitled';
+      titleEl.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('lifeos:open-note', { detail: { id: note.id } }));
+      });
 
       const meta = document.createElement('div');
       meta.className = 'note-meta';

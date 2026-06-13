@@ -14,6 +14,12 @@ export function init(container, data, onSave) {
   _render();
 }
 
+export function selectNote(id) {
+  _selectedId = id;
+  _showArchived = false; // unarchived notes shown so the note is visible
+  _render();
+}
+
 export function destroy() {
   _container.innerHTML = '';
   _selectedId   = null;

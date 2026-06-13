@@ -83,6 +83,13 @@ brandWrap.innerHTML = `
 `;
 tabBar.insertBefore(brandWrap, tabBar.firstChild);
 
+// ── Deep-link: open a specific note from sidebar ───────────────────
+document.addEventListener('lifeos:open-note', async e => {
+  const notesIndex = TABS.indexOf('notes');
+  await switchTo(notesIndex);
+  mods['notes']?.selectNote?.(e.detail.id);
+});
+
 // ── Tab bar clicks ─────────────────────────────────────────────────
 TABS.forEach((name, i) => {
   const btn = document.createElement('button');
