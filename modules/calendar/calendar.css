@@ -398,6 +398,49 @@
 }
 .cal-modal-input:focus { border-color: var(--accent-2); }
 
+.cal-modal-link-input { color: var(--text-3); font-size: var(--fs-xs); }
+
+.cal-modal-time-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.cal-modal-time-input {
+  flex: 1;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--s2) var(--s3);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  transition: border-color var(--dur-fast);
+  outline: none;
+  color-scheme: dark;
+}
+.cal-modal-time-input:focus { border-color: var(--accent-2); }
+
+.cal-modal-time-sep { font-size: var(--fs-sm); color: var(--text-3); }
+
+.cal-modal-evt-time {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  margin-right: var(--s2);
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-modal-link-btn {
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+  font-size: 16px;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-fast);
+}
+.cal-modal-link-btn:hover { background: var(--surface-2); }
+.cal-modal-link-btn .material-symbols-outlined { font-size: 16px; }
+
 .cal-cat-grid {
   display: flex;
   flex-wrap: wrap;
