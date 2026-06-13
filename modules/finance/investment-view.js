@@ -73,7 +73,9 @@ function _buildList() {
   const bonds  = filtered.filter(i => i.productType === 'governmentBond');
   const others = filtered.filter(i => i.productType !== 'governmentBond');
 
-  if (!filtered.length) {
+  const showNisa = !_filterCountry || _filterCountry === 'JP';
+
+  if (!filtered.length && !showNisa) {
     const empty = div('inv-empty');
     empty.textContent = list.length
       ? 'No investments for this country.'
@@ -88,10 +90,11 @@ function _buildList() {
     }
   }
 
-  // NISA section — always shown in investment tab (not filtered by country)
-  const nisaWrap = div('nisa-wrap');
-  root.appendChild(nisaWrap);
-  NisaView.mount(nisaWrap, _data, _onSave);
+  if (showNisa) {
+    const nisaWrap = div('nisa-wrap');
+    root.appendChild(nisaWrap);
+    NisaView.mount(nisaWrap, _data, _onSave);
+  }
 
   return root;
 }
