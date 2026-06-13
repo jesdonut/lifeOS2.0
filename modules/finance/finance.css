@@ -1219,3 +1219,307 @@
   .bond-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
   .bond-summary    { grid-template-columns: 1fr 1fr; }
 }
+
+/* ── NISA ── */
+.nisa-wrap { margin: var(--s4) var(--s4) 0; }
+
+.nisa-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.nisa-section-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s3) var(--s4);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+.nisa-section-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+.nisa-add-fund-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--s1) var(--s2);
+  border-radius: var(--radius);
+}
+.nisa-add-fund-btn:hover { background: var(--surface-3); color: var(--text); }
+.nisa-add-fund-btn .material-symbols-outlined { font-size: 14px; }
+
+/* Overview card */
+.nisa-overview {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.nisa-overview-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--border-dim);
+}
+.nisa-stat {
+  padding: var(--s3) var(--s4);
+  border-right: 1px solid var(--border-dim);
+}
+.nisa-stat:last-child { border-right: none; }
+.nisa-stat-lbl {
+  font-size: 10px;
+  color: var(--text-3);
+  margin-bottom: var(--s1);
+}
+.nisa-stat-val {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+.nisa-limits {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.nisa-stat-limit {
+  padding: var(--s3) var(--s4);
+  border-right: 1px solid var(--border-dim);
+}
+.nisa-stat-limit:last-child { border-right: none; }
+.nisa-limit-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: var(--s1);
+}
+.nisa-limit-sep { font-size: var(--fs-xs); color: var(--text-3); }
+.nisa-limit-cap { font-size: var(--fs-xs); color: var(--text-3); }
+.nisa-limit-bar {
+  height: 3px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.nisa-limit-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.2s;
+}
+.nisa-limit-fill.full { background: var(--red, #e55); }
+
+/* Fund cards */
+.nisa-fund-card {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.nisa-fund-card:last-child { border-bottom: none; }
+
+.nisa-fund-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--border-dim);
+}
+.nisa-fund-name {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text);
+}
+.nisa-fund-actions { display: flex; gap: var(--s1); }
+.nisa-fund-action-btn {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius);
+  color: var(--text-3);
+}
+.nisa-fund-action-btn:hover { background: var(--surface-3); color: var(--text); }
+.nisa-fund-action-btn .material-symbols-outlined { font-size: 16px; }
+.nisa-fund-del:hover { color: var(--red, #e55); }
+
+.nisa-fund-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--border-dim);
+}
+.nisa-fund-stat {
+  padding: var(--s3) var(--s4);
+  border-right: 1px solid var(--border-dim);
+}
+.nisa-fund-stat:last-child { border-right: none; }
+.nisa-fund-stat-lbl {
+  font-size: 10px;
+  color: var(--text-3);
+  margin-bottom: var(--s1);
+}
+.nisa-fund-stat-val {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Inline edit */
+.nisa-inline-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+}
+.nisa-val-inp {
+  width: 120px;
+  padding: 3px var(--s2);
+  font-size: var(--fs-xs);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+}
+.nisa-val-edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  color: var(--text-3);
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius);
+}
+.nisa-val-edit-btn:hover { color: var(--accent); }
+.nisa-val-edit-btn .material-symbols-outlined { font-size: 14px; }
+.nisa-inline-save, .nisa-inline-cancel {
+  padding: 3px var(--s2);
+  font-size: var(--fs-xs);
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+}
+.nisa-inline-save   { background: var(--accent); color: #fff; }
+.nisa-inline-cancel { background: var(--surface-3); color: var(--text-2); }
+.nisa-inline-save:hover   { opacity: 0.85; }
+.nisa-inline-cancel:hover { background: var(--surface-2); }
+
+/* Purchases */
+.nisa-purchases { padding: var(--s2) var(--s4) var(--s3); }
+.nisa-purchases-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--s2);
+}
+.nisa-purchases-label {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  font-weight: 500;
+}
+.nisa-add-purchase-btn {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--radius);
+  color: var(--text-3);
+}
+.nisa-add-purchase-btn:hover { color: var(--accent); background: var(--surface-3); }
+.nisa-add-purchase-btn .material-symbols-outlined { font-size: 14px; }
+
+.nisa-purchases-empty {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding: var(--s1) 0;
+}
+
+.nisa-purchase-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s1) 0;
+  border-top: 1px solid var(--border-dim);
+}
+.nisa-purchase-row:first-of-type { border-top: none; }
+.nisa-purchase-info {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+.nisa-purchase-date   { font-size: var(--fs-xs); color: var(--text-3); }
+.nisa-purchase-amount { font-size: var(--fs-xs); font-weight: 500; color: var(--text); }
+.nisa-purchase-bucket {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 99px;
+  font-weight: 500;
+}
+.nisa-purchase-bucket.bk-tsu    { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); }
+.nisa-purchase-bucket.bk-growth { background: color-mix(in srgb, #4caf50 15%, transparent); color: #4caf50; }
+
+.nisa-purchase-actions { display: flex; gap: 2px; }
+.nisa-purchase-action {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: var(--radius);
+  color: var(--text-3);
+}
+.nisa-purchase-action:hover        { color: var(--text); background: var(--surface-3); }
+.nisa-purchase-del:hover           { color: var(--red, #e55); }
+.nisa-purchase-action .material-symbols-outlined { font-size: 14px; }
+
+.nisa-purchase-edit-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) 0;
+  border-top: 1px solid var(--border-dim);
+  flex-wrap: wrap;
+}
+.nisa-inp {
+  padding: 3px var(--s2);
+  font-size: var(--fs-xs);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+}
+.nisa-inp[type="date"]   { width: 130px; }
+.nisa-inp[type="number"] { width: 110px; }
+.nisa-inp[type="text"]   { flex: 1; min-width: 180px; }
+.nisa-sel {
+  padding: 3px var(--s2);
+  font-size: var(--fs-xs);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* Add fund form */
+.nisa-add-fund-form {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 800px) {
+  .nisa-overview-stats { grid-template-columns: 1fr 1fr 1fr; }
+  .nisa-limits         { grid-template-columns: 1fr 1fr; }
+  .nisa-fund-stats     { grid-template-columns: 1fr 1fr 1fr; }
+}

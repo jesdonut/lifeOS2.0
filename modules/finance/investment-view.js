@@ -2,6 +2,7 @@
 
 import { COUNTRIES, PRODUCTS } from './investment-products.js';
 import { calculate } from './investment-calc.js';
+import * as NisaView from './nisa-view.js';
 
 const SYM = { JPY: '¥', IDR: 'Rp ', GBP: '£', USD: '$', CNY: '¥' };
 function sym(currency) { return SYM[currency] ?? (currency + ' '); }
@@ -36,6 +37,7 @@ export function mount(container, data, onSave) {
 }
 
 export function unmount() {
+  NisaView.unmount();
   if (_container) _container.innerHTML = '';
   _container = null;
   _view = 'list';
@@ -47,6 +49,7 @@ export function unmount() {
 
 export function update(newData) {
   _data = newData;
+  NisaView.update(newData);
   if (_container && _view === 'list') _render();
 }
 
@@ -84,6 +87,11 @@ function _buildList() {
       root.appendChild(cards);
     }
   }
+
+  // NISA section — always shown in investment tab (not filtered by country)
+  const nisaWrap = div('nisa-wrap');
+  root.appendChild(nisaWrap);
+  NisaView.mount(nisaWrap, _data, _onSave);
 
   return root;
 }
