@@ -959,7 +959,6 @@ function openSpendModal(dateStr, entryId, preselectCatId) {
   const amtInput = document.createElement('input');
   amtInput.className = 'cal-modal-spend-input';
   amtInput.type = 'number';
-  amtInput.min = '0';
   amtInput.step = '1';
   amtInput.placeholder = '0';
   amtInput.value = editing?.amount ?? '';
@@ -988,7 +987,7 @@ function openSpendModal(dateStr, entryId, preselectCatId) {
   saveBtn.addEventListener('click', () => {
     if (!selectedCat) { catGrid.querySelector('.cal-spend-cat-chip')?.focus(); return; }
     const amount = parseFloat(amtInput.value);
-    if (!amount || amount <= 0) { amtInput.focus(); return; }
+    if (isNaN(amount) || amount === 0) { amtInput.focus(); return; }
     saveSpendEntry(dateStr, {
       id:          editing?.id ?? spendUid(),
       categoryId:  selectedCat,
