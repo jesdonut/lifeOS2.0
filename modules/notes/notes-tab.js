@@ -299,7 +299,18 @@ function _buildRightPane() {
   delBtn.innerHTML = '<span class="material-symbols-outlined">delete</span>';
   delBtn.title = 'Delete';
 
-  toolbar.append(pinBtn, archBtn, delBtn);
+  const hintBtn = btn('nt-tb-btn nt-hint-btn', '?', () => {
+    const hint    = pane.querySelector('.nt-hint-panel');
+    const preview = pane.querySelector('.nt-editor-preview');
+    if (!hint || !preview) return;
+    const showing = hint.style.display !== 'none';
+    hint.style.display    = showing ? 'none' : '';
+    preview.style.display = showing ? '' : 'none';
+    hintBtn.classList.toggle('active', !showing);
+  });
+  hintBtn.title = 'Markdown reference';
+
+  toolbar.append(pinBtn, archBtn, delBtn, hintBtn);
   pane.appendChild(toolbar);
 
   // Title
@@ -337,10 +348,23 @@ function _buildRightPane() {
   const preview = el('div', 'nt-editor-preview note-text');
   preview.innerHTML = _renderMd(ta.value);
 
+  const hint = el('div', 'nt-hint-panel');
+  hint.style.display = 'none';
+  hint.innerHTML = `
+    <div class="nt-hint-row"><code>**text**</code><span>bold</span></div>
+    <div class="nt-hint-row"><code>*text*</code><span>italic</span></div>
+    <div class="nt-hint-row"><code>\`text\`</code><span>inline code</span></div>
+    <div class="nt-hint-row"><code># Heading</code><span>h1</span></div>
+    <div class="nt-hint-row"><code>## Heading</code><span>h2</span></div>
+    <div class="nt-hint-row"><code>### Heading</code><span>h3</span></div>
+    <div class="nt-hint-row"><code>- item</code><span>bullet list</span></div>
+    <div class="nt-hint-row"><code>blank line</code><span>paragraph break</span></div>
+  `;
+
   ta.addEventListener('input',  () => { preview.innerHTML = _renderMd(ta.value); });
   ta.addEventListener('change', () => patchNote(note.id, { text: ta.value, updatedAt: new Date().toISOString() }));
 
-  body.append(ta, preview);
+  body.append(ta, preview, hint);
   pane.appendChild(body);
   return pane;
 }

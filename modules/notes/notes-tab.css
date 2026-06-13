@@ -270,7 +270,8 @@
 .nt-tb-btn:hover { color: var(--text); background: var(--surface-3); }
 .nt-tb-btn.active { color: var(--accent); }
 .nt-tb-btn .material-symbols-outlined { font-size: 18px; }
-.nt-tb-del:hover { color: var(--red); }
+.nt-tb-del:hover   { color: var(--red); }
+.nt-hint-btn       { font-size: var(--fs-xs); font-weight: 600; width: 24px; height: 24px; justify-content: center; margin-left: auto; }
 
 .nt-title-inp {
   width: 100%;
@@ -343,6 +344,29 @@
 .nt-editor-preview {
   overflow-y: auto;
   padding: var(--s4) var(--s5);
+}
+.nt-hint-panel {
+  overflow-y: auto;
+  padding: var(--s4) var(--s5);
+  background: var(--surface);
+}
+.nt-hint-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s2) 0;
+  border-bottom: 1px solid var(--border-dim);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+}
+.nt-hint-row:last-child { border-bottom: none; }
+.nt-hint-row code {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--surface-3);
+  padding: 2px 6px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--text);
 }
 
 /* ── Shared inline form buttons ── */
