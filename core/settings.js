@@ -1,7 +1,7 @@
 // core/settings.js — full settings modal
 
 import { exportBackup, importBackup } from './store.js';
-import { doImportV1 } from './import-v1.js';
+import { doImportV1, doMergeInvestments } from './import-v1.js';
 import { doImportDelta } from './import-delta.js';
 
 // ── Constants ──────────────────────────────────────────────────────
@@ -880,6 +880,31 @@ function renderData(el) {
           closeSettings();
           location.reload();
           setTimeout(() => alert(summary), 300);
+        } catch (err) {
+          alert('Import failed: ' + err.message);
+        }
+      });
+      fi.click();
+    }
+  ));
+
+  el.appendChild(dataRow('Import investments', 'Merge bonds and NISA config from a JSON file. Skips already-imported entries.', 'Import', false,
+    () => {
+      const fi = document.createElement('input');
+      fi.type   = 'file';
+      fi.accept = '.json';
+      fi.addEventListener('change', async e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          const r = await doMergeInvestments(file);
+          const parts = [];
+          if (r.bondsAdded)   parts.push(`${r.bondsAdded} bond${r.bondsAdded === 1 ? '' : 's'} imported`);
+          if (r.bondsSkipped) parts.push(`${r.bondsSkipped} skipped`);
+          if (r.hasNisa)      parts.push('NISA config saved');
+          closeSettings();
+          location.reload();
+          setTimeout(() => alert(parts.length ? parts.join(', ') + '.' : 'Nothing new to import.'), 300);
         } catch (err) {
           alert('Import failed: ' + err.message);
         }
