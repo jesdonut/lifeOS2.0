@@ -7,12 +7,18 @@ export function doImportV1(file) {
     const reader = new FileReader();
     reader.onload = e => {
       try {
-        const v1 = JSON.parse(e.target.result);
-        if (!v1.events && !v1.period && !v1.finance) {
+        const parsed = JSON.parse(e.target.result);
+        if (parsed.version === 2) {
+          // Already a v2 file — load directly
+          localStorage.setItem(STORE_KEY, JSON.stringify(parsed));
+          resolve(parsed);
+          return;
+        }
+        if (!parsed.events && !parsed.period && !parsed.finance) {
           reject(new Error('This does not look like a v1 LifeOS file.'));
           return;
         }
-        const v2 = _convert(v1);
+        const v2 = _convert(parsed);
         localStorage.setItem(STORE_KEY, JSON.stringify(v2));
         resolve(v2);
       } catch (err) {
