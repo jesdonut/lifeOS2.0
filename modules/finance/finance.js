@@ -18,6 +18,16 @@ const DEFAULT_INCOME = [
   { id: 'resident',   label: '住民税',            amount: 0, isNeg: true  },
 ];
 
+const DEFAULT_BILLS = [
+  { id: 'rent',        label: '家賃',           amount: 0 },
+  { id: 'electricity', label: '電気',           amount: 0 },
+  { id: 'gas',         label: 'ガス',           amount: 0 },
+  { id: 'water',       label: '水道',           amount: 0 },
+  { id: 'internet',    label: 'インターネット',  amount: 0 },
+  { id: 'phone',       label: '携帯',           amount: 0 },
+  { id: 'commute',     label: '定期券',         amount: 0 },
+];
+
 // ── State ──────────────────────────────────────────────────────────
 let _container = null, _data = null, _onSave = null;
 let _year = new Date().getFullYear(), _month = new Date().getMonth();
@@ -60,12 +70,35 @@ function _uid()  { return Math.random().toString(36).slice(2, 9); }
 function _mkey(y, m) { return `${y}-${String(m + 1).padStart(2, '0')}`; }
 function _mdata(y, m) { return _data.finance?.months?.[_mkey(y, m)] ?? {}; }
 
-function _incRows(y, m) { return _mdata(y, m).income ?? DEFAULT_INCOME; }
-function _spendCats()   { return _data.settings?.spendCategories ?? []; }
+function _incRows(y, m) {
+  const saved = _mdata(y, m).income;
+  if (!saved) return DEFAULT_INCOME;
+  const ids = new Set(saved.map(r => r.id));
+  const missing = DEFAULT_INCOME.filter(r => !ids.has(r.id));
+  return missing.length ? [...saved, ...missing] : saved;
+}
+
+function _billRows(y, m) {
+  const saved = _mdata(y, m).bills;
+  if (!saved) return DEFAULT_BILLS;
+  const ids = new Set(saved.map(r => r.id));
+  const missing = DEFAULT_BILLS.filter(r => !ids.has(r.id));
+  return missing.length ? [...saved, ...missing] : saved;
+}
+
+function _spendCats() { return _data.settings?.spendCategories ?? []; }
 
 function _setIncome(rows) {
   const key    = _mkey(_year, _month);
   const month  = { ..._mdata(_year, _month), income: rows };
+  const months = { ...(_data.finance?.months ?? {}), [key]: month };
+  _data = { ..._data, finance: { months } };
+  _onSave({ finance: { months } });
+}
+
+function _setBills(rows) {
+  const key    = _mkey(_year, _month);
+  const month  = { ..._mdata(_year, _month), bills: rows };
   const months = { ...(_data.finance?.months ?? {}), [key]: month };
   _data = { ..._data, finance: { months } };
   _onSave({ finance: { months } });
@@ -85,9 +118,10 @@ function _catTotal(y, m, catId) {
 }
 
 function _totals(y, m) {
-  const rows = _incRows(y, m);
-  const inc  = rows.reduce((s, r) => s + (r.isNeg ? -(r.amount || 0) : (r.amount || 0)), 0);
-  const cats = _spendCats();
+  const rows  = _incRows(y, m);
+  const inc   = rows.reduce((s, r) => s + (r.isNeg ? -(r.amount || 0) : (r.amount || 0)), 0);
+  const bills = _billRows(y, m).reduce((s, r) => s + (r.amount || 0), 0);
+  const cats  = _spendCats();
   const catTotals = {};
   let spent = 0;
   cats.forEach(c => {
@@ -95,8 +129,8 @@ function _totals(y, m) {
     catTotals[c.id] = t;
     spent += t;
   });
-  const balance = inc - spent;
-  return { inc, catTotals, spent, balance };
+  const balance = inc - bills - spent;
+  return { inc, bills, catTotals, spent, balance };
 }
 
 function _prevMo(y, m) { return m === 0 ? { y: y - 1, m: 11 } : { y, m: m - 1 }; }
@@ -228,6 +262,7 @@ function _buildDistBar(t) {
   const cats = _spendCats();
   const inc  = Math.max(t.inc, 1);
   const segs = [];
+  if (t.bills > 0) segs.push([t.bills, 'var(--text-3)', 'Bills']);
   cats.forEach(c => {
     const v = t.catTotals[c.id] ?? 0;
     if (v > 0) segs.push([v, c.color, c.name]);
@@ -259,17 +294,24 @@ function _buildDistBar(t) {
 
 // ── Main layout ────────────────────────────────────────────────────
 function _buildMain() {
-  const t    = _totals(_year, _month);
-  const cats = _spendCats();
-  const rows = _incRows(_year, _month);
-  const filled = rows.filter(r => r.amount > 0).length;
+  const t         = _totals(_year, _month);
+  const cats      = _spendCats();
+  const incRows   = _incRows(_year, _month);
+  const billRows  = _billRows(_year, _month);
+  const filled    = incRows.filter(r => r.amount > 0).length;
+  const filledB   = billRows.filter(r => r.amount > 0).length;
+
+  if (!_open.hasOwnProperty('bills')) _open.bills = false;
 
   const main  = document.createElement('div'); main.className  = 'fin-main';
   const left  = document.createElement('div'); left.className  = 'fin-left';
   const right = document.createElement('div'); right.className = 'fin-right';
 
   left.appendChild(_acc('income', 'Income', '収入', false,
-    `${filled} of ${rows.length} filled`, t.inc, true, () => _buildIncRows(), null));
+    `${filled} of ${incRows.length} filled`, t.inc, true, () => _buildIncRows(), null));
+
+  left.appendChild(_acc('bills', 'Bills', '固定費', true,
+    `${filledB} of ${billRows.length} filled`, t.bills, false, () => _buildBillRows(), null));
 
   cats.forEach(cat => {
     if (!_open.hasOwnProperty(cat.id)) _open[cat.id] = false;
@@ -413,6 +455,79 @@ function _buildIncRows() {
   return [rowsEl, addBtn];
 }
 
+// ── Bills rows (editable, sortable) ───────────────────────────────
+function _buildBillRows() {
+  const rows   = _billRows(_year, _month);
+  const rowsEl = document.createElement('div');
+  rowsEl.className = 'fin-inc-rows';
+
+  rows.forEach((r, i) => {
+    const el = document.createElement('div');
+    el.className = 'fin-inc-row';
+    el.dataset.id = r.id;
+
+    const handle = document.createElement('span');
+    handle.className = 'fin-drag-handle material-symbols-outlined';
+    handle.textContent = 'drag_indicator';
+
+    const lbl = document.createElement('input');
+    lbl.type = 'text';
+    lbl.className = 'fin-inc-lbl';
+    lbl.value = r.label;
+    lbl.addEventListener('click', e => e.stopPropagation());
+    lbl.addEventListener('change', e => {
+      _setBills(rows.map((x, j) => j === i ? { ...x, label: e.target.value.trim() || x.label } : x));
+    });
+
+    const wrap = document.createElement('div');
+    wrap.className = `fin-inp-wrap${r.amount > 0 ? ' filled' : ''} neg`;
+    const yen = document.createElement('span'); yen.className = 'fin-yen'; yen.textContent = '¥';
+    const inp = document.createElement('input');
+    inp.type = 'number'; inp.step = '100'; inp.min = '0';
+    inp.value = r.amount || ''; inp.placeholder = '0';
+    inp.addEventListener('click', e => e.stopPropagation());
+    inp.addEventListener('change', e => {
+      _setBills(rows.map((x, j) => j === i ? { ...x, amount: parseFloat(e.target.value) || 0 } : x));
+      _render();
+    });
+    wrap.append(yen, inp);
+
+    const rm = document.createElement('button');
+    rm.className = 'fin-rm-btn';
+    rm.innerHTML = '<span class="material-symbols-outlined">close</span>';
+    rm.addEventListener('click', e => {
+      e.stopPropagation();
+      _setBills(rows.filter((_, j) => j !== i));
+      _render();
+    });
+
+    el.append(handle, lbl, wrap, rm);
+    rowsEl.appendChild(el);
+  });
+
+  Sortable.create(rowsEl, {
+    handle:    '.fin-drag-handle',
+    animation: 120,
+    onEnd() {
+      const ids    = [...rowsEl.querySelectorAll('.fin-inc-row')].map(el => el.dataset.id);
+      const rowMap = Object.fromEntries(rows.map(r => [r.id, r]));
+      _setBills(ids.map(id => rowMap[id]).filter(Boolean));
+      setTimeout(_render, 0);
+    },
+  });
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'fin-add-row';
+  addBtn.innerHTML = '<span class="material-symbols-outlined">add</span>Add row';
+  addBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    _setBills([...rows, { id: _uid(), label: '新しい項目', amount: 0 }]);
+    _render();
+  });
+
+  return [rowsEl, addBtn];
+}
+
 // ── Category rows (auto from calendar) ────────────────────────────
 function _buildCatRows(cat) {
   const prefix  = _mkey(_year, _month);
@@ -466,6 +581,12 @@ function _buildSummary(t) {
   const incRow = document.createElement('div'); incRow.className = 'fin-sum-row';
   incRow.innerHTML = `<span>Income</span><span style="color:var(--green)">+¥${t.inc.toLocaleString()}</span>`;
   card.appendChild(incRow);
+
+  if (t.bills > 0) {
+    const billRow = document.createElement('div'); billRow.className = 'fin-sum-row';
+    billRow.innerHTML = `<span>Bills</span><span style="color:var(--text-2)">−¥${t.bills.toLocaleString()}</span>`;
+    card.appendChild(billRow);
+  }
 
   cats.forEach(cat => {
     const v = t.catTotals[cat.id] ?? 0;

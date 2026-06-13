@@ -176,21 +176,50 @@ function _period(v1) {
 
 // ── Finance ────────────────────────────────────────────────────────
 
+const BILLS_MAP = [
+  { v1: 'rent',            id: 'rent',        label: '家賃' },
+  { v1: 'electricity',     id: 'electricity', label: '電気' },
+  { v1: 'gas',             id: 'gas',         label: 'ガス' },
+  { v1: 'water',           id: 'water',       label: '水道' },
+  { v1: 'internet',        id: 'internet',    label: 'インターネット' },
+  { v1: 'phone',           id: 'phone',       label: '携帯' },
+  { v1: 'commutationPass', id: 'commute',     label: '定期券' },
+];
+
 const INCOME_MAP = [
-  { v1: 'salary',       id: 'salary',     label: '給料',            isNeg: false },
-  { v1: 'transportReimb', id: 'transport', label: '交通費補助',       isNeg: false },
-  { v1: 'otherIncome',  id: 'other',      label: 'その他収入',       isNeg: false },
-  { v1: 'taxWithheld',  id: 'incometax',  label: '所得税',           isNeg: true  },
-  { v1: 'insuranceDed', id: 'health',     label: '健康保険',         isNeg: true  },
+  { v1: 'salary',         id: 'salary',      label: '給料',            isNeg: false },
+  { v1: 'transportReimb', id: 'transport',   label: '交通費補助',       isNeg: false },
+  { v1: 'otherIncome',    id: 'other',       label: 'その他収入',       isNeg: false },
+  { v1: 'taxWithheld',    id: 'incometax',   label: '所得税',           isNeg: true  },
+  { v1: 'incomeTax',      id: 'incometax',   label: '所得税',           isNeg: true  },
+  { v1: 'insuranceDed',   id: 'health',      label: '健康保険',         isNeg: true  },
+  { v1: 'healthIns',      id: 'health',      label: '健康保険',         isNeg: true  },
+  { v1: 'pensionIns',     id: 'pension',     label: '厚生年金保険',     isNeg: true  },
+  { v1: 'employmentIns',  id: 'employment',  label: '雇用保険',         isNeg: true  },
 ];
 
 function _finance(v1, today) {
   const months = {};
   for (const [key, v] of Object.entries(v1.finance ?? {})) {
-    const rows = INCOME_MAP
-      .filter(m => v[m.v1] != null && v[m.v1] !== 0)
-      .map(m => ({ id: m.id, label: m.label, amount: v[m.v1], isNeg: m.isNeg }));
-    if (rows.length) months[key] = { income: rows };
+    const byId = new Map();
+    for (const m of INCOME_MAP) {
+      if (v[m.v1] == null || v[m.v1] === 0) continue;
+      const existing = byId.get(m.id);
+      if (!existing || v[m.v1] > existing.amount) {
+        byId.set(m.id, { id: m.id, label: m.label, amount: v[m.v1], isNeg: m.isNeg });
+      }
+    }
+    const billsById = new Map();
+    for (const m of BILLS_MAP) {
+      if (v[m.v1] == null || v[m.v1] === 0) continue;
+      billsById.set(m.id, { id: m.id, label: m.label, amount: v[m.v1] });
+    }
+
+    if (byId.size || billsById.size) {
+      months[key] = {};
+      if (byId.size)    months[key].income = [...byId.values()];
+      if (billsById.size) months[key].bills  = [...billsById.values()];
+    }
   }
 
   // Extract NHI from v1.spend: entries keyed to first of month are monthly totals
@@ -199,7 +228,7 @@ function _finance(v1, today) {
     const amount = cats['nhi'];
     if (!amount || amount <= 0) continue;
     const month = date.slice(0, 7);
-    if (!months[month]) months[month] = { income: [] };
+    if (!months[month]) months[month] = {};
     const existing = months[month].income ?? [];
     if (!existing.find(r => r.id === 'nhi')) {
       existing.push({ id: 'nhi', label: '国民健康保険', amount, isNeg: true });
