@@ -192,8 +192,15 @@ function _buildBondSection(bonds) {
 
   const wrap = div('bond-section');
 
-  const hdr = div('bond-section-hdr');
-  hdr.textContent = 'Government Bonds';
+  const hdr    = div('bond-section-hdr');
+  const hdrTitle = div('bond-section-hdr-title'); hdrTitle.textContent = 'Government Bonds';
+  const addBtn = btn('nisa-add-fund-btn', '', () => {
+    _view = 'form'; _editId = null;
+    _formData = { country: 'ID', productType: 'governmentBond' };
+    _render();
+  });
+  addBtn.innerHTML = '<span class="material-symbols-outlined">add</span>Add bond';
+  hdr.append(hdrTitle, addBtn);
   wrap.appendChild(hdr);
 
   const cols = div('bond-cols');

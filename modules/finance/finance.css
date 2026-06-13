@@ -1153,12 +1153,17 @@
   overflow: hidden;
 }
 .bond-section-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: var(--s3) var(--s4);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+.bond-section-hdr-title {
   font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--text);
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
 }
 .bond-cols {
   display: grid;
