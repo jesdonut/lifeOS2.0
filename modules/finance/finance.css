@@ -1144,3 +1144,78 @@
   .fin-main  { grid-template-columns: 1fr; }
   .fin-right { position: static; }
 }
+
+/* ── Bond section ─────────────────────────────────────────────────── */
+.bond-section {
+  margin: var(--s4) var(--s4) 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.bond-section-hdr {
+  padding: var(--s3) var(--s4);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+.bond-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.bond-col { min-width: 0; }
+.bond-col:first-child { border-right: 1px solid var(--border); }
+.bond-col-hdr {
+  padding: var(--s2) var(--s3);
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border-dim);
+}
+.bond-col-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--surface-3); border-radius: 99px;
+  padding: 1px 6px; font-size: 10px; color: var(--text-2);
+}
+.bond-tbl-hdr {
+  display: grid;
+  padding: var(--s1) var(--s3);
+  font-size: 10px;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border-dim);
+  gap: var(--s1);
+}
+.bond-list { max-height: 280px; overflow-y: auto; }
+.bond-row {
+  display: grid;
+  padding: var(--s2) var(--s3);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border-dim);
+  align-items: center;
+  gap: var(--s1);
+}
+.bond-row:last-child { border-bottom: none; }
+.bond-tbl-active  { grid-template-columns: 1.4fr 1.3fr 0.8fr 1.3fr 1.3fr 1.2fr; }
+.bond-tbl-matured { grid-template-columns: 1.4fr 1.3fr 0.8fr 1.4fr; }
+.bc-series  { font-weight: 500; color: var(--text); }
+.bc-rate    { color: var(--accent); }
+.bc-matures { color: var(--text-3); }
+.bond-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.bond-sum-item {
+  padding: var(--s3) var(--s4);
+  border-right: 1px solid var(--border-dim);
+}
+.bond-sum-item:last-child { border-right: none; }
+.bond-sum-lbl { font-size: 10px; color: var(--text-3); margin-bottom: var(--s1); }
+.bond-sum-val { font-size: var(--fs-sm); font-weight: 600; color: var(--text); }
+@media (max-width: 800px) {
+  .bond-cols       { grid-template-columns: 1fr; }
+  .bond-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+  .bond-summary    { grid-template-columns: 1fr 1fr; }
+}

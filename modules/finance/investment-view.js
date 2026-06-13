@@ -67,6 +67,9 @@ function _buildList() {
 
   if (list.length) root.appendChild(_buildSummaryBar(list));
 
+  const bonds  = filtered.filter(i => i.productType === 'governmentBond');
+  const others = filtered.filter(i => i.productType !== 'governmentBond');
+
   if (!filtered.length) {
     const empty = div('inv-empty');
     empty.textContent = list.length
@@ -74,9 +77,12 @@ function _buildList() {
       : 'No investments yet. Add one to start tracking.';
     root.appendChild(empty);
   } else {
-    const cards = div('inv-cards');
-    filtered.forEach(item => cards.appendChild(_buildCard(item)));
-    root.appendChild(cards);
+    if (bonds.length)  root.appendChild(_buildBondSection(bonds));
+    if (others.length) {
+      const cards = div('inv-cards');
+      others.forEach(item => cards.appendChild(_buildCard(item)));
+      root.appendChild(cards);
+    }
   }
 
   return root;
@@ -141,6 +147,124 @@ function _buildSummaryBar(list) {
   bar.append(lbl, vals);
   return bar;
 }
+
+// ── Bond section ───────────────────────────────────────────────────
+
+const BOND_TAX = { IDR: 0.1 };
+
+function _bondCalc(b) {
+  const start  = new Date(b.startDate + 'T00:00:00');
+  const end    = new Date(b.maturityDate + 'T00:00:00');
+  const months = (end.getFullYear() - start.getFullYear()) * 12
+               + (end.getMonth() - start.getMonth()) + 1;
+  const tax        = BOND_TAX[b.currency] ?? 0;
+  const grossYear  = b.principal * (b.couponRate / 100);
+  const netYear    = Math.round(grossYear * (1 - tax));
+  const netMonth   = Math.round(netYear / 12);
+  const totalCoupon = Math.round(netMonth * months);
+  return { months, netYear, netMonth, totalCoupon };
+}
+
+function _fmtIDR(v) {
+  if (v >= 1_000_000_000) return 'Rp' + (v / 1_000_000_000).toFixed(2).replace(/\.?0+$/, '') + 'B';
+  if (v >= 1_000_000)     return 'Rp' + (v / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (v >= 1_000)         return 'Rp' + Math.round(v / 1_000) + 'K';
+  return 'Rp' + Math.round(v).toLocaleString();
+}
+
+function _buildBondSection(bonds) {
+  const today   = new Date().toISOString().slice(0, 10);
+  const active  = bonds.filter(b => (b.maturityDate ?? '') >= today)
+                       .sort((a, b) => a.maturityDate.localeCompare(b.maturityDate));
+  const matured = bonds.filter(b => (b.maturityDate ?? '') < today)
+                       .sort((a, b) => b.maturityDate.localeCompare(a.maturityDate));
+
+  const wrap = div('bond-section');
+
+  const hdr = div('bond-section-hdr');
+  hdr.textContent = 'Government Bonds';
+  wrap.appendChild(hdr);
+
+  const cols = div('bond-cols');
+  cols.appendChild(_buildBondCol('Active', active, false));
+  cols.appendChild(_buildBondCol('Matured', matured, true));
+  wrap.appendChild(cols);
+
+  wrap.appendChild(_buildBondSummary(active, bonds));
+  return wrap;
+}
+
+function _buildBondCol(label, bonds, isMatured) {
+  const col = div('bond-col');
+
+  const colHdr = div('bond-col-hdr');
+  const countEl = document.createElement('span');
+  countEl.className = 'bond-col-count';
+  countEl.textContent = bonds.length;
+  colHdr.textContent = label + ' ';
+  colHdr.appendChild(countEl);
+  col.appendChild(colHdr);
+
+  const gridClass = isMatured ? 'bond-tbl-matured' : 'bond-tbl-active';
+  const tblHdr = div('bond-tbl-hdr ' + gridClass);
+  tblHdr.innerHTML = isMatured
+    ? '<span>Series</span><span>Amount</span><span>Rate</span><span>Earned</span>'
+    : '<span>Series</span><span>Amount</span><span>Rate</span><span>Net/Mo</span><span>Total</span><span>Matures</span>';
+  col.appendChild(tblHdr);
+
+  const list = div('bond-list');
+  bonds.forEach(b => list.appendChild(_buildBondRow(b, isMatured, gridClass)));
+  col.appendChild(list);
+
+  return col;
+}
+
+function _buildBondRow(b, isMatured, gridClass) {
+  const calc = _bondCalc(b);
+  const row  = div('bond-row ' + gridClass);
+
+  const seriesEl = document.createElement('span'); seriesEl.className = 'bc-series'; seriesEl.textContent = b.displayName;
+  const amtEl    = document.createElement('span'); amtEl.textContent    = _fmtIDR(b.principal);
+  const rateEl   = document.createElement('span'); rateEl.className = 'bc-rate'; rateEl.textContent = b.couponRate.toFixed(2) + '%';
+  const totalEl  = document.createElement('span'); totalEl.textContent  = _fmtIDR(calc.totalCoupon);
+
+  if (isMatured) {
+    row.append(seriesEl, amtEl, rateEl, totalEl);
+  } else {
+    const moEl  = document.createElement('span'); moEl.textContent  = _fmtIDR(calc.netMonth);
+    const matEl = document.createElement('span'); matEl.className = 'bc-matures';
+    const d = new Date(b.maturityDate + 'T00:00:00');
+    matEl.textContent = d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+    row.append(seriesEl, amtEl, rateEl, moEl, totalEl, matEl);
+  }
+
+  return row;
+}
+
+function _buildBondSummary(active, all) {
+  const tax        = 0.1;
+  const invested   = active.reduce((s, b) => s + b.principal, 0);
+  const annualNet  = Math.round(active.reduce((s, b) => s + b.principal * (b.couponRate / 100) * (1 - tax), 0));
+  const monthlyNet = Math.round(annualNet / 12);
+  const totalCoupon = all.reduce((s, b) => s + _bondCalc(b).totalCoupon, 0);
+
+  const bar = div('bond-summary');
+  [
+    ['Active invested',    fmt('IDR', invested)],
+    ['Annual net',         fmt('IDR', annualNet)],
+    ['Monthly net',        fmt('IDR', monthlyNet)],
+    ['Total coupon (all)', fmt('IDR', totalCoupon)],
+  ].forEach(([label, value]) => {
+    const item = div('bond-sum-item');
+    const lbl  = div('bond-sum-lbl'); lbl.textContent = label;
+    const val  = div('bond-sum-val'); val.textContent = value;
+    item.append(lbl, val);
+    bar.appendChild(item);
+  });
+  return bar;
+}
+
+// ── Investment card ─────────────────────────────────────────────────
 
 function _buildCard(item) {
   const product    = PRODUCTS[item.country]?.[item.productType];
