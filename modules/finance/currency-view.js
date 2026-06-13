@@ -31,6 +31,7 @@ function state() {
   return {
     currencies:   c.currencies   ?? [],
     lots:         c.lots         ?? [],
+    wallet:       c.wallet       ?? [],
     targets:      c.targets      ?? ['JPY', 'IDR'],
     currentRates: c.currentRates ?? {},
   };
@@ -100,8 +101,15 @@ function _render() {
   grid.appendChild(addSlot);
   _c.appendChild(grid);
 
-  // Total bar
-  if (seen.length && s.targets.length) {
+  // Wallet section
+  if (s.wallet.length > 0 || true) {
+    _c.appendChild(_buildWalletSection(s));
+  }
+
+  // Total bar (lots + wallet combined)
+  const allHeld = [...s.lots, ...s.wallet.map(w => ({ currency: w.currency, amount: w.amount }))];
+  const allCodes = [...new Set(allHeld.map(x => x.currency))];
+  if (allCodes.length && s.targets.length) {
     const bar = document.createElement('div'); bar.className = 'fin-cur-total-bar';
     const lbl = document.createElement('span'); lbl.className = 'fin-cur-total-lbl'; lbl.textContent = 'total held';
     bar.appendChild(lbl);
@@ -109,18 +117,108 @@ function _render() {
     s.targets.forEach((t, i) => {
       if (i > 0) { const dot = document.createElement('span'); dot.className = 'fin-cur-total-dot'; dot.textContent = '·'; vals.appendChild(dot); }
       let sum = 0, hasAll = true;
-      s.lots.forEach(l => {
+      allHeld.forEach(l => {
         if (l.currency === t) { sum += l.amount || 0; return; }
         const r = s.currentRates?.[l.currency]?.[t];
         if (r) sum += (l.amount || 0) * r; else hasAll = false;
       });
       const v = document.createElement('span'); v.className = 'fin-cur-total-item';
-      v.textContent = hasAll && seen.length ? fmtAmt(sum, t) : '—';
+      v.textContent = hasAll && allCodes.length ? fmtAmt(sum, t) : '—';
       vals.appendChild(v);
     });
     bar.appendChild(vals);
     _c.appendChild(bar);
   }
+}
+
+// ── Wallet section ─────────────────────────────────────────────────
+function _buildWalletSection(s) {
+  const wrap = document.createElement('div'); wrap.className = 'fin-wallet-wrap';
+  const hdr  = document.createElement('div'); hdr.className = 'fin-wallet-hdr';
+  const ttl  = document.createElement('span'); ttl.className = 'fin-wallet-title'; ttl.textContent = 'Wallet';
+  hdr.appendChild(ttl);
+  wrap.appendChild(hdr);
+
+  const list = document.createElement('div'); list.className = 'fin-wallet-list';
+
+  s.wallet.forEach(w => {
+    const cur = CUR_MAP[w.currency] ?? { code: w.currency, flag: '🏳', symbol: w.currency };
+    const row = document.createElement('div'); row.className = 'fin-wallet-row';
+
+    const left = document.createElement('div'); left.className = 'fin-wallet-left';
+    const flag = document.createElement('span'); flag.className = 'fin-wallet-flag'; flag.textContent = cur.flag;
+    const code = document.createElement('span'); code.className = 'fin-wallet-code'; code.textContent = w.currency;
+    const amt  = document.createElement('span'); amt.className = 'fin-wallet-amt';
+    amt.textContent = fmtAmt(w.amount, w.currency);
+    left.append(flag, code, amt);
+
+    if (w.note) {
+      const note = document.createElement('span'); note.className = 'fin-wallet-note'; note.textContent = w.note;
+      left.appendChild(note);
+    }
+
+    const right = document.createElement('div'); right.className = 'fin-wallet-right';
+    s.targets.forEach(t => {
+      if (t === w.currency) return;
+      const r = s.currentRates?.[w.currency]?.[t];
+      if (!r) return;
+      const cv = document.createElement('span'); cv.className = 'fin-wallet-converted';
+      cv.textContent = fmtAmt(w.amount * r, t);
+      right.appendChild(cv);
+    });
+
+    const rm = document.createElement('button'); rm.className = 'fin-wallet-rm';
+    rm.innerHTML = '<span class="material-symbols-outlined">close</span>';
+    rm.addEventListener('click', () => {
+      persist({ wallet: s.wallet.filter(x => x.id !== w.id) });
+      _render();
+    });
+    right.appendChild(rm);
+
+    row.append(left, right);
+    list.appendChild(row);
+  });
+
+  // Add row
+  const addRow = document.createElement('div'); addRow.className = 'fin-wallet-add-row';
+  const addBtn = document.createElement('button'); addBtn.className = 'fin-cur-add-lot'; addBtn.textContent = '+ Add';
+  addBtn.addEventListener('click', () => {
+    addBtn.style.display = 'none';
+    const form = document.createElement('div'); form.className = 'fin-wallet-form';
+
+    const curSel = document.createElement('select'); curSel.className = 'fin-wallet-form-sel';
+    CURRENCIES.forEach(c => {
+      const opt = document.createElement('option'); opt.value = c.code;
+      opt.textContent = `${c.flag} ${c.code} — ${c.name}`; curSel.appendChild(opt);
+    });
+    curSel.value = 'GBP';
+
+    const amtInp = document.createElement('input');
+    amtInp.type = 'number'; amtInp.className = 'fin-wallet-form-inp'; amtInp.placeholder = 'Amount'; amtInp.min = '0';
+
+    const noteInp = document.createElement('input');
+    noteInp.type = 'text'; noteInp.className = 'fin-wallet-form-inp'; noteInp.placeholder = 'Note (optional)';
+
+    const saveBtn = document.createElement('button'); saveBtn.className = 'fin-lot-save-btn'; saveBtn.textContent = 'Add';
+    const cancelBtn = document.createElement('button'); cancelBtn.className = 'fin-lot-cancel-btn'; cancelBtn.textContent = 'Cancel';
+
+    saveBtn.addEventListener('click', () => {
+      const amt = parseFloat(amtInp.value);
+      if (!amt) return;
+      persist({ wallet: [...state().wallet, { id: uid(), currency: curSel.value, amount: amt, note: noteInp.value.trim() || null }] });
+      _render();
+    });
+    cancelBtn.addEventListener('click', () => { form.remove(); addBtn.style.display = ''; });
+    amtInp.addEventListener('keydown', e => { if (e.key === 'Enter') saveBtn.click(); });
+
+    form.append(curSel, amtInp, noteInp, saveBtn, cancelBtn);
+    addRow.appendChild(form);
+  });
+  addRow.appendChild(addBtn);
+  list.appendChild(addRow);
+
+  wrap.appendChild(list);
+  return wrap;
 }
 
 // ── Targets bar ────────────────────────────────────────────────────
