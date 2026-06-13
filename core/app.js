@@ -174,6 +174,10 @@ tabBar.appendChild(tabRight);
 // ── Boot ───────────────────────────────────────────────────────────
 applyTheme(_theme);
 
+if (/Mobi|Android/i.test(navigator.userAgent)) {
+  window.location.replace('mobile.html');
+}
+
 const _data = load();
 if (!_data.settings?.setupDone) {
   window.location.href = 'index.html';

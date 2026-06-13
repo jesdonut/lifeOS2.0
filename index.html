@@ -260,6 +260,11 @@
 
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
+  // ── Mobile redirect ───────────────────────────────────────────
+  if (/Mobi|Android/i.test(navigator.userAgent)) {
+    window.location.replace('mobile.html');
+  }
+
   // ── Already set up → point CTAs at app ───────────────────────
   try {
     const d = JSON.parse(localStorage.getItem('lifeOS_data') || '{}');
