@@ -78,7 +78,8 @@ function _render() {
 
   if (_addFundOpen) root.appendChild(_buildAddFundForm());
 
-  funds().forEach(f => root.appendChild(_buildFundCard(f)));
+  funds().slice().sort((a, b) => (b.currentValue ?? 0) - (a.currentValue ?? 0))
+         .forEach(f => root.appendChild(_buildFundCard(f)));
 
   _container.appendChild(root);
 }
