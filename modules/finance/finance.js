@@ -439,7 +439,7 @@ function _buildIncRows() {
     animation: 120,
     onEnd() {
       const ids    = [...rowsEl.querySelectorAll('.fin-inc-row')].map(el => el.dataset.id);
-      const rowMap = Object.fromEntries(rows.map(r => [r.id, r]));
+      const rowMap = Object.fromEntries(_incRows(_year, _month).map(r => [r.id, r]));
       _setIncome(ids.map(id => rowMap[id]).filter(Boolean));
       setTimeout(_render, 0);
     },
@@ -514,7 +514,7 @@ function _buildBillRows() {
     animation: 120,
     onEnd() {
       const ids    = [...rowsEl.querySelectorAll('.fin-inc-row')].map(el => el.dataset.id);
-      const rowMap = Object.fromEntries(rows.map(r => [r.id, r]));
+      const rowMap = Object.fromEntries(_billRows(_year, _month).map(r => [r.id, r]));
       _setBills(ids.map(id => rowMap[id]).filter(Boolean));
       setTimeout(_render, 0);
     },
