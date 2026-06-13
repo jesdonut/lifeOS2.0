@@ -331,6 +331,45 @@ function _tasks(v1) {
   return out;
 }
 
+// ── Merge investments (bonds + nisa) into existing v2 store ───────
+
+export function doMergeInvestments(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (!parsed.bonds && !parsed.nisa) {
+          reject(new Error('Expected a JSON file with bonds or nisa keys.'));
+          return;
+        }
+        const raw  = localStorage.getItem(STORE_KEY);
+        const main = raw ? JSON.parse(raw) : { version: 2 };
+        const today = new Date().toISOString().slice(0, 10);
+
+        // Convert bonds to investment entries and merge by ID
+        const incoming    = _bonds(parsed, today);
+        const existing    = main.finance?.investments ?? [];
+        const existingIds = new Set(existing.map(i => i.id));
+        const toAdd       = incoming.filter(i => !existingIds.has(i.id));
+        main.finance      = { ...(main.finance ?? {}), investments: [...existing, ...toAdd] };
+
+        // Store NISA config (replaces placeholder)
+        if (parsed.nisa) {
+          main.nisa = { ...(main.nisa ?? {}), ...parsed.nisa };
+        }
+
+        localStorage.setItem(STORE_KEY, JSON.stringify(main));
+        resolve({ bondsAdded: toAdd.length, bondsSkipped: incoming.length - toAdd.length, hasNisa: !!parsed.nisa });
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = () => reject(new Error('Could not read file.'));
+    reader.readAsText(file);
+  });
+}
+
 // ── Currency ───────────────────────────────────────────────────────
 
 function _currency(v1) {
