@@ -375,12 +375,26 @@ function _acc(id, title, jp, isExpense, meta, total, isIncome, buildBody, color)
 }
 
 // ── Income rows (editable, sortable) ──────────────────────────────
+function _allIncSaved() {
+  return _mdata(_year, _month).income ?? DEFAULT_INCOME.map(x => ({ ...x }));
+}
+
+function _patchInc(id, patch) {
+  const all = _allIncSaved();
+  const exists = all.find(x => x.id === id);
+  if (exists) {
+    _setIncome(all.map(x => x.id === id ? { ...x, ...patch } : x));
+  } else {
+    _setIncome([...all, { ...DEFAULT_INCOME.find(x => x.id === id), ...patch }]);
+  }
+}
+
 function _buildIncRows() {
   const rows   = _incRows(_year, _month);
   const rowsEl = document.createElement('div');
   rowsEl.className = 'fin-inc-rows';
 
-  rows.forEach((r, i) => {
+  rows.forEach(r => {
     const el = document.createElement('div');
     el.className = 'fin-inc-row';
     el.dataset.id = r.id;
@@ -395,7 +409,7 @@ function _buildIncRows() {
     sign.title = r.isNeg ? 'Deduction — click to make positive' : 'Income — click to make deduction';
     sign.addEventListener('click', e => {
       e.stopPropagation();
-      _setIncome(rows.map((x, j) => j === i ? { ...x, isNeg: !x.isNeg } : x));
+      _patchInc(r.id, { isNeg: !r.isNeg });
       _render();
     });
 
@@ -405,7 +419,7 @@ function _buildIncRows() {
     lbl.value = r.label;
     lbl.addEventListener('click', e => e.stopPropagation());
     const saveIncLbl = e => {
-      _setIncome(rows.map((x, j) => j === i ? { ...x, label: e.target.value.trim() || x.label } : x));
+      _patchInc(r.id, { label: e.target.value.trim() || r.label });
     };
     lbl.addEventListener('change', saveIncLbl);
     lbl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); saveIncLbl(e); lbl.blur(); } });
@@ -418,7 +432,7 @@ function _buildIncRows() {
     inp.value = r.amount || ''; inp.placeholder = '0';
     inp.addEventListener('click', e => e.stopPropagation());
     inp.addEventListener('change', e => {
-      _setIncome(rows.map((x, j) => j === i ? { ...x, amount: parseFloat(e.target.value) || 0 } : x));
+      _patchInc(r.id, { amount: parseFloat(e.target.value) || 0 });
       _render();
     });
     wrap.append(yen, inp);
@@ -429,13 +443,7 @@ function _buildIncRows() {
     rm.title = 'Remove';
     rm.addEventListener('click', e => {
       e.stopPropagation();
-      const allSaved = _mdata(_year, _month).income ?? DEFAULT_INCOME.map(x => ({ ...x }));
-      const inSaved = allSaved.find(x => x.id === r.id);
-      if (inSaved) {
-        _setIncome(allSaved.map(x => x.id === r.id ? { ...x, hidden: true, amount: 0 } : x));
-      } else {
-        _setIncome([...allSaved, { ...r, hidden: true, amount: 0 }]);
-      }
+      _patchInc(r.id, { hidden: true, amount: 0 });
       _render();
     });
 
@@ -447,9 +455,11 @@ function _buildIncRows() {
     handle:    '.fin-drag-handle',
     animation: 120,
     onEnd() {
-      const ids    = [...rowsEl.querySelectorAll('.fin-inc-row')].map(el => el.dataset.id);
-      const rowMap = Object.fromEntries(_incRows(_year, _month).map(r => [r.id, r]));
-      _setIncome(ids.map(id => rowMap[id]).filter(Boolean));
+      const visibleIds = [...rowsEl.querySelectorAll('.fin-inc-row')].map(el => el.dataset.id);
+      const all        = _allIncSaved();
+      const hidden     = all.filter(x => x.hidden);
+      const rowMap     = Object.fromEntries(all.map(r => [r.id, r]));
+      _setIncome([...visibleIds.map(id => rowMap[id]).filter(Boolean), ...hidden]);
       setTimeout(_render, 0);
     },
   });
@@ -459,7 +469,7 @@ function _buildIncRows() {
   addBtn.innerHTML = '<span class="material-symbols-outlined">add</span>Add row';
   addBtn.addEventListener('click', e => {
     e.stopPropagation();
-    _setIncome([...rows, { id: _uid(), label: '新しい項目', amount: 0, isNeg: false }]);
+    _setIncome([..._allIncSaved(), { id: _uid(), label: '新しい項目', amount: 0, isNeg: false }]);
     _render();
   });
 
