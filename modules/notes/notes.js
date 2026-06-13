@@ -173,29 +173,20 @@ function render() {
       const item = document.createElement('div');
       item.className = 'note-item';
 
-      const text = document.createElement('div');
-      text.className = 'note-text';
-      text.innerHTML = renderMd(note.text);
+      const titleEl = document.createElement('div');
+      titleEl.className = 'note-text';
+      titleEl.style.cssText = 'font-size:var(--fs-xs);color:var(--text);font-weight:500;';
+      titleEl.textContent = note.title || note.text?.split('\n')[0]?.replace(/^#+\s*/, '') || 'Untitled';
 
       const meta = document.createElement('div');
       meta.className = 'note-meta';
 
       const dateEl = document.createElement('span');
       dateEl.className = 'note-date';
-      dateEl.textContent = fmtDate(note.createdAt);
+      dateEl.textContent = fmtDate(note.updatedAt ?? note.createdAt);
 
-      const editBtn = document.createElement('button');
-      editBtn.className = 'note-edit-btn';
-      editBtn.textContent = 'edit';
-      editBtn.addEventListener('click', e => { e.stopPropagation(); openNoteModal(note); });
-
-      const delBtn = document.createElement('button');
-      delBtn.className = 'note-del-btn';
-      delBtn.textContent = '✕';
-      delBtn.addEventListener('click', e => { e.stopPropagation(); deleteNote(note.id); });
-
-      meta.append(dateEl, editBtn, delBtn);
-      item.append(text, meta);
+      meta.append(dateEl);
+      item.append(titleEl, meta);
       list.appendChild(item);
     });
   }

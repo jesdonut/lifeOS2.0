@@ -271,7 +271,7 @@
 .nt-tb-btn.active { color: var(--accent); }
 .nt-tb-btn .material-symbols-outlined { font-size: 18px; }
 .nt-tb-del:hover   { color: var(--red); }
-.nt-hint-btn       { font-size: var(--fs-xs); font-weight: 600; width: 24px; height: 24px; justify-content: center; margin-left: auto; }
+.nt-hint-btn       { font-size: var(--fs-xs); font-weight: 600; width: 24px; height: 24px; justify-content: center; margin-left: var(--s3); }
 
 .nt-title-inp {
   width: 100%;
@@ -369,6 +369,7 @@
 .nt-md-table th,
 .nt-md-table td {
   border: 1px solid var(--border);
+  border-radius: 0;
   padding: var(--s2) var(--s3);
   text-align: left;
   color: var(--text);
