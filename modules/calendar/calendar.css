@@ -400,6 +400,21 @@
 
 .cal-modal-link-input { color: var(--text-3); font-size: var(--fs-xs); }
 
+.cal-modal-notes-input {
+  resize: vertical;
+  font-family: var(--font);
+  line-height: 1.5;
+  outline: none;
+}
+
+.cal-modal-evt-notes {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding: 2px var(--s3) var(--s2) calc(var(--s2) + 8px + var(--s2));
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
 .cal-modal-time-row {
   display: flex;
   align-items: center;

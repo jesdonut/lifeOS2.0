@@ -750,6 +750,12 @@ function openModal(date, editId = null) {
         actions.unshift(linkBtn);
       }
       row.append(dot, titleWrap, cat, ...actions);
+      if (evt.notes) {
+        const noteEl = document.createElement('div');
+        noteEl.className = 'cal-modal-evt-notes';
+        noteEl.textContent = evt.notes;
+        list.appendChild(noteEl);
+      }
       list.appendChild(row);
     });
     card.appendChild(list);
@@ -799,6 +805,15 @@ function openModal(date, editId = null) {
     linkInput.autocomplete = 'off';
     form.appendChild(linkInput);
 
+    const notesInput = document.createElement('textarea');
+    notesInput.className = 'cal-modal-input cal-modal-notes-input';
+    notesInput.placeholder = 'Notes (optional)';
+    notesInput.value = editing?.notes ?? '';
+    notesInput.rows = 3;
+    notesInput.addEventListener('click', e => e.stopPropagation());
+    notesInput.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+    form.appendChild(notesInput);
+
     let selectedCat = editing?.category ?? 'personal';
     const catGrid = document.createElement('div');
     catGrid.className = 'cal-cat-grid';
@@ -835,7 +850,7 @@ function openModal(date, editId = null) {
       parkBtn.className = 'cal-park-btn';
       parkBtn.textContent = 'Park for later';
       parkBtn.addEventListener('click', () => {
-        saveEvent({ ...editing, date: null, time: timeStart.value || editing?.time || null, endTime: timeEnd.value || editing?.endTime || null, link: linkInput.value.trim() || editing?.link || null });
+        saveEvent({ ...editing, date: null, time: timeStart.value || editing?.time || null, endTime: timeEnd.value || editing?.endTime || null, link: linkInput.value.trim() || editing?.link || null, notes: notesInput.value.trim() || editing?.notes || null });
         closeModal();
       });
       const delBtn = document.createElement('button');
@@ -856,6 +871,7 @@ function openModal(date, editId = null) {
         time:    timeStart.value || null,
         endTime: timeEnd.value   || null,
         link:    linkInput.value.trim() || null,
+        notes:   notesInput.value.trim() || null,
       });
       openModal(date);
     });
