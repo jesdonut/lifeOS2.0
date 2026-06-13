@@ -301,7 +301,7 @@ function _buildMain() {
   const filled    = incRows.filter(r => r.amount > 0).length;
   const filledB   = billRows.filter(r => r.amount > 0).length;
 
-  if (!_open.hasOwnProperty('bills')) _open.bills = false;
+  if (!_open.hasOwnProperty('fixed-bills')) _open['fixed-bills'] = false;
 
   const main  = document.createElement('div'); main.className  = 'fin-main';
   const left  = document.createElement('div'); left.className  = 'fin-left';
@@ -310,7 +310,7 @@ function _buildMain() {
   left.appendChild(_acc('income', 'Income', '収入', false,
     `${filled} of ${incRows.length} filled`, t.inc, true, () => _buildIncRows(), null));
 
-  left.appendChild(_acc('bills', 'Bills', '固定費', true,
+  left.appendChild(_acc('fixed-bills', 'Bills', '固定費', true,
     `${filledB} of ${billRows.length} filled`, t.bills, false, () => _buildBillRows(), null));
 
   cats.forEach(cat => {

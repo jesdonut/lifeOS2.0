@@ -1,0 +1,485 @@
+/* mobile.css — standalone mobile entry page */
+
+/* Category color tokens */
+:root {
+  --cat-food:          #e8824a;
+  --cat-bills:         #5b8fce;
+  --cat-commute:       #4aae8f;
+  --cat-entertainment: #a06fd8;
+  --cat-beauty:        #e06b9a;
+  --cat-paperwork:     #c9a84c;
+  --cat-medical:       #e06060;
+  --cat-necessities:   #7aab7a;
+
+  --cat-ev-personal:   #d69aa5;
+  --cat-ev-work:       #b8c89a;
+  --cat-ev-health:     #c79a9a;
+  --cat-ev-friends:    #7c9ccb;
+  --cat-ev-family:     #86afc5;
+  --cat-ev-travel:     #d1b36a;
+  --cat-ev-education:  #8fafa2;
+  --cat-ev-partner:    #b7a6b5;
+  --cat-ev-project:    #c49a73;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-base);
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+#mob-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.mob-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px var(--s4);
+  padding-top: max(14px, env(safe-area-inset-top));
+  border-bottom: 1px solid var(--border-dim);
+  flex-shrink: 0;
+}
+
+.mob-title {
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.mob-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.mob-export-btn {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--bg);
+  padding: 6px 14px;
+  border-radius: 100px;
+  transition: background var(--dur-fast);
+}
+.mob-export-btn:hover { background: var(--accent-2); }
+
+.mob-clear-btn {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding: 6px 10px;
+  border-radius: 100px;
+  transition: color var(--dur-fast);
+}
+.mob-clear-btn:hover { color: var(--red); }
+
+/* ── Date bar ── */
+.mob-datebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s3) var(--s2);
+  border-bottom: 1px solid var(--border-dim);
+  flex-shrink: 0;
+}
+
+.mob-nav-btn {
+  font-size: 24px;
+  color: var(--text-3);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast), background var(--dur-fast);
+}
+.mob-nav-btn:hover { color: var(--text); background: var(--surface-2); }
+
+.mob-date-label {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.mob-today-badge {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+/* ── Tabs ── */
+.mob-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-dim);
+  flex-shrink: 0;
+}
+
+.mob-tab {
+  flex: 1;
+  padding: 12px 0;
+  font-size: var(--fs-sm);
+  color: var(--text-3);
+  text-align: center;
+  transition: color var(--dur-fast);
+  position: relative;
+}
+.mob-tab.active {
+  color: var(--text);
+  font-weight: 600;
+}
+.mob-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px 2px 0 0;
+}
+
+/* ── Content ── */
+.mob-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--s3) var(--s4);
+  padding-bottom: max(var(--s5), env(safe-area-inset-bottom));
+}
+
+/* ── Section header ── */
+.mob-section-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--s3);
+}
+
+.mob-section-total {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.mob-add-btn {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--accent);
+  padding: 6px 12px;
+  border: 1px solid var(--accent-2);
+  border-radius: 100px;
+  transition: background var(--dur-fast);
+}
+.mob-add-btn:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+
+/* ── Entry list ── */
+.mob-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mob-entry {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: 10px var(--s3);
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-fast);
+}
+.mob-entry:hover { background: var(--surface-2); }
+
+.mob-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.mob-entry-cat {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  flex: 1;
+}
+
+.mob-entry-sub {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  background: var(--surface-2);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.mob-entry-note {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  font-style: italic;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mob-entry-amt {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+  min-width: 70px;
+  text-align: right;
+}
+
+.mob-del-btn {
+  font-size: 16px;
+  color: var(--text-3);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast);
+  flex-shrink: 0;
+}
+.mob-del-btn:hover { color: var(--red); }
+
+/* ── Tasks ── */
+.mob-entry.task.done .mob-task-text {
+  text-decoration: line-through;
+  color: var(--text-3);
+}
+
+.mob-check-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--bg);
+  flex-shrink: 0;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+.mob-check-btn.checked {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.mob-task-text {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  flex: 1;
+}
+
+/* ── Period tab ── */
+.mob-period-section {
+  margin-bottom: var(--s5);
+}
+
+.mob-period-label {
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  margin-bottom: var(--s3);
+}
+
+.mob-flow-btns {
+  display: flex;
+  gap: var(--s2);
+  flex-wrap: wrap;
+}
+
+.mob-flow-btn {
+  padding: 9px 16px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  background: var(--surface-1);
+  transition: all var(--dur-fast);
+}
+.mob-flow-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+  font-weight: 600;
+}
+.mob-flow-btn.spotting.active {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+.mob-symp-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}
+
+.mob-symp-btn {
+  padding: 7px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--border-dim);
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  background: transparent;
+  transition: all var(--dur-fast);
+}
+.mob-symp-btn.active {
+  border-color: var(--accent-2);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+/* ── Empty state ── */
+.mob-empty {
+  font-size: var(--fs-sm);
+  color: var(--text-3);
+  padding: var(--s5) 0;
+}
+
+/* ── Bottom sheet overlay ── */
+.mob-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  animation: mob-fade-in var(--dur-fast) ease;
+}
+
+@keyframes mob-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.mob-sheet {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--surface-1);
+  border-radius: 20px 20px 0 0;
+  padding: var(--s4);
+  padding-bottom: max(var(--s5), env(safe-area-inset-bottom));
+  animation: mob-slide-up 220ms var(--ease-out);
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+
+@keyframes mob-slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.mob-sheet-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--s4);
+}
+
+.mob-sheet-title {
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.mob-sheet-close {
+  font-size: 20px;
+  color: var(--text-3);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background var(--dur-fast);
+}
+.mob-sheet-close:hover { background: var(--surface-2); }
+
+/* ── Category grid (spend sheet) ── */
+.mob-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s2);
+  margin-bottom: var(--s3);
+}
+
+.mob-cat-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: 12px var(--s3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-dim);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  background: var(--surface-2);
+  transition: all var(--dur-fast);
+}
+.mob-cat-btn.active {
+  border-color: var(--accent-2);
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+}
+
+/* ── Sheet fields ── */
+.mob-sheet-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+
+.mob-input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px var(--s3);
+  font-size: var(--fs-base);
+  color: var(--text);
+  font-family: var(--font);
+  outline: none;
+  transition: border-color var(--dur-fast);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.mob-input:focus { border-color: var(--accent-2); }
+
+.mob-save-btn {
+  background: var(--accent);
+  color: var(--bg);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-fast);
+  width: 100%;
+  margin-top: var(--s1);
+}
+.mob-save-btn:hover { background: var(--accent-2); }

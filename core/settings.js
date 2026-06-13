@@ -2,6 +2,7 @@
 
 import { exportBackup, importBackup } from './store.js';
 import { doImportV1 } from './import-v1.js';
+import { doImportDelta } from './import-delta.js';
 
 // ── Constants ──────────────────────────────────────────────────────
 
@@ -860,6 +861,27 @@ function renderData(el) {
           location.reload();
         } catch {
           alert('Could not read that file. Make sure it is a valid LifeOS backup.');
+        }
+      });
+      fi.click();
+    }
+  ));
+
+  el.appendChild(dataRow('Import mobile data', 'Merge entries from a mobile delta export. Adds new entries without overwriting.', 'Import delta', false,
+    () => {
+      const fi = document.createElement('input');
+      fi.type   = 'file';
+      fi.accept = '.json';
+      fi.addEventListener('change', async e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          const summary = await doImportDelta(file);
+          closeSettings();
+          location.reload();
+          setTimeout(() => alert(summary), 300);
+        } catch (err) {
+          alert('Import failed: ' + err.message);
         }
       });
       fi.click();
