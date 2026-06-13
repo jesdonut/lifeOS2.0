@@ -107,10 +107,22 @@
 }
 
 /* ── Edit row ── */
-.bud-cat-row.editing .bud-cat-top { margin-bottom: 0; }
+.bud-edit-top {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s2);
+}
+
+.bud-edit-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding-left: 18px;
+}
 
 .bud-input {
-  width: 140px;
+  width: 110px;
   background: var(--surface-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -121,6 +133,19 @@
   transition: border-color var(--dur-fast);
 }
 .bud-input:focus { border-color: var(--accent-2); }
+
+.bud-freq-sel {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--s1) var(--s2);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--dur-fast);
+}
+.bud-freq-sel:focus { border-color: var(--accent-2); }
 
 .bud-edit-actions {
   display: flex;

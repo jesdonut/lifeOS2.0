@@ -270,6 +270,9 @@ function makeEditRow(cat, currentTarget) {
   const row = document.createElement('div');
   row.className = 'bud-cat-row editing';
 
+  const top = document.createElement('div');
+  top.className = 'bud-edit-top';
+
   const dot = document.createElement('span');
   dot.className = 'bud-dot';
   dot.style.background = cat.color ?? `var(--cat-${cat.id})`;
@@ -278,26 +281,52 @@ function makeEditRow(cat, currentTarget) {
   name.className   = 'bud-cat-name';
   name.textContent = cat.name;
 
+  top.append(dot, name);
+
+  const controls = document.createElement('div');
+  controls.className = 'bud-edit-controls';
+
   const input = document.createElement('input');
   input.className   = 'bud-input';
   input.type        = 'number';
   input.min         = '0';
-  input.placeholder = 'Monthly (¥)';
+  input.placeholder = '0';
   if (currentTarget != null) input.value = currentTarget;
+
+  const freq = document.createElement('select');
+  freq.className = 'bud-freq-sel';
+  [['monthly', 'Monthly (¥)'], ['daily', 'Daily (¥)'], ['yearly', 'Yearly (¥)']].forEach(([val, lbl]) => {
+    const opt = document.createElement('option');
+    opt.value = val; opt.textContent = lbl;
+    freq.appendChild(opt);
+  });
+
+  const toMonthly = () => {
+    const val = parseFloat(input.value);
+    if (isNaN(val) || val < 0) return null;
+    if (freq.value === 'daily')  return Math.round(val * 30);
+    if (freq.value === 'yearly') return Math.round(val / 12);
+    return Math.round(val);
+  };
 
   const saveBtn = document.createElement('button');
   saveBtn.className   = 'bud-save-btn';
   saveBtn.textContent = 'Save';
   saveBtn.addEventListener('click', () => {
-    const val = parseInt(input.value, 10);
-    if (!isNaN(val) && val >= 0) saveBudget(cat.id, val);
+    const val = toMonthly();
+    if (val != null) saveBudget(cat.id, val);
     _editingCat = null;
     render();
   });
 
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className   = 'bud-cancel-btn';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', () => { _editingCat = null; render(); });
+
   const actions = document.createElement('div');
   actions.className = 'bud-edit-actions';
-  actions.appendChild(saveBtn);
+  actions.append(saveBtn, cancelBtn);
 
   if (currentTarget != null) {
     const removeBtn = document.createElement('button');
@@ -307,18 +336,13 @@ function makeEditRow(cat, currentTarget) {
     actions.appendChild(removeBtn);
   }
 
-  const cancelBtn = document.createElement('button');
-  cancelBtn.className   = 'bud-cancel-btn';
-  cancelBtn.textContent = 'Cancel';
-  cancelBtn.addEventListener('click', () => { _editingCat = null; render(); });
-  actions.appendChild(cancelBtn);
-
   input.addEventListener('keydown', e => {
     if (e.key === 'Enter')  saveBtn.click();
     if (e.key === 'Escape') cancelBtn.click();
   });
 
-  row.append(dot, name, input, actions);
+  controls.append(input, freq, actions);
+  row.append(top, controls);
   requestAnimationFrame(() => input.focus());
   return row;
 }
