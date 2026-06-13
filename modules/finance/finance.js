@@ -1,6 +1,7 @@
 // modules/finance/finance.js
 import * as CurrencyView    from './currency-view.js';
 import * as InvestmentView  from './investment-view.js';
+import * as BudgetView      from '../budget/budget.js';
 
 const MONTHS_S = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const MONTHS_L = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -38,6 +39,7 @@ const SUB_VIEWS = [
   { key: 'finance',    label: 'Finance'    },
   { key: 'currency',   label: 'Currency'   },
   { key: 'investment', label: 'Investment' },
+  { key: 'budget',     label: 'Budget'     },
 ];
 
 // ── Module contract ────────────────────────────────────────────────
@@ -55,6 +57,7 @@ export function init(container, data, onSave) {
 export function destroy() {
   CurrencyView.unmount();
   InvestmentView.unmount();
+  BudgetView.unmount();
   _container = _data = _onSave = null;
   _subView = 'finance';
 }
@@ -63,6 +66,7 @@ export function onDataChange(newData) {
   _data = newData;
   CurrencyView.update(newData);
   InvestmentView.update(newData);
+  BudgetView.update(newData);
 }
 
 // ── Data helpers ───────────────────────────────────────────────────
@@ -147,6 +151,7 @@ function _render() {
   const body = document.createElement('div'); body.className = 'fin-body';
   CurrencyView.unmount();
   InvestmentView.unmount();
+  BudgetView.unmount();
   if (_subView === 'finance') {
     body.appendChild(_buildHero());
     body.appendChild(_buildMain());
@@ -154,11 +159,8 @@ function _render() {
     CurrencyView.mount(body, _data, partial => _onSave(partial));
   } else if (_subView === 'investment') {
     InvestmentView.mount(body, _data, partial => _onSave(partial));
-  } else {
-    const placeholder = document.createElement('p');
-    placeholder.style.cssText = 'padding:var(--s5);color:var(--text-3);font-size:var(--fs-sm)';
-    placeholder.textContent = `${_subView} — coming soon`;
-    body.appendChild(placeholder);
+  } else if (_subView === 'budget') {
+    BudgetView.mount(body, _data, partial => _onSave(partial), _year, _month);
   }
   root.appendChild(body);
   _container.appendChild(root);

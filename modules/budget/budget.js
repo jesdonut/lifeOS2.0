@@ -1,11 +1,8 @@
-// modules/budget/budget.js
+// modules/budget/budget.js — sub-view inside Finance
 
 let _container, _data, _onSave;
 let _year, _month;
 let _editingCat = null;
-
-const MONTHS = ['January','February','March','April','May','June',
-                'July','August','September','October','November','December'];
 
 function spendCats() { return _data.settings?.spendCategories ?? []; }
 function budgets()   { return _data.settings?.monthlyBudgets  ?? {}; }
@@ -34,36 +31,33 @@ function saveBudget(catId, amount) {
   _onSave({ settings: { ..._data.settings, monthlyBudgets: next } });
 }
 
-// ── Module contract ────────────────────────────────────────────────
+// ── Sub-view contract ──────────────────────────────────────────────
 
-export function init(container, data, onSave) {
-  _container = container;
-  _data      = data;
-  _onSave    = onSave;
-  const now  = new Date();
-  _year      = now.getFullYear();
-  _month     = now.getMonth();
+export function mount(container, data, onSave, year, month) {
+  _container   = container;
+  _data        = data;
+  _onSave      = onSave;
+  _year        = year;
+  _month       = month;
+  _editingCat  = null;
   _loadCss();
   render();
 }
 
-export function destroy() {
-  _container.innerHTML = '';
-  _editingCat = null;
+export function unmount() {
+  if (_container) _container.innerHTML = '';
+  _container = null;
 }
 
-export function onDataChange(newData) {
-  _data = newData;
-  render();
+export function update(data) {
+  _data = data;
+  if (_container) render();
 }
 
 function _loadCss() {
   const href = new URL('./budget.css', import.meta.url).href;
   if (!document.querySelector(`link[href="${href}"]`)) {
-    const link = document.createElement('link');
-    link.rel  = 'stylesheet';
-    link.href = href;
-    document.head.appendChild(link);
+    document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', href }));
   }
 }
 
@@ -74,8 +68,6 @@ function render() {
 
   const wrap = document.createElement('div');
   wrap.className = 'bud-wrap';
-
-  wrap.appendChild(renderHeader());
 
   const cats       = spendCats();
   const bud        = budgets();
@@ -88,45 +80,11 @@ function render() {
     empty.textContent = 'No spend categories set up yet. Add them in Settings.';
     wrap.appendChild(empty);
   } else {
-    if (budgeted.length > 0) {
-      wrap.appendChild(renderBudgetedSection(budgeted, bud));
-    }
-    if (unbudgeted.length > 0) {
-      wrap.appendChild(renderUnbudgetedSection(unbudgeted));
-    }
+    if (budgeted.length > 0) wrap.appendChild(renderBudgetedSection(budgeted, bud));
+    if (unbudgeted.length > 0) wrap.appendChild(renderUnbudgetedSection(unbudgeted));
   }
 
   _container.appendChild(wrap);
-}
-
-function renderHeader() {
-  const hdr = document.createElement('div');
-  hdr.className = 'bud-hdr';
-
-  const prev = document.createElement('button');
-  prev.className  = 'bud-nav-btn';
-  prev.textContent = '‹';
-  prev.addEventListener('click', () => {
-    _month--;
-    if (_month < 0) { _month = 11; _year--; }
-    render();
-  });
-
-  const label = document.createElement('span');
-  label.className   = 'bud-month-label';
-  label.textContent = `${MONTHS[_month]} ${_year}`;
-
-  const next = document.createElement('button');
-  next.className  = 'bud-nav-btn';
-  next.textContent = '›';
-  next.addEventListener('click', () => {
-    _month++;
-    if (_month > 11) { _month = 0; _year++; }
-    render();
-  });
-
-  hdr.append(prev, label, next);
-  return hdr;
 }
 
 function renderBudgetedSection(cats, bud) {
@@ -144,7 +102,6 @@ function renderBudgetedSection(cats, bud) {
     section.appendChild(makeCatRow(cat, target, spent));
   });
 
-  // Totals row
   const totalRow   = document.createElement('div');
   totalRow.className = 'bud-total-row';
 
@@ -225,7 +182,6 @@ function makeCatRow(cat, target, spent) {
   const over = rem < 0;
   const barColor = pct >= 1 ? 'var(--red)' : pct >= 0.8 ? 'var(--amber)' : (cat.color ?? `var(--cat-${cat.id})`);
 
-  // Top line
   const top = document.createElement('div');
   top.className = 'bud-cat-top';
 
@@ -252,7 +208,6 @@ function makeCatRow(cat, target, spent) {
 
   top.append(dot, name, amts, remEl, editBtn);
 
-  // Progress bar
   const barWrap = document.createElement('div');
   barWrap.className = 'bud-bar-wrap';
 

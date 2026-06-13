@@ -5,34 +5,6 @@
   max-width: 640px;
 }
 
-/* ── Header ── */
-.bud-hdr {
-  display: flex;
-  align-items: center;
-  gap: var(--s3);
-  margin-bottom: var(--s5);
-}
-
-.bud-nav-btn {
-  font-size: 18px;
-  color: var(--text-3);
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  transition: color var(--dur-fast), background var(--dur-fast);
-}
-.bud-nav-btn:hover { color: var(--text); background: var(--surface-2); }
-
-.bud-month-label {
-  font-size: var(--fs-lg);
-  font-weight: 600;
-  color: var(--text);
-  min-width: 160px;
-}
-
 /* ── Budgeted section ── */
 .bud-section {
   display: flex;
