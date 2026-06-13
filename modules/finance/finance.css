@@ -1263,13 +1263,13 @@
   background: var(--surface);
 }
 .nisa-overview-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   border-bottom: 1px solid var(--border-dim);
 }
 .nisa-stat {
-  padding: var(--s3) var(--s4);
+  padding: var(--s2) var(--s4) var(--s2) var(--s4);
   border-right: 1px solid var(--border-dim);
+  min-width: 140px;
 }
 .nisa-stat:last-child { border-right: none; }
 .nisa-stat-lbl {
@@ -1283,12 +1283,12 @@
   color: var(--text);
 }
 .nisa-limits {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
 }
 .nisa-stat-limit {
-  padding: var(--s3) var(--s4);
+  padding: var(--s2) var(--s4);
   border-right: 1px solid var(--border-dim);
+  min-width: 160px;
 }
 .nisa-stat-limit:last-child { border-right: none; }
 .nisa-limit-row {
@@ -1315,54 +1315,82 @@
 
 /* Fund cards */
 .nisa-fund-card {
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-dim);
   background: var(--surface);
 }
 .nisa-fund-card:last-child { border-bottom: none; }
 
-.nisa-fund-head {
+.nisa-fund-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--s3) var(--s4);
-  border-bottom: 1px solid var(--border-dim);
+  padding: var(--s2) var(--s3) var(--s2) var(--s4);
+  cursor: pointer;
+  gap: var(--s3);
 }
+.nisa-fund-row:hover { background: var(--surface-2); }
+
 .nisa-fund-name {
   font-size: var(--fs-sm);
-  font-weight: 500;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nisa-fund-row-right {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  flex-shrink: 0;
+}
+.nisa-fund-val {
+  font-size: var(--fs-sm);
+  font-weight: 600;
   color: var(--text);
 }
-.nisa-fund-actions { display: flex; gap: var(--s1); }
-.nisa-fund-action-btn {
+.nisa-gain-badge {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 99px;
+}
+.nisa-gain-badge.up   { color: var(--green); background: color-mix(in srgb, var(--green) 12%, transparent); }
+.nisa-gain-badge.down { color: var(--red);   background: color-mix(in srgb, var(--red)   12%, transparent); }
+
+.nisa-chevron-btn,
+.nisa-fund-del-btn {
   display: inline-flex;
   align-items: center;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 3px;
   border-radius: var(--radius);
   color: var(--text-3);
 }
-.nisa-fund-action-btn:hover { background: var(--surface-3); color: var(--text); }
-.nisa-fund-action-btn .material-symbols-outlined { font-size: 16px; }
-.nisa-fund-del:hover { color: var(--red, #e55); }
+.nisa-chevron-btn:hover  { color: var(--text); background: var(--surface-3); }
+.nisa-fund-del-btn:hover { color: var(--red);  background: var(--surface-3); }
+.nisa-chevron-btn .material-symbols-outlined,
+.nisa-fund-del-btn .material-symbols-outlined { font-size: 16px; }
 
 .nisa-fund-stats {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
+  border-top: 1px solid var(--border-dim);
   border-bottom: 1px solid var(--border-dim);
+  background: var(--surface-2);
 }
 .nisa-fund-stat {
-  padding: var(--s3) var(--s4);
+  padding: var(--s2) var(--s4);
   border-right: 1px solid var(--border-dim);
+  min-width: 120px;
 }
 .nisa-fund-stat:last-child { border-right: none; }
-.nisa-fund-gain.up   { color: var(--green); }
-.nisa-fund-gain.down { color: var(--red); }
 .nisa-fund-stat-lbl {
   font-size: 10px;
   color: var(--text-3);
-  margin-bottom: var(--s1);
+  margin-bottom: 2px;
 }
 .nisa-fund-stat-val {
   font-size: var(--fs-sm);
@@ -1521,9 +1549,7 @@
 }
 
 @media (max-width: 800px) {
-  .nisa-overview-stats { grid-template-columns: 1fr 1fr 1fr; }
-  .nisa-limits         { grid-template-columns: 1fr 1fr; }
-  .nisa-fund-stats     { grid-template-columns: 1fr 1fr 1fr; }
-  .nisa-fund-stats .nisa-fund-stat:nth-child(3) { border-right: none; }
-  .nisa-fund-stats .nisa-fund-stat:nth-child(4) { border-right: 1px solid var(--border-dim); }
+  .nisa-overview-stats,
+  .nisa-limits,
+  .nisa-fund-stats { flex-wrap: wrap; }
 }

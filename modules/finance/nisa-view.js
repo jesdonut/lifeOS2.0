@@ -16,6 +16,7 @@ function fmtJPY(n)  { return '¥' + Math.round(n).toLocaleString(); }
 let _container         = null;
 let _data              = null;
 let _onSave            = null;
+let _expandedFundId    = null;
 let _editValueFundId   = null;
 let _editRatioFundId   = null;
 let _addPurchaseFundId = null;
@@ -47,6 +48,7 @@ export function mount(container, data, onSave) {
 export function unmount() {
   if (_container) _container.innerHTML = '';
   _container         = null;
+  _expandedFundId    = null;
   _editValueFundId   = null;
   _editRatioFundId   = null;
   _addPurchaseFundId = null;
@@ -157,22 +159,63 @@ function _limitStat(label, used, limit) {
 
 // ── Fund card ──────────────────────────────────────────────────────
 function _buildFundCard(fund) {
+  const isExpanded    = _expandedFundId === fund.id;
+  const totalInvested = (fund.purchases ?? []).reduce((s, p) => s + (p.amount ?? 0), 0);
+  const gain          = (fund.currentValue ?? 0) - totalInvested;
+  const annualFee     = (fund.currentValue ?? 0) * ((fund.expenseRatio ?? 0) / 100);
+
   const card = div('nisa-fund-card');
 
-  // Header
-  const head = div('nisa-fund-head');
+  // ── Compact row (always visible) ──
+  const row = div('nisa-fund-row');
+  row.addEventListener('click', () => { _expandedFundId = isExpanded ? null : fund.id; _render(); });
+
   const name = div('nisa-fund-name'); name.textContent = fund.name;
 
-  const actions = div('nisa-fund-actions');
+  const right = div('nisa-fund-row-right');
 
-  const delBtn = btn('nisa-fund-action-btn nisa-fund-del', '', () => {
+  if (_editValueFundId === fund.id) {
+    const inp    = _inp('number', fund.currentValue ?? 0);
+    const save   = btn('nisa-inline-save', 'Save', e => {
+      e.stopPropagation();
+      patchFund(fund.id, { currentValue: parseFloat(inp.value) || 0 });
+      _editValueFundId = null; _render();
+    });
+    const cancel = btn('nisa-inline-cancel', 'Cancel', e => {
+      e.stopPropagation(); _editValueFundId = null; _render();
+    });
+    inp.addEventListener('click', e => e.stopPropagation());
+    const editRow = div('nisa-inline-row'); editRow.append(inp, save, cancel);
+    right.appendChild(editRow);
+  } else {
+    const valEl   = div('nisa-fund-val'); valEl.textContent = fmtJPY(fund.currentValue ?? 0);
+    const editBtn = btn('nisa-val-edit-btn', '', e => {
+      e.stopPropagation(); _editValueFundId = fund.id; _render();
+    });
+    editBtn.innerHTML = '<span class="material-symbols-outlined">edit</span>';
+    editBtn.title = 'Update value';
+
+    const gainEl = div('nisa-gain-badge ' + (gain >= 0 ? 'up' : 'down'));
+    gainEl.textContent = (gain >= 0 ? '+' : '') + fmtJPY(gain);
+
+    right.append(valEl, editBtn, gainEl);
+  }
+
+  const chevron = btn('nisa-chevron-btn', '', e => {
+    e.stopPropagation(); _expandedFundId = isExpanded ? null : fund.id; _render();
+  });
+  chevron.innerHTML = `<span class="material-symbols-outlined">${isExpanded ? 'expand_less' : 'expand_more'}</span>`;
+
+  const delBtn = btn('nisa-fund-del-btn', '', e => {
+    e.stopPropagation();
     const count = (fund.purchases ?? []).length;
     const msg   = count
       ? `Delete "${fund.name}"? This will also delete its ${count} purchase(s).`
       : `Delete "${fund.name}"?`;
     if (confirm(msg)) {
-      if (_editValueFundId === fund.id)   _editValueFundId   = null;
-      if (_editRatioFundId === fund.id)   _editRatioFundId   = null;
+      if (_expandedFundId    === fund.id) _expandedFundId    = null;
+      if (_editValueFundId   === fund.id) _editValueFundId   = null;
+      if (_editRatioFundId   === fund.id) _editRatioFundId   = null;
       if (_addPurchaseFundId === fund.id) _addPurchaseFundId = null;
       if (_editPurchase?.fundId === fund.id) _editPurchase   = null;
       saveFunds(funds().filter(f => f.id !== fund.id));
@@ -182,113 +225,78 @@ function _buildFundCard(fund) {
   delBtn.innerHTML = '<span class="material-symbols-outlined">delete</span>';
   delBtn.title = 'Delete fund';
 
-  actions.appendChild(delBtn);
-  head.append(name, actions);
-  card.appendChild(head);
+  right.append(chevron, delBtn);
+  row.append(name, right);
+  card.appendChild(row);
 
-  // Stats
-  const stats = div('nisa-fund-stats');
+  // ── Expanded content ──
+  if (isExpanded) {
+    // Secondary stats row
+    const stats = div('nisa-fund-stats');
 
-  // Current value
-  const valStat = div('nisa-fund-stat');
-  const valLbl  = div('nisa-fund-stat-lbl'); valLbl.textContent = 'Current Value';
-  valStat.appendChild(valLbl);
-  if (_editValueFundId === fund.id) {
-    const inp  = _inp('number', fund.currentValue ?? 0);
-    const save = btn('nisa-inline-save', 'Save', () => {
-      patchFund(fund.id, { currentValue: parseFloat(inp.value) || 0 });
-      _editValueFundId = null; _render();
+    const invStat = div('nisa-fund-stat');
+    const invLbl  = div('nisa-fund-stat-lbl'); invLbl.textContent = 'Total Invested';
+    const invVal  = div('nisa-fund-stat-val'); invVal.textContent = fmtJPY(totalInvested);
+    invStat.append(invLbl, invVal);
+
+    const ratioStat = div('nisa-fund-stat');
+    const ratioLbl  = div('nisa-fund-stat-lbl'); ratioLbl.textContent = 'Expense Ratio';
+    ratioStat.appendChild(ratioLbl);
+    if (_editRatioFundId === fund.id) {
+      const inp    = _inp('number', fund.expenseRatio ?? 0); inp.step = '0.001';
+      const save   = btn('nisa-inline-save', 'Save', () => {
+        patchFund(fund.id, { expenseRatio: parseFloat(inp.value) || 0 });
+        _editRatioFundId = null; _render();
+      });
+      const cancel = btn('nisa-inline-cancel', 'Cancel', () => { _editRatioFundId = null; _render(); });
+      const r = div('nisa-inline-row'); r.append(inp, save, cancel);
+      ratioStat.appendChild(r);
+    } else {
+      const ratioVal = div('nisa-fund-stat-val'); ratioVal.textContent = (fund.expenseRatio ?? 0) + '%';
+      const editBtn  = btn('nisa-val-edit-btn', '', () => { _editRatioFundId = fund.id; _render(); });
+      editBtn.innerHTML = '<span class="material-symbols-outlined">edit</span>';
+      const r = div('nisa-inline-row'); r.append(ratioVal, editBtn);
+      ratioStat.appendChild(r);
+    }
+
+    const feeStat = div('nisa-fund-stat');
+    const feeLbl  = div('nisa-fund-stat-lbl'); feeLbl.textContent = 'Annual Fee';
+    const feeVal  = div('nisa-fund-stat-val'); feeVal.textContent = fmtJPY(annualFee);
+    feeStat.append(feeLbl, feeVal);
+
+    stats.append(invStat, ratioStat, feeStat);
+    card.appendChild(stats);
+
+    // Purchases
+    const section = div('nisa-purchases');
+
+    const phdr    = div('nisa-purchases-hdr');
+    const pLbl    = div('nisa-purchases-label'); pLbl.textContent = 'Purchases';
+    const addPBtn = btn('nisa-add-purchase-btn', '', () => {
+      _addPurchaseFundId = _addPurchaseFundId === fund.id ? null : fund.id;
+      _editPurchase = null; _render();
     });
-    const cancel = btn('nisa-inline-cancel', 'Cancel', () => { _editValueFundId = null; _render(); });
-    const row = div('nisa-inline-row'); row.append(inp, save, cancel);
-    valStat.appendChild(row);
-  } else {
-    const valEl  = div('nisa-fund-stat-val'); valEl.textContent = fmtJPY(fund.currentValue ?? 0);
-    const editBtn = btn('nisa-val-edit-btn', '', () => { _editValueFundId = fund.id; _render(); });
-    editBtn.innerHTML = '<span class="material-symbols-outlined">edit</span>';
-    editBtn.title = 'Update value';
-    const row = div('nisa-inline-row'); row.append(valEl, editBtn);
-    valStat.appendChild(row);
+    addPBtn.innerHTML = '<span class="material-symbols-outlined">add</span>';
+    addPBtn.title = 'Add purchase';
+    phdr.append(pLbl, addPBtn);
+    section.appendChild(phdr);
+
+    if (_addPurchaseFundId === fund.id) section.appendChild(_buildAddPurchaseForm(fund.id));
+
+    const purchases = fund.purchases ?? [];
+    if (!purchases.length && _addPurchaseFundId !== fund.id) {
+      const empty = div('nisa-purchases-empty'); empty.textContent = 'No purchases yet.';
+      section.appendChild(empty);
+    } else {
+      purchases.forEach(p => {
+        const isEditing = _editPurchase?.fundId === fund.id && _editPurchase?.purchaseId === p.id;
+        section.appendChild(isEditing ? _buildEditPurchaseRow(fund.id, p) : _buildPurchaseRow(fund.id, p));
+      });
+    }
+
+    card.appendChild(section);
   }
 
-  // Expense ratio
-  const ratioStat = div('nisa-fund-stat');
-  const ratioLbl  = div('nisa-fund-stat-lbl'); ratioLbl.textContent = 'Expense Ratio';
-  ratioStat.appendChild(ratioLbl);
-  if (_editRatioFundId === fund.id) {
-    const inp    = _inp('number', fund.expenseRatio ?? 0); inp.step = '0.001';
-    const save   = btn('nisa-inline-save', 'Save', () => {
-      patchFund(fund.id, { expenseRatio: parseFloat(inp.value) || 0 });
-      _editRatioFundId = null; _render();
-    });
-    const cancel = btn('nisa-inline-cancel', 'Cancel', () => { _editRatioFundId = null; _render(); });
-    const row = div('nisa-inline-row'); row.append(inp, save, cancel);
-    ratioStat.appendChild(row);
-  } else {
-    const ratioEl  = div('nisa-fund-stat-val'); ratioEl.textContent = (fund.expenseRatio ?? 0) + '%';
-    const editBtn  = btn('nisa-val-edit-btn', '', () => { _editRatioFundId = fund.id; _render(); });
-    editBtn.innerHTML = '<span class="material-symbols-outlined">edit</span>';
-    editBtn.title = 'Edit expense ratio';
-    const row = div('nisa-inline-row'); row.append(ratioEl, editBtn);
-    ratioStat.appendChild(row);
-  }
-
-  // Total invested + gain/loss
-  const totalInvested = (fund.purchases ?? []).reduce((s, p) => s + (p.amount ?? 0), 0);
-  const gain          = (fund.currentValue ?? 0) - totalInvested;
-
-  const invStat = div('nisa-fund-stat');
-  const invLbl  = div('nisa-fund-stat-lbl'); invLbl.textContent = 'Total Invested';
-  const invVal  = div('nisa-fund-stat-val'); invVal.textContent = fmtJPY(totalInvested);
-  invStat.append(invLbl, invVal);
-
-  const gainStat = div('nisa-fund-stat');
-  const gainLbl  = div('nisa-fund-stat-lbl'); gainLbl.textContent = 'Gain / Loss';
-  const gainVal  = div('nisa-fund-stat-val nisa-fund-gain ' + (gain >= 0 ? 'up' : 'down'));
-  gainVal.textContent = (gain >= 0 ? '+' : '') + fmtJPY(gain);
-  gainStat.append(gainLbl, gainVal);
-
-  // Annual fee
-  const annualFee = (fund.currentValue ?? 0) * ((fund.expenseRatio ?? 0) / 100);
-  const feeStat   = div('nisa-fund-stat');
-  const feeLbl    = div('nisa-fund-stat-lbl'); feeLbl.textContent = 'Annual Fee';
-  const feeVal    = div('nisa-fund-stat-val'); feeVal.textContent = fmtJPY(annualFee);
-  feeStat.append(feeLbl, feeVal);
-
-  stats.append(valStat, invStat, gainStat, ratioStat, feeStat);
-  card.appendChild(stats);
-
-  // Purchases
-  const section = div('nisa-purchases');
-
-  const phdr    = div('nisa-purchases-hdr');
-  const pLbl    = div('nisa-purchases-label'); pLbl.textContent = 'Purchases';
-  const addPBtn = btn('nisa-add-purchase-btn', '', () => {
-    _addPurchaseFundId = _addPurchaseFundId === fund.id ? null : fund.id;
-    _editPurchase = null;
-    _render();
-  });
-  addPBtn.innerHTML = '<span class="material-symbols-outlined">add</span>';
-  addPBtn.title = 'Add purchase';
-  phdr.append(pLbl, addPBtn);
-  section.appendChild(phdr);
-
-  if (_addPurchaseFundId === fund.id) {
-    section.appendChild(_buildAddPurchaseForm(fund.id));
-  }
-
-  const purchases = fund.purchases ?? [];
-  if (!purchases.length && _addPurchaseFundId !== fund.id) {
-    const empty = div('nisa-purchases-empty'); empty.textContent = 'No purchases yet.';
-    section.appendChild(empty);
-  } else {
-    purchases.forEach(p => {
-      const isEditing = _editPurchase?.fundId === fund.id && _editPurchase?.purchaseId === p.id;
-      section.appendChild(isEditing ? _buildEditPurchaseRow(fund.id, p) : _buildPurchaseRow(fund.id, p));
-    });
-  }
-
-  card.appendChild(section);
   return card;
 }
 
