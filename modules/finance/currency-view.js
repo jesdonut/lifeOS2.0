@@ -167,13 +167,19 @@ function _buildWalletSection(s) {
       right.appendChild(cv);
     });
 
+    const edit = document.createElement('button'); edit.className = 'fin-wallet-edit';
+    edit.innerHTML = '<span class="material-symbols-outlined">edit</span>';
+    edit.addEventListener('click', () => {
+      row.replaceWith(_buildWalletEditRow(w, s));
+    });
+
     const rm = document.createElement('button'); rm.className = 'fin-wallet-rm';
     rm.innerHTML = '<span class="material-symbols-outlined">close</span>';
     rm.addEventListener('click', () => {
       persist({ wallet: s.wallet.filter(x => x.id !== w.id) });
       _render();
     });
-    right.appendChild(rm);
+    right.append(edit, rm);
 
     row.append(left, right);
     list.appendChild(row);
@@ -181,6 +187,7 @@ function _buildWalletSection(s) {
 
   // Add row
   const addRow = document.createElement('div'); addRow.className = 'fin-wallet-add-row';
+
   const addBtn = document.createElement('button'); addBtn.className = 'fin-cur-add-lot'; addBtn.textContent = '+ Add';
   addBtn.addEventListener('click', () => {
     addBtn.style.display = 'none';
@@ -219,6 +226,41 @@ function _buildWalletSection(s) {
 
   wrap.appendChild(list);
   return wrap;
+}
+
+function _buildWalletEditRow(w, s) {
+  const form = document.createElement('div'); form.className = 'fin-wallet-form fin-wallet-edit-form';
+
+  const curSel = document.createElement('select'); curSel.className = 'fin-wallet-form-sel';
+  CURRENCIES.forEach(c => {
+    const opt = document.createElement('option'); opt.value = c.code;
+    opt.textContent = `${c.flag} ${c.code} — ${c.name}`; curSel.appendChild(opt);
+  });
+  curSel.value = w.currency;
+
+  const amtInp = document.createElement('input');
+  amtInp.type = 'number'; amtInp.className = 'fin-wallet-form-inp';
+  amtInp.placeholder = 'Amount'; amtInp.min = '0'; amtInp.value = w.amount ?? '';
+
+  const noteInp = document.createElement('input');
+  noteInp.type = 'text'; noteInp.className = 'fin-wallet-form-inp';
+  noteInp.placeholder = 'Note (optional)'; noteInp.value = w.note ?? '';
+
+  const saveBtn = document.createElement('button'); saveBtn.className = 'fin-lot-save-btn'; saveBtn.textContent = 'Save';
+  const cancelBtn = document.createElement('button'); cancelBtn.className = 'fin-lot-cancel-btn'; cancelBtn.textContent = 'Cancel';
+
+  saveBtn.addEventListener('click', () => {
+    const amt = parseFloat(amtInp.value);
+    if (!amt) return;
+    const updated = { ...w, currency: curSel.value, amount: amt, note: noteInp.value.trim() || null };
+    persist({ wallet: state().wallet.map(x => x.id === w.id ? updated : x) });
+    _render();
+  });
+  cancelBtn.addEventListener('click', () => _render());
+  amtInp.addEventListener('keydown', e => { if (e.key === 'Enter') saveBtn.click(); if (e.key === 'Escape') cancelBtn.click(); });
+
+  form.append(curSel, amtInp, noteInp, saveBtn, cancelBtn);
+  return form;
 }
 
 // ── Targets bar ────────────────────────────────────────────────────
