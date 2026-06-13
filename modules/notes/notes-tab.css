@@ -360,6 +360,26 @@
   color: var(--text-2);
 }
 .nt-hint-row:last-child { border-bottom: none; }
+.nt-md-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: var(--fs-xs);
+  margin: var(--s2) 0;
+}
+.nt-md-table th,
+.nt-md-table td {
+  border: 1px solid var(--border);
+  padding: var(--s2) var(--s3);
+  text-align: left;
+  color: var(--text);
+}
+.nt-md-table th {
+  background: var(--surface-2);
+  font-weight: 600;
+  color: var(--text-2);
+}
+.nt-md-table tr:nth-child(even) td { background: var(--surface-2); }
+
 .nt-hint-row code {
   font-family: 'JetBrains Mono', monospace;
   background: var(--surface-3);

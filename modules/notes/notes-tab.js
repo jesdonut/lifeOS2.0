@@ -358,6 +358,8 @@ function _buildRightPane() {
     <div class="nt-hint-row"><code>## Heading</code><span>h2</span></div>
     <div class="nt-hint-row"><code>### Heading</code><span>h3</span></div>
     <div class="nt-hint-row"><code>- item</code><span>bullet list</span></div>
+    <div class="nt-hint-row"><code>| A | B |</code><span>table row</span></div>
+    <div class="nt-hint-row"><code>| — | — |</code><span>table separator</span></div>
     <div class="nt-hint-row"><code>blank line</code><span>paragraph break</span></div>
   `;
 
@@ -378,10 +380,42 @@ function _renderMd(raw) {
     .replace(/\*(.+?)\*/g,     '<em>$1</em>')
     .replace(/`(.+?)`/g,       '<code>$1</code>');
 
+  const parseCells = line => line.replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+  const isSep      = line => /^\|?[\s\-:|]+(\|[\s\-:|]+)*\|?$/.test(line);
+  const isPipe     = line => line.trim().startsWith('|');
+
   const lines = esc(raw).split('\n');
-  let html = '', inUl = false;
+  let html = '', inUl = false, tableBuf = [];
+
   const flush = () => { if (inUl) { html += '</ul>'; inUl = false; } };
+
+  const flushTable = () => {
+    if (!tableBuf.length) return;
+    const rows = tableBuf;
+    tableBuf = [];
+    if (rows.length < 2) { rows.forEach(r => { html += `<p>${inline(r)}</p>`; }); return; }
+    const headers = parseCells(rows[0]);
+    // rows[1] is the separator — skip it, start body from rows[2]
+    const bodyRows = rows.slice(2);
+    html += '<table class="nt-md-table"><thead><tr>';
+    headers.forEach(h => { html += `<th>${inline(h)}</th>`; });
+    html += '</tr></thead><tbody>';
+    bodyRows.forEach(row => {
+      const cells = parseCells(row);
+      html += '<tr>';
+      cells.forEach(c => { html += `<td>${inline(c)}</td>`; });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+  };
+
   for (const line of lines) {
+    if (isPipe(line)) {
+      flush();
+      tableBuf.push(line);
+      continue;
+    }
+    flushTable();
     let m;
     if      ((m = line.match(/^### (.+)/)))  { flush(); html += `<h3>${inline(m[1])}</h3>`; }
     else if ((m = line.match(/^## (.+)/)))   { flush(); html += `<h2>${inline(m[1])}</h2>`; }
@@ -391,6 +425,7 @@ function _renderMd(raw) {
     else                                      { flush(); html += `<p>${inline(line)}</p>`; }
   }
   flush();
+  flushTable();
   return html;
 }
 
