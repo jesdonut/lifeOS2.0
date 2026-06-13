@@ -1,16 +1,5 @@
 // nisa-view.js — NISA tracker section
 
-const DEFAULT_FUNDS = [
-  { id: 'emaxis-topix',        name: 'eMAXIS Slim 国内株式 (TOPIX)',                               expenseRatio: 0.143,   currentValue: 0, purchases: [] },
-  { id: 'emaxis-all-country',  name: 'eMAXIS Slim 全世界株式 (オール・カントリー)',                 expenseRatio: 0.05775, currentValue: 0, purchases: [] },
-  { id: 'emaxis-sp500',        name: 'eMAXIS Slim 米国株式 (S&P500)',                              expenseRatio: 0.0814,  currentValue: 0, purchases: [] },
-  { id: 'rakuten-all-country', name: '楽天・プラス・オールカントリー株式インデックス・ファンド',   expenseRatio: 0.0561,  currentValue: 0, purchases: [] },
-  { id: 'rakuten-nikkei225',   name: '楽天・プラス・日経225インデックス・ファンド',                expenseRatio: 0.132,   currentValue: 0, purchases: [] },
-  { id: 'rakuten-nasdaq100',   name: '楽天・プラス・NASDAQ-100インデックス・ファンド',             expenseRatio: 0.198,   currentValue: 0, purchases: [] },
-  { id: 'rakuten-sp500',       name: '楽天・プラス・S&P500インデックス・ファンド',                 expenseRatio: 0.077,   currentValue: 0, purchases: [] },
-  { id: 'fang-plus',           name: 'iFreeNEXT FANG+インデックス',                               expenseRatio: 0.7755,  currentValue: 0, purchases: [] },
-];
-
 const LIMITS = {
   annualTsumitate:  1_200_000,
   annualGrowth:     2_400_000,
@@ -35,10 +24,7 @@ let _addFundOpen       = false;
 
 // ── Data helpers ───────────────────────────────────────────────────
 function nisaData() { return _data.nisa ?? {}; }
-function funds() {
-  const saved = nisaData().funds;
-  return (saved && saved.length) ? saved : DEFAULT_FUNDS.map(f => ({ ...f, purchases: [] }));
-}
+function funds() { return nisaData().funds ?? []; }
 
 function saveFunds(newFunds) {
   const nisa = { ...nisaData(), funds: newFunds };
