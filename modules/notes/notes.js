@@ -162,13 +162,14 @@ function render() {
   const list = document.createElement('div');
   list.className = 'notes-list';
 
-  if (notes().length === 0) {
+  const pinned = notes().filter(n => n.pinned && !n.archived);
+  if (pinned.length === 0) {
     const empty = document.createElement('p');
     empty.style.cssText = 'font-size:var(--fs-xs);color:var(--text-3);padding:var(--s2) var(--s2);';
-    empty.textContent = 'No notes yet.';
+    empty.textContent = 'Pin notes from the Notes tab to see them here.';
     list.appendChild(empty);
   } else {
-    [...notes()].reverse().forEach(note => {
+    [...pinned].reverse().forEach(note => {
       const item = document.createElement('div');
       item.className = 'note-item';
 

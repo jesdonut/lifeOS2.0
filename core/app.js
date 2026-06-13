@@ -4,14 +4,14 @@ import { load, save, subscribe } from './store.js';
 import { initGestures } from './gestures.js';
 import { openSettings, applyAccent } from './settings.js';
 
-const TABS = ['calendar', 'period', 'finance', 'budget', 'tasks'];
+const TABS = ['calendar', 'period', 'finance', 'budget', 'notes'];
 
 const MODULE_MAP = {
   calendar: () => import('../modules/calendar/calendar.js'),
   period:   () => import('../modules/period/period-ui.js'),
   finance:  () => import('../modules/finance/finance.js'),
   budget:   () => import('../modules/budget/budget.js'),
-  tasks:    () => import('../modules/tasks/tasks.js'),
+  notes:    () => import('../modules/notes/notes-tab.js'),
 };
 
 // ── DOM refs ───────────────────────────────────────────────────────
