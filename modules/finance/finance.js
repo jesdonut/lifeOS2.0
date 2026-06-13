@@ -75,7 +75,8 @@ function _incRows(y, m) {
   if (!saved) return DEFAULT_INCOME;
   const ids = new Set(saved.map(r => r.id));
   const missing = DEFAULT_INCOME.filter(r => !ids.has(r.id));
-  return missing.length ? [...saved, ...missing] : saved;
+  const all = missing.length ? [...saved, ...missing] : saved;
+  return all.filter(r => !r.hidden);
 }
 
 function _billRows(y, m) {
@@ -428,7 +429,13 @@ function _buildIncRows() {
     rm.title = 'Remove';
     rm.addEventListener('click', e => {
       e.stopPropagation();
-      _setIncome(rows.filter((_, j) => j !== i));
+      const allSaved = _mdata(_year, _month).income ?? DEFAULT_INCOME.map(x => ({ ...x }));
+      const inSaved = allSaved.find(x => x.id === r.id);
+      if (inSaved) {
+        _setIncome(allSaved.map(x => x.id === r.id ? { ...x, hidden: true, amount: 0 } : x));
+      } else {
+        _setIncome([...allSaved, { ...r, hidden: true, amount: 0 }]);
+      }
       _render();
     });
 
