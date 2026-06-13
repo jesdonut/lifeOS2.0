@@ -310,8 +310,10 @@ function _buildMain() {
   left.appendChild(_acc('income', 'Income', '収入', false,
     `${filled} of ${incRows.length} filled`, t.inc, true, () => _buildIncRows(), null));
 
-  left.appendChild(_acc('fixed-bills', 'Bills', '固定費', true,
-    `${filledB} of ${billRows.length} filled`, t.bills, false, () => _buildBillRows(), null));
+  if (_year < 2025) {
+    left.appendChild(_acc('fixed-bills', 'Bills', '固定費', true,
+      `${filledB} of ${billRows.length} filled`, t.bills, false, () => _buildBillRows(), null));
+  }
 
   cats.forEach(cat => {
     if (!_open.hasOwnProperty(cat.id)) _open[cat.id] = false;
