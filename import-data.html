@@ -52,10 +52,6 @@
         <span class="material-symbols-outlined">history</span>
         Seratus v1
       </button>
-      <button class="source-tab" data-panel="investments">
-        <span class="material-symbols-outlined">savings</span>
-        Investments
-      </button>
     </div>
   </div>
 
@@ -198,44 +194,6 @@
           </div>
           <div class="processing-msg" id="v1-processing-msg">Importing your data...</div>
           <div class="error-msg" id="v1-error-msg"></div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Investments -->
-    <div class="source-panel" id="panel-investments">
-      <div class="panel-inner">
-
-        <div class="privacy-badge">
-          <span class="material-symbols-outlined">lock</span>
-          <p>Your file never leaves your device. All parsing happens locally in your browser. Nothing is uploaded.</p>
-        </div>
-
-        <div class="step">
-          <div class="step-label">What this imports</div>
-          <div class="step-body">
-            <ul>
-              <li><strong>Bonds</strong> (SBN / ORI / SR / ST / SBR series) — merged into your investment tracker by ID. Already-imported bonds are skipped.</li>
-              <li><strong>NISA config</strong> — stores your tsumitate schedule and projection settings.</li>
-            </ul>
-            <p style="margin-top:var(--s2);color:var(--text-3);font-size:var(--fs-sm)">File format: JSON with a <code>bonds</code> array and/or a <code>nisa</code> object.</p>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="step" style="margin-bottom:0">
-          <div class="step-label">Upload your investments file</div>
-          <div class="drop-zone" id="inv-drop-zone">
-            <input type="file" id="inv-file-input" accept=".json" />
-            <span class="material-symbols-outlined">upload_file</span>
-            <div class="drop-zone-label">Drop your JSON file here, or click to choose</div>
-            <div class="drop-zone-hint">Format: JSON with bonds and/or nisa keys</div>
-          </div>
-          <div class="processing-msg" id="inv-processing-msg">Importing...</div>
-          <div class="error-msg" id="inv-error-msg"></div>
-          <div class="result-summary" id="inv-result-summary" style="display:none"></div>
         </div>
 
       </div>
@@ -477,7 +435,7 @@
 
 <script src="core/lang.js"></script>
 <script type="module">
-  import { doImportV1, doMergeInvestments } from './core/import-v1.js';
+  import { doImportV1 } from './core/import-v1.js';
 
   const dropZone  = document.getElementById('v1-drop-zone');
   const fileInput = document.getElementById('v1-file-input');
@@ -514,52 +472,6 @@
   function showV1Error(msg) {
     errMsg.textContent    = msg;
     errMsg.style.display  = msg ? 'block' : 'none';
-  }
-
-  // ── Investments import ─────────────────────────────────────────────
-  const invDropZone  = document.getElementById('inv-drop-zone');
-  const invFileInput = document.getElementById('inv-file-input');
-  const invProcMsg   = document.getElementById('inv-processing-msg');
-  const invErrMsg    = document.getElementById('inv-error-msg');
-  const invResult    = document.getElementById('inv-result-summary');
-
-  invDropZone.addEventListener('dragover',  e => { e.preventDefault(); invDropZone.classList.add('dragover'); });
-  invDropZone.addEventListener('dragleave', () => invDropZone.classList.remove('dragover'));
-  invDropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    invDropZone.classList.remove('dragover');
-    if (e.dataTransfer.files[0]) handleInvFile(e.dataTransfer.files[0]);
-  });
-  invFileInput.addEventListener('change', e => {
-    if (e.target.files[0]) handleInvFile(e.target.files[0]);
-  });
-
-  async function handleInvFile(file) {
-    if (!file.name.endsWith('.json')) {
-      showInvError('Please choose a .json file.');
-      return;
-    }
-    showInvError('');
-    invProcMsg.style.display = 'block';
-    invResult.style.display  = 'none';
-    try {
-      const r = await doMergeInvestments(file);
-      invProcMsg.style.display = 'none';
-      const parts = [];
-      if (r.bondsAdded)   parts.push(`${r.bondsAdded} bond${r.bondsAdded === 1 ? '' : 's'} imported`);
-      if (r.bondsSkipped) parts.push(`${r.bondsSkipped} already existed (skipped)`);
-      if (r.hasNisa)      parts.push('NISA config saved');
-      invResult.textContent = parts.length ? parts.join(', ') + '.' : 'Nothing new to import.';
-      invResult.style.display = 'block';
-    } catch (err) {
-      invProcMsg.style.display = 'none';
-      showInvError('Import failed: ' + err.message);
-    }
-  }
-
-  function showInvError(msg) {
-    invErrMsg.textContent   = msg;
-    invErrMsg.style.display = msg ? 'block' : 'none';
   }
 </script>
 </body>
