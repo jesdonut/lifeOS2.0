@@ -465,8 +465,7 @@ function _buildCycles(el) {
   const pct       = n => `${(n / maxDays * 100).toFixed(2)}%`;
   const refLines  = [21, 28, 35, 42].filter(d => d < maxDays);
 
-  const chart = document.createElement('div'); chart.className = 'pr-cyc-chart';
-
+  const axisWrap = document.createElement('div'); axisWrap.className = 'pr-cyc-axis-wrap';
   const axis    = document.createElement('div'); axis.className = 'pr-cyc-row pr-cyc-axis';
   const axisLbl = document.createElement('div'); axisLbl.className = 'pr-cyc-lbl-col';
   const axisBar = document.createElement('div'); axisBar.className = 'pr-cyc-bar-zone';
@@ -476,7 +475,10 @@ function _buildCycles(el) {
   });
   const axisNum = document.createElement('div'); axisNum.className = 'pr-cyc-num-col';
   axis.append(axisLbl, axisBar, axisNum);
-  chart.appendChild(axis);
+  axisWrap.appendChild(axis);
+  el.appendChild(axisWrap);
+
+  const chart = document.createElement('div'); chart.className = 'pr-cyc-chart';
 
   completedLengths.forEach((length, i) =>
     chart.appendChild(_cycleRow(i + 1, _entries[i].start, length, null, 'completed', maxDays, refLines))

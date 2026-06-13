@@ -379,7 +379,7 @@
   font-weight: 600;
   color: var(--text-2);
 }
-.nt-md-table tr:nth-child(even) td { background: var(--surface-2); }
+.nt-md-table tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 40%, transparent); }
 
 .nt-hint-row code {
   font-family: 'JetBrains Mono', monospace;

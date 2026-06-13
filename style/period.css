@@ -614,8 +614,17 @@
   font-size: var(--fs-sm);
 }
 
+.pr-cyc-axis-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg);
+  padding: 0 var(--s5);
+  border-bottom: 1px solid var(--border);
+}
+
 .pr-cyc-chart {
-  padding: var(--s4) var(--s5) var(--s7);
+  padding: var(--s2) var(--s5) var(--s7);
   overflow-x: auto;
 }
 
@@ -628,8 +637,6 @@
 
 .pr-cyc-axis {
   min-height: 22px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: var(--s2);
   align-items: flex-end;
   padding-bottom: 4px;
 }
