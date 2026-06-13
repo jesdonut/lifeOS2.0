@@ -112,12 +112,14 @@ function _calendar(v1) {
     if (day.length) spendEntries[date] = day;
   }
 
-  // v1.spendLog: per-item detail — overrides spend for those dates
+  // v1.spendLog: per-item detail — merges with spend for those dates
   for (const [date, cats] of Object.entries(v1.spendLog ?? {})) {
     const day = [];
+    const coveredCats = new Set();
     for (const [v1CatId, items] of Object.entries(cats)) {
       if (v1CatId in V1_SPEND_MAP && !V1_SPEND_MAP[v1CatId]) continue;
       const categoryId = V1_SPEND_MAP[v1CatId] ?? v1CatId;
+      coveredCats.add(v1CatId);
       for (const item of items) {
         day.push({
           id:          item.id,
@@ -127,6 +129,17 @@ function _calendar(v1) {
           amount:      item.amount,
           currency:    'JPY',
         });
+      }
+    }
+    // Add any spend categories not present in spendLog (e.g. medical logged as total only)
+    for (const [v1CatId, amount] of Object.entries(v1.spend?.[date] ?? {})) {
+      if (amount <= 0 || coveredCats.has(v1CatId)) continue;
+      if (v1CatId in V1_SPEND_MAP) {
+        const mapped = V1_SPEND_MAP[v1CatId];
+        if (!mapped) continue;
+        day.push({ id: 'imp_' + date + '_' + v1CatId, categoryId: mapped, subcategory: null, amount, currency: 'JPY' });
+      } else {
+        day.push({ id: 'imp_' + date + '_' + v1CatId, categoryId: v1CatId, subcategory: null, amount, currency: 'JPY' });
       }
     }
     if (day.length) spendEntries[date] = day;
