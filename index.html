@@ -265,13 +265,6 @@
     window.location.replace('mobile.html');
   }
 
-  // ── Already set up → point CTAs at app ───────────────────────
-  try {
-    const d = JSON.parse(localStorage.getItem('lifeOS_data') || '{}');
-    if (d.settings?.setupDone) {
-      document.querySelectorAll('a[href="setup.html"]').forEach(a => a.href = 'app.html');
-    }
-  } catch {}
 
   // Builds May 2026 mini calendar HTML (starts Friday, period days 6-9)
   function mkPeriodCal() {
