@@ -1349,7 +1349,7 @@
 
 .nisa-fund-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   border-bottom: 1px solid var(--border-dim);
 }
 .nisa-fund-stat {
@@ -1357,6 +1357,8 @@
   border-right: 1px solid var(--border-dim);
 }
 .nisa-fund-stat:last-child { border-right: none; }
+.nisa-fund-gain.up   { color: var(--green); }
+.nisa-fund-gain.down { color: var(--red); }
 .nisa-fund-stat-lbl {
   font-size: 10px;
   color: var(--text-3);
@@ -1522,4 +1524,6 @@
   .nisa-overview-stats { grid-template-columns: 1fr 1fr 1fr; }
   .nisa-limits         { grid-template-columns: 1fr 1fr; }
   .nisa-fund-stats     { grid-template-columns: 1fr 1fr 1fr; }
+  .nisa-fund-stats .nisa-fund-stat:nth-child(3) { border-right: none; }
+  .nisa-fund-stats .nisa-fund-stat:nth-child(4) { border-right: 1px solid var(--border-dim); }
 }

@@ -232,6 +232,21 @@ function _buildFundCard(fund) {
     ratioStat.appendChild(row);
   }
 
+  // Total invested + gain/loss
+  const totalInvested = (fund.purchases ?? []).reduce((s, p) => s + (p.amount ?? 0), 0);
+  const gain          = (fund.currentValue ?? 0) - totalInvested;
+
+  const invStat = div('nisa-fund-stat');
+  const invLbl  = div('nisa-fund-stat-lbl'); invLbl.textContent = 'Total Invested';
+  const invVal  = div('nisa-fund-stat-val'); invVal.textContent = fmtJPY(totalInvested);
+  invStat.append(invLbl, invVal);
+
+  const gainStat = div('nisa-fund-stat');
+  const gainLbl  = div('nisa-fund-stat-lbl'); gainLbl.textContent = 'Gain / Loss';
+  const gainVal  = div('nisa-fund-stat-val nisa-fund-gain ' + (gain >= 0 ? 'up' : 'down'));
+  gainVal.textContent = (gain >= 0 ? '+' : '') + fmtJPY(gain);
+  gainStat.append(gainLbl, gainVal);
+
   // Annual fee
   const annualFee = (fund.currentValue ?? 0) * ((fund.expenseRatio ?? 0) / 100);
   const feeStat   = div('nisa-fund-stat');
@@ -239,7 +254,7 @@ function _buildFundCard(fund) {
   const feeVal    = div('nisa-fund-stat-val'); feeVal.textContent = fmtJPY(annualFee);
   feeStat.append(feeLbl, feeVal);
 
-  stats.append(valStat, ratioStat, feeStat);
+  stats.append(valStat, invStat, gainStat, ratioStat, feeStat);
   card.appendChild(stats);
 
   // Purchases
