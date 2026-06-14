@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Seratus</title>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#131110" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Seratus" />
+  <link rel="apple-touch-icon" href="/icons/icon.svg" />
   <link rel="stylesheet" href="style/base.css" />
   <link rel="stylesheet" href="style/layout.css" />
   <link rel="stylesheet" href="style/settings.css" />
@@ -35,6 +41,11 @@
 
   <script src="lib/Sortable.min.js"></script>
   <script type="module" src="core/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  </script>
 
 </body>
 </html>

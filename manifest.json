@@ -1,0 +1,24 @@
+{
+  "name": "Seratus — lifeOS v2.0",
+  "short_name": "Seratus",
+  "description": "A personal life OS for health, finances, calendar, and habits.",
+  "start_url": "/app.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#131110",
+  "theme_color": "#131110",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
