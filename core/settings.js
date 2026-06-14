@@ -761,6 +761,56 @@ function renderAppearance(el) {
 
 // ── Data ───────────────────────────────────────────────────────────
 
+const _isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+function exportAndConfirm(onConfirmed) {
+  exportBackup();
+  if (!_isMobile) { onConfirmed?.(); return; }
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = [
+    'position:fixed', 'inset:0', 'background:rgba(0,0,0,0.75)',
+    'z-index:3000', 'display:flex', 'align-items:center',
+    'justify-content:center', 'padding:var(--s4)',
+  ].join(';');
+
+  const box = document.createElement('div');
+  box.style.cssText = [
+    'background:var(--surface)', 'border:1px solid var(--border)',
+    'border-radius:var(--radius-lg)', 'padding:var(--s6)',
+    'max-width:340px', 'width:100%',
+    'display:flex', 'flex-direction:column', 'gap:var(--s4)',
+  ].join(';');
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:var(--fs-base);font-weight:600;color:var(--text)';
+  title.textContent = 'Did the file save?';
+
+  const hint = document.createElement('p');
+  hint.style.cssText = 'font-size:var(--fs-xs);color:var(--text-2);line-height:1.6;margin:0';
+  hint.textContent = 'On iOS, the file opens in your browser — tap Share, then Save to Files to keep it. On Android, check your Downloads folder.';
+
+  const acts = document.createElement('div');
+  acts.style.cssText = 'display:flex;flex-direction:column;gap:var(--s2)';
+
+  const yesBtn = document.createElement('button');
+  yesBtn.className = 'sp-data-btn';
+  yesBtn.style.cssText = 'padding:var(--s3);background:var(--accent);color:var(--bg);font-weight:600';
+  yesBtn.textContent = 'Yes, I have the file';
+  yesBtn.addEventListener('click', () => { overlay.remove(); onConfirmed?.(); });
+
+  const retryBtn = document.createElement('button');
+  retryBtn.className = 'sp-data-btn';
+  retryBtn.style.cssText = 'padding:var(--s3)';
+  retryBtn.textContent = 'Not yet — try again';
+  retryBtn.addEventListener('click', () => { overlay.remove(); exportAndConfirm(onConfirmed); });
+
+  acts.append(yesBtn, retryBtn);
+  box.append(title, hint, acts);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
 function showLogoutModal() {
   const overlay = document.createElement('div');
   overlay.style.cssText = [
@@ -790,9 +840,10 @@ function showLogoutModal() {
   dlBtn.style.cssText = 'width:100%;padding:var(--s3)';
   dlBtn.textContent = 'Download backup';
   dlBtn.addEventListener('click', () => {
-    exportBackup();
-    dlBtn.textContent = 'Downloaded';
-    dlBtn.style.opacity = '0.5';
+    exportAndConfirm(() => {
+      dlBtn.textContent = 'Downloaded';
+      dlBtn.style.opacity = '0.5';
+    });
   });
 
   const hr = document.createElement('hr');
@@ -849,7 +900,7 @@ function renderData(el) {
   ));
 
   el.appendChild(dataRow('Export backup', 'Download all your data as a JSON file.', 'Export', false,
-    () => exportBackup()
+    () => exportAndConfirm()
   ));
 
   el.appendChild(dataRow('Import backup', 'Restore from a previously exported JSON file.', 'Import', false,
