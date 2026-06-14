@@ -992,12 +992,9 @@ function _renderSearchResults(container, query) {
 }
 
 function _navigateToEvent(evt) {
-  const [y, m] = evt.date.split('-').map(Number);
-  _year = y;
-  _view = 'month';
-  render();
-  requestAnimationFrame(() => {
-    scrollToMonth(m - 1);
+  const [y, m, d] = evt.date.split('-').map(Number);
+
+  function highlight() {
     setTimeout(() => {
       const chip = _container.querySelector(`[data-id="${evt.id}"]`);
       if (chip) {
@@ -1006,7 +1003,18 @@ function _navigateToEvent(evt) {
         setTimeout(() => chip.classList.remove('cal-evt-highlight'), 2000);
       }
     }, 320);
-  });
+  }
+
+  if (_view === 'week') {
+    _weekStart = getWeekStart(new Date(y, m - 1, d));
+    render();
+    requestAnimationFrame(highlight);
+  } else {
+    _year = y;
+    _view = 'month';
+    render();
+    requestAnimationFrame(() => { scrollToMonth(m - 1); highlight(); });
+  }
 }
 
 // ── Spend entry modal ───────────────────────────────────────────────
