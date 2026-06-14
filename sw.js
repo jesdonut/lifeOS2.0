@@ -39,8 +39,10 @@ const SHELL = [
   '/modules/notes/countdown-view.js',
   '/modules/budget/budget.js',
   '/modules/budget/budget.css',
-  '/icons/icon.svg',
-  '/icons/icon-maskable.svg',
+  '/icons/seratus-100.svg',
+  '/icons/seratus-100-512.png',
+  '/icons/favicon-32.png',
+  '/icons/apple-touch-icon.png',
   '/manifest.json',
 ];
 
