@@ -24,6 +24,100 @@
 }
 .cal-add-btn:hover { color: var(--accent); border-color: var(--accent-2); }
 
+.cal-search-btn {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: var(--text-3);
+  border-radius: var(--radius);
+  transition: color var(--dur-fast), background var(--dur-fast);
+}
+.cal-search-btn:hover { color: var(--text); background: var(--surface-2); }
+.cal-search-btn .material-symbols-outlined { font-size: 18px; }
+
+/* ── Search panel ── */
+.cal-search-panel {
+  position: absolute;
+  top: 48px;
+  right: var(--s4);
+  width: 300px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px color-mix(in srgb, #000 35%, transparent);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.cal-search-input {
+  width: 100%;
+  padding: var(--s3) var(--s4);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border-dim);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  outline: none;
+  box-sizing: border-box;
+}
+.cal-search-input::placeholder { color: var(--text-3); }
+
+.cal-search-results { max-height: 280px; overflow-y: auto; }
+
+.cal-search-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s4);
+  cursor: pointer;
+  transition: background var(--dur-fast);
+}
+.cal-search-row:hover { background: var(--surface-2); }
+
+.cal-search-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cal-search-title {
+  flex: 1;
+  font-size: var(--fs-sm);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cal-search-date {
+  font-size: 10px;
+  color: var(--text-3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cal-search-empty {
+  padding: var(--s4);
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+}
+
+/* ── Event highlight (after search navigate) ── */
+@keyframes cal-highlight-pulse {
+  0%   { outline-color: var(--accent); }
+  50%  { outline-color: transparent; }
+  100% { outline-color: var(--accent); }
+}
+.cal-evt-highlight {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 1px;
+  animation: cal-highlight-pulse 0.6s ease 2;
+}
+
 /* ── Months scroll area ── */
 .cal-scroll {
   flex: 1;

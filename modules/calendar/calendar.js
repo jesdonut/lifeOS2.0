@@ -43,6 +43,7 @@ let _view = 'week'; // 'week' | 'month' | 'year'
 let _weekStart = null; // Monday of displayed week; null until first week render
 let _modal = null;
 let _spendModal = null;
+let _searchPanel = null;
 
 // ── Helpers ────────────────────────────────────────────────────────
 
@@ -229,7 +230,15 @@ function render() {
     }
   });
 
-  header.append(prevBtn, yearLabel, nextBtn, todayBtn, viewToggle, addBtn);
+  const searchBtn = document.createElement('button');
+  searchBtn.className = 'cal-search-btn';
+  searchBtn.title = 'Search events';
+  searchBtn.innerHTML = '<span class="material-symbols-outlined">search</span>';
+  searchBtn.addEventListener('click', () => {
+    if (_searchPanel) { closeSearch(); } else { openSearch(); }
+  });
+
+  header.append(prevBtn, yearLabel, nextBtn, todayBtn, viewToggle, addBtn, searchBtn);
   _container.appendChild(header);
 
   // Scroll area
@@ -853,11 +862,19 @@ function openModal(date, editId = null) {
         saveEvent({ ...editing, date: null, time: timeStart.value || editing?.time || null, endTime: timeEnd.value || editing?.endTime || null, link: linkInput.value.trim() || editing?.link || null, notes: notesInput.value.trim() || editing?.notes || null });
         closeModal();
       });
+      const dupBtn = document.createElement('button');
+      dupBtn.className = 'cal-park-btn';
+      dupBtn.textContent = 'Duplicate';
+      dupBtn.addEventListener('click', () => {
+        saveEvent({ ...editing, id: uid(), createdAt: undefined });
+        openModal(date);
+      });
+
       const delBtn = document.createElement('button');
       delBtn.className = 'cal-del-btn';
       delBtn.textContent = 'Delete';
       delBtn.addEventListener('click', () => { removeEvent(editing.id); openModal(date); });
-      actions.append(parkBtn, delBtn);
+      actions.append(parkBtn, dupBtn, delBtn);
     }
 
     const saveBtn = document.createElement('button');
@@ -891,6 +908,105 @@ function openModal(date, editId = null) {
 function closeModal() {
   _modal?.remove();
   _modal = null;
+}
+
+// ── Search ─────────────────────────────────────────────────────────
+
+function openSearch() {
+  _searchPanel = document.createElement('div');
+  _searchPanel.className = 'cal-search-panel';
+
+  const inp = document.createElement('input');
+  inp.className = 'cal-search-input';
+  inp.type = 'text';
+  inp.placeholder = 'Search events...';
+  inp.autocomplete = 'off';
+  _searchPanel.appendChild(inp);
+
+  const results = document.createElement('div');
+  results.className = 'cal-search-results';
+  _searchPanel.appendChild(results);
+
+  inp.addEventListener('input', () => _renderSearchResults(results, inp.value));
+  inp.addEventListener('keydown', e => { if (e.key === 'Escape') closeSearch(); });
+  document.addEventListener('keydown', _searchEscHandler);
+
+  _container.appendChild(_searchPanel);
+  requestAnimationFrame(() => inp.focus());
+}
+
+function _searchEscHandler(e) {
+  if (e.key === 'Escape') closeSearch();
+}
+
+function closeSearch() {
+  _searchPanel?.remove();
+  _searchPanel = null;
+  document.removeEventListener('keydown', _searchEscHandler);
+}
+
+function _renderSearchResults(container, query) {
+  container.innerHTML = '';
+  if (!query.trim()) return;
+
+  const q       = query.toLowerCase();
+  const matched = events()
+    .filter(e => e.date && e.title?.toLowerCase().includes(q))
+    .sort((a, b) => a.date > b.date ? 1 : -1)
+    .slice(0, 25);
+
+  if (!matched.length) {
+    const empty = document.createElement('div');
+    empty.className = 'cal-search-empty';
+    empty.textContent = 'No events found';
+    container.appendChild(empty);
+    return;
+  }
+
+  matched.forEach(evt => {
+    const row = document.createElement('div');
+    row.className = 'cal-search-row';
+
+    const dot = document.createElement('span');
+    dot.className = 'cal-search-dot';
+    dot.style.background = catColor(evt.category ?? 'personal');
+
+    const title = document.createElement('span');
+    title.className = 'cal-search-title';
+    title.textContent = evt.title;
+
+    const dateEl = document.createElement('span');
+    dateEl.className = 'cal-search-date';
+    const [y, m, d] = evt.date.split('-').map(Number);
+    dateEl.textContent = new Date(y, m - 1, d).toLocaleDateString('en', {
+      month: 'short', day: 'numeric', year: 'numeric',
+    });
+
+    row.append(dot, title, dateEl);
+    row.addEventListener('click', () => {
+      closeSearch();
+      _navigateToEvent(evt);
+    });
+    container.appendChild(row);
+  });
+}
+
+function _navigateToEvent(evt) {
+  const [y, m] = evt.date.split('-').map(Number);
+  _year = y;
+  _view = 'month';
+  render();
+  requestAnimationFrame(() => {
+    scrollToMonth(m - 1);
+    setTimeout(() => {
+      const chip = _container.querySelector(`[data-id="${evt.id}"]`);
+      if (chip) {
+        chip.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        chip.classList.add('cal-evt-highlight');
+        setTimeout(() => chip.classList.remove('cal-evt-highlight'), 2000);
+      }
+    }, 320);
+  });
 }
 
 // ── Spend entry modal ───────────────────────────────────────────────
