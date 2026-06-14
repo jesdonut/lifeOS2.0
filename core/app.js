@@ -4,7 +4,12 @@ import { load, save, subscribe } from './store.js';
 import { initGestures } from './gestures.js';
 import { openSettings, applyAccent } from './settings.js';
 
-const TABS = ['calendar', 'period', 'finance', 'notes'];
+const _bootData = load();
+const _periodOn = _bootData.settings?.periodEnabled ?? false;
+
+const TABS = _periodOn
+  ? ['calendar', 'period', 'finance', 'notes']
+  : ['calendar', 'finance', 'notes'];
 
 const MODULE_MAP = {
   calendar: () => import('../modules/calendar/calendar.js'),
