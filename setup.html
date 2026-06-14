@@ -305,9 +305,8 @@
     window.location.href = 'app.html';
   });
 
-  // ── Skip if already set up ────────────────────────────────────
+  // ── Pre-fill from existing data ───────────────────────────────
   const d = load();
-  if (d.settings?.setupDone) window.location.href = 'app.html';
   if (d.settings?.name) document.getElementById('f-name').value = d.settings.name;
 </script>
 
