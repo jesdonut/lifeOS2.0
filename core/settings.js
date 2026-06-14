@@ -300,8 +300,13 @@ function renderProfile(el) {
         periodEnabled,
       }
     });
+    const periodChanged = periodEnabled !== (_data.settings?.periodEnabled ?? false);
     saveBtn.textContent = 'Saved';
-    setTimeout(() => { saveBtn.textContent = 'Save changes'; }, 1500);
+    if (periodChanged) {
+      setTimeout(() => location.reload(), 800);
+    } else {
+      setTimeout(() => { saveBtn.textContent = 'Save changes'; }, 1500);
+    }
   });
   actions.appendChild(saveBtn);
   el.appendChild(actions);
