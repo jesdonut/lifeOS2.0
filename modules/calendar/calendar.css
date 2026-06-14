@@ -118,6 +118,17 @@
 .evt-project   { background: color-mix(in srgb, var(--cat-project)    18%, transparent); color: var(--cat-project); }
 .evt-partner   { background: color-mix(in srgb, var(--cat-partner)    18%, transparent); color: var(--cat-partner); }
 
+/* ── Light mode: darken chip text for contrast ── */
+[data-theme="light"] .evt-work      { background: color-mix(in srgb, var(--cat-work)      20%, transparent); color: color-mix(in srgb, var(--cat-work)      74%, #1a1410); }
+[data-theme="light"] .evt-personal  { background: color-mix(in srgb, var(--cat-personal)  20%, transparent); color: color-mix(in srgb, var(--cat-personal)  74%, #1a1410); }
+[data-theme="light"] .evt-health    { background: color-mix(in srgb, var(--cat-health)     20%, transparent); color: color-mix(in srgb, var(--cat-health)     74%, #1a1410); }
+[data-theme="light"] .evt-family    { background: color-mix(in srgb, var(--cat-family)     20%, transparent); color: color-mix(in srgb, var(--cat-family)     74%, #1a1410); }
+[data-theme="light"] .evt-friends   { background: color-mix(in srgb, var(--cat-friends)    20%, transparent); color: color-mix(in srgb, var(--cat-friends)    74%, #1a1410); }
+[data-theme="light"] .evt-travel    { background: color-mix(in srgb, var(--cat-travel)     20%, transparent); color: color-mix(in srgb, var(--cat-travel)     74%, #1a1410); }
+[data-theme="light"] .evt-education { background: color-mix(in srgb, var(--cat-education)  20%, transparent); color: color-mix(in srgb, var(--cat-education)  74%, #1a1410); }
+[data-theme="light"] .evt-project   { background: color-mix(in srgb, var(--cat-project)    20%, transparent); color: color-mix(in srgb, var(--cat-project)    74%, #1a1410); }
+[data-theme="light"] .evt-partner   { background: color-mix(in srgb, var(--cat-partner)    20%, transparent); color: color-mix(in srgb, var(--cat-partner)    74%, #1a1410); }
+
 /* ── Month view weekend tinting ── */
 .cal-dow.weekend { opacity: 0.45; }
 .cal-cell.weekend { background: color-mix(in srgb, var(--surface-2) 22%, transparent); }
