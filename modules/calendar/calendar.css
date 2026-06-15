@@ -732,6 +732,48 @@
   border-radius: var(--radius-sm);
 }
 
+/* Time block: events with both start and end time */
+.cal-time-block {
+  white-space: normal;
+  min-height: 48px;
+}
+
+.cal-tb-time {
+  font-size: 10px;
+  opacity: 0.75;
+  display: block;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-tb-body {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  flex: 1;
+  padding-left: 14px;
+  min-height: 14px;
+  margin: 2px 0;
+}
+
+.cal-tb-bar {
+  width: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0.35;
+  flex-shrink: 0;
+}
+
+.cal-tb-title {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
 .cal-evt-spend {
   font-size: 9px;
   opacity: 0.75;

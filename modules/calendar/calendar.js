@@ -480,10 +480,37 @@ function buildWeek(scroll) {
       const catId = evt.category ?? 'personal';
       const bg    = catBg(catId);
       const chip  = document.createElement('div');
-      chip.className = `cal-evt cal-week-evt${bg ? '' : ` evt-${catId}`}`;
-      if (bg) { chip.style.background = bg; chip.style.color = catColor(catId); }
-      chip.dataset.id = evt.id;
-      chip.textContent = evtChipLabel(evt);
+
+      if (evt.time && evt.endTime) {
+        chip.className = `cal-evt cal-week-evt cal-time-block${bg ? '' : ` evt-${catId}`}`;
+        if (bg) { chip.style.background = bg; chip.style.color = catColor(catId); }
+        chip.dataset.id = evt.id;
+
+        const startEl = document.createElement('span');
+        startEl.className = 'cal-tb-time cal-tb-start';
+        startEl.textContent = evt.time;
+
+        const body = document.createElement('span');
+        body.className = 'cal-tb-body';
+        const bar = document.createElement('span');
+        bar.className = 'cal-tb-bar';
+        const titleEl = document.createElement('span');
+        titleEl.className = 'cal-tb-title';
+        titleEl.textContent = evt.title;
+        body.append(bar, titleEl);
+
+        const endEl = document.createElement('span');
+        endEl.className = 'cal-tb-time cal-tb-end';
+        endEl.textContent = evt.endTime;
+
+        chip.append(startEl, body, endEl);
+      } else {
+        chip.className = `cal-evt cal-week-evt${bg ? '' : ` evt-${catId}`}`;
+        if (bg) { chip.style.background = bg; chip.style.color = catColor(catId); }
+        chip.dataset.id = evt.id;
+        chip.textContent = evtChipLabel(evt);
+      }
+
       chip.addEventListener('click', e => { e.stopPropagation(); openModal(key, evt.id); });
       evtList.appendChild(chip);
     });
