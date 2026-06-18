@@ -946,7 +946,7 @@ function openSearch() {
   const inp = document.createElement('input');
   inp.className = 'cal-search-input';
   inp.type = 'text';
-  inp.placeholder = 'Search events...';
+  inp.placeholder = 'Search events and spending...';
   inp.autocomplete = 'off';
   _searchPanel.appendChild(inp);
 
@@ -976,46 +976,103 @@ function _renderSearchResults(container, query) {
   container.innerHTML = '';
   if (!query.trim()) return;
 
-  const q       = query.toLowerCase();
-  const matched = events()
+  const q = query.trim().toLowerCase();
+
+  // ── Events ────────────────────────────────────────────────────
+  const matchedEvts = events()
     .filter(e => e.date && e.title?.toLowerCase().includes(q))
     .sort((a, b) => a.date > b.date ? 1 : -1)
-    .slice(0, 25);
+    .slice(0, 20);
 
-  if (!matched.length) {
+  // ── Spend entries ─────────────────────────────────────────────
+  const spendEntries = calData().spendEntries ?? {};
+  const cats = spendCats();
+  const catMap = Object.fromEntries(cats.map(c => [c.id, c]));
+  const matchedSpend = [];
+  for (const [date, list] of Object.entries(spendEntries)) {
+    for (const e of (list ?? [])) {
+      const cat    = catMap[e.categoryId];
+      const amtStr = (e.amount ?? 0).toString();
+      const text   = (e.note || e.subcategory || '').toLowerCase();
+      const catName = (cat?.name ?? '').toLowerCase();
+      if (amtStr.includes(q) || text.includes(q) || catName.includes(q)) {
+        matchedSpend.push({ date, cat, ...e });
+      }
+    }
+  }
+  matchedSpend.sort((a, b) => b.date.localeCompare(a.date));
+
+  if (!matchedEvts.length && !matchedSpend.length) {
     const empty = document.createElement('div');
     empty.className = 'cal-search-empty';
-    empty.textContent = 'No events found';
+    empty.textContent = 'No results found';
     container.appendChild(empty);
     return;
   }
 
-  matched.forEach(evt => {
-    const row = document.createElement('div');
-    row.className = 'cal-search-row';
+  function fmtDate(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
 
-    const dot = document.createElement('span');
-    dot.className = 'cal-search-dot';
-    dot.style.background = catColor(evt.category ?? 'personal');
-
-    const title = document.createElement('span');
-    title.className = 'cal-search-title';
-    title.textContent = evt.title;
-
-    const dateEl = document.createElement('span');
-    dateEl.className = 'cal-search-date';
-    const [y, m, d] = evt.date.split('-').map(Number);
-    dateEl.textContent = new Date(y, m - 1, d).toLocaleDateString('en', {
-      month: 'short', day: 'numeric', year: 'numeric',
+  if (matchedEvts.length) {
+    if (matchedSpend.length) {
+      const lbl = document.createElement('div');
+      lbl.className = 'cal-search-section-lbl';
+      lbl.textContent = 'Events';
+      container.appendChild(lbl);
+    }
+    matchedEvts.forEach(evt => {
+      const row = document.createElement('div');
+      row.className = 'cal-search-row';
+      const dot = document.createElement('span');
+      dot.className = 'cal-search-dot';
+      dot.style.background = catColor(evt.category ?? 'personal');
+      const title = document.createElement('span');
+      title.className = 'cal-search-title';
+      title.textContent = evt.title;
+      const dateEl = document.createElement('span');
+      dateEl.className = 'cal-search-date';
+      dateEl.textContent = fmtDate(evt.date);
+      row.append(dot, title, dateEl);
+      row.addEventListener('click', () => { closeSearch(); _navigateToEvent(evt); });
+      container.appendChild(row);
     });
+  }
 
-    row.append(dot, title, dateEl);
-    row.addEventListener('click', () => {
-      closeSearch();
-      _navigateToEvent(evt);
+  if (matchedSpend.length) {
+    if (matchedEvts.length) {
+      const lbl = document.createElement('div');
+      lbl.className = 'cal-search-section-lbl';
+      lbl.textContent = 'Spending';
+      container.appendChild(lbl);
+    }
+    matchedSpend.slice(0, 20).forEach(entry => {
+      const row = document.createElement('div');
+      row.className = 'cal-search-row';
+      const dot = document.createElement('span');
+      dot.className = 'cal-search-dot';
+      dot.style.background = entry.cat?.color ?? 'var(--text-3)';
+      const title = document.createElement('span');
+      title.className = 'cal-search-title';
+      title.textContent = entry.note || entry.subcategory || entry.cat?.name || entry.categoryId;
+      const right = document.createElement('span');
+      right.className = 'cal-search-spend-right';
+      const amt = document.createElement('span');
+      amt.className = 'cal-search-spend-amt';
+      amt.textContent = `¥${(entry.amount ?? 0).toLocaleString()}`;
+      const dateEl = document.createElement('span');
+      dateEl.className = 'cal-search-date';
+      dateEl.textContent = fmtDate(entry.date);
+      right.append(amt, dateEl);
+      row.append(dot, title, right);
+      row.addEventListener('click', () => {
+        closeSearch();
+        _navigateToEvent({ date: entry.date });
+      });
+      container.appendChild(row);
     });
-    container.appendChild(row);
-  });
+  }
 }
 
 function _navigateToEvent(evt) {

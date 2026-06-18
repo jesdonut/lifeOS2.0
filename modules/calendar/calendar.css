@@ -106,6 +106,30 @@
   color: var(--text-3);
 }
 
+.cal-search-section-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  padding: var(--s2) var(--s3) var(--s1);
+}
+
+.cal-search-spend-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.cal-search-spend-amt {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── Event highlight (after search navigate) ── */
 @keyframes cal-highlight-pulse {
   0%   { outline-color: var(--accent); }

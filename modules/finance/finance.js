@@ -34,7 +34,6 @@ let _container = null, _data = null, _onSave = null;
 let _year = new Date().getFullYear(), _month = new Date().getMonth();
 let _open = { income: true };
 let _subView = 'finance';
-let _spendSearch = '';
 
 const SUB_VIEWS = [
   { key: 'finance',    label: 'Finance'    },
@@ -61,7 +60,6 @@ export function destroy() {
   BudgetView.unmount();
   _container = _data = _onSave = null;
   _subView = 'finance';
-  _spendSearch = '';
 }
 
 export function onDataChange(newData) {
@@ -312,108 +310,24 @@ function _buildMain() {
   const left  = document.createElement('div'); left.className  = 'fin-left';
   const right = document.createElement('div'); right.className = 'fin-right';
 
-  // ── Spend search bar ──────────────────────────────────────────
-  const searchWrap = document.createElement('div'); searchWrap.className = 'fin-search-wrap';
-  const searchIco  = document.createElement('span');
-  searchIco.className = 'fin-search-ico material-symbols-outlined';
-  searchIco.textContent = 'search';
-  const searchInp  = document.createElement('input');
-  searchInp.type = 'text';
-  searchInp.className = 'fin-search-inp';
-  searchInp.placeholder = 'Search spending (amount, note, category...)';
-  searchInp.value = _spendSearch;
-  searchInp.addEventListener('input', e => {
-    _spendSearch = e.target.value;
-    const resultsEl = document.getElementById('fin-search-results');
-    if (resultsEl) resultsEl.replaceWith(_buildSpendResults(_spendSearch));
-  });
-  searchInp.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { _spendSearch = ''; searchInp.value = ''; searchInp.dispatchEvent(new Event('input')); }
-  });
-  searchWrap.append(searchIco, searchInp);
-  left.appendChild(searchWrap);
+  left.appendChild(_acc('income', 'Income', '収入', false,
+    `${filled} of ${incRows.length} filled`, t.inc, true, () => _buildIncRows(), null));
 
-  const resultsEl = _buildSpendResults(_spendSearch);
-  left.appendChild(resultsEl);
-
-  if (!_spendSearch) {
-    left.appendChild(_acc('income', 'Income', '収入', false,
-      `${filled} of ${incRows.length} filled`, t.inc, true, () => _buildIncRows(), null));
-
-    if (_year < 2025) {
-      left.appendChild(_acc('fixed-bills', 'Bills', '固定費', true,
-        `${filledB} of ${billRows.length} filled`, t.bills, false, () => _buildBillRows(), null));
-    }
-
-    cats.forEach(cat => {
-      if (!_open.hasOwnProperty(cat.id)) _open[cat.id] = false;
-      const total = t.catTotals[cat.id] ?? 0;
-      left.appendChild(_acc(cat.id, cat.name, '', true,
-        'auto · from daily', total, false, () => _buildCatRows(cat), cat.color));
-    });
+  if (_year < 2025) {
+    left.appendChild(_acc('fixed-bills', 'Bills', '固定費', true,
+      `${filledB} of ${billRows.length} filled`, t.bills, false, () => _buildBillRows(), null));
   }
+
+  cats.forEach(cat => {
+    if (!_open.hasOwnProperty(cat.id)) _open[cat.id] = false;
+    const total = t.catTotals[cat.id] ?? 0;
+    left.appendChild(_acc(cat.id, cat.name, '', true,
+      'auto · from daily', total, false, () => _buildCatRows(cat), cat.color));
+  });
 
   right.appendChild(_buildSummary(t));
   main.append(left, right);
   return main;
-}
-
-// ── Spend search results ───────────────────────────────────────────
-function _buildSpendResults(query) {
-  const el = document.createElement('div');
-  el.id = 'fin-search-results';
-  if (!query.trim()) return el;
-
-  const q    = query.trim().toLowerCase();
-  const cats = _spendCats();
-  const catMap = Object.fromEntries(cats.map(c => [c.id, c]));
-  const entries = _data.calendar?.spendEntries ?? {};
-
-  const hits = [];
-  for (const [date, list] of Object.entries(entries)) {
-    for (const e of (list ?? [])) {
-      const cat     = catMap[e.categoryId];
-      const amtStr  = (e.amount ?? 0).toString();
-      const note    = (e.note || e.subcategory || '').toLowerCase();
-      const catName = (cat?.name ?? '').toLowerCase();
-      if (amtStr.includes(q) || note.includes(q) || catName.includes(q)) {
-        hits.push({ date, cat, ...e });
-      }
-    }
-  }
-  hits.sort((a, b) => b.date.localeCompare(a.date));
-
-  if (!hits.length) {
-    const empty = document.createElement('div');
-    empty.className = 'fin-search-empty';
-    empty.textContent = `No results for "${query}"`;
-    el.appendChild(empty);
-    return el;
-  }
-
-  const list = document.createElement('div'); list.className = 'fin-search-list';
-  hits.forEach(h => {
-    const row = document.createElement('div'); row.className = 'fin-search-row';
-    const d   = new Date(h.date + 'T00:00:00');
-    const dateStr = `${d.getDate()} ${MONTHS_S[d.getMonth()]} ${d.getFullYear()}`;
-    const dot = document.createElement('span'); dot.className = 'fin-search-dot';
-    dot.style.background = h.cat?.color ?? 'var(--text-3)';
-    row.innerHTML = `
-      <span class="fin-search-date">${dateStr}</span>
-    `;
-    row.insertBefore(dot, row.firstChild);
-    const info = document.createElement('span'); info.className = 'fin-search-info';
-    info.textContent = h.note || h.subcategory || h.cat?.name || h.categoryId;
-    const amt = document.createElement('span'); amt.className = 'fin-search-amt';
-    amt.textContent = `¥${(h.amount ?? 0).toLocaleString()}`;
-    row.append(info, amt);
-    list.appendChild(row);
-  });
-
-  const count = document.createElement('div'); count.className = 'fin-search-count';
-  count.textContent = `${hits.length} result${hits.length !== 1 ? 's' : ''}`;
-  el.append(count, list);
-  return el;
 }
 
 // ── Accordion ──────────────────────────────────────────────────────
