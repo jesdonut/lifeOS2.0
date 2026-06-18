@@ -479,6 +479,7 @@ const DEFAULT_SPEND_CATS = [
   { id: 'paperwork',     name: 'Paperwork',         color: '#c9a84c', sub: ['Visa', 'Government', 'Ward office'],                                            isCustom: false },
   { id: 'medical',       name: 'Medical',           color: '#e06060', sub: ['Hospital', 'Clinic', 'Pharmacy'],                                               isCustom: false },
   { id: 'necessities',   name: 'Daily necessities', color: '#7aab7a', sub: ['Shampoo', 'Body soap', 'Conditioner', 'Toothbrush', 'Detergent', 'Dish soap'], isCustom: false },
+  { id: 'project',       name: 'Project',           color: '#4a9fbf', sub: ['Work', 'Personal', 'Side project'],                                              isCustom: false },
 ];
 
 function renderSpending(el) {
@@ -551,7 +552,7 @@ function renderSpending(el) {
 
         const renameBtn = document.createElement('button');
         renameBtn.className = 'sp-cat-btn';
-        renameBtn.textContent = 'Rename';
+        renameBtn.textContent = 'Edit';
         renameBtn.addEventListener('click', () => { editingId = cat.id; editingSub = null; renderCats(); });
 
         row.append(swatch, name, renameBtn);
