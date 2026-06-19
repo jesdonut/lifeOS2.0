@@ -33,7 +33,12 @@ function projectCatIds() {
   const cats = [...spend, ...calendarCats];
   return new Set(
     cats
-      .filter(c => c && (c.id === 'project' || (c.name && c.name.toLowerCase() === 'project')))
+      .filter(c => {
+        if (!c) return false;
+        if (c.id === 'project') return true;
+        const name = (c.name || '').toLowerCase();
+        return name.startsWith('project'); // matches 'project' and 'projects'
+      })
       .map(c => c.id)
   );
 }

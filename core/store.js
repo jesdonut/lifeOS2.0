@@ -50,6 +50,30 @@ export function load() {
   } catch {
     _data = defaultData();
   }
+  // Migration: if user created a `Project` category under `settings.categories`
+  // (calendar categories), ensure it's present in `settings.spendCategories`
+  try {
+    const cats = _data.settings?.categories ?? [];
+    const spend = _data.settings?.spendCategories ?? [];
+    const spendIds = new Set(spend.map(c => c.id));
+    let migrated = false;
+    for (const c of cats) {
+      if (!c || !c.name) continue;
+      const name = c.name.toLowerCase();
+      if (name.startsWith('project') && !spendIds.has(c.id)) {
+        spend.push({ id: c.id, name: c.name, color: c.color ?? '#c49a73', sub: c.sub ?? [], isCustom: !!c.isCustom });
+        spendIds.add(c.id);
+        migrated = true;
+      }
+    }
+    if (migrated) {
+      _data.settings = { ..._data.settings, spendCategories: spend };
+      // Persist migration so the app sees the category consistently
+      localStorage.setItem(KEY, JSON.stringify(_data));
+    }
+  } catch (e) {
+    // migration best-effort — ignore errors
+  }
   return _data;
 }
 
