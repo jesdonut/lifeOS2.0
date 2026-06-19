@@ -45,8 +45,12 @@ function projectCatIds() {
 
 // All spend entries tagged with any project category for _year
 function projectSpendEntries() {
+  return projectSpendEntriesByYear(_year);
+}
+
+function projectSpendEntriesByYear(year) {
   const ids     = projectCatIds();
-  const prefix  = `${_year}-`;
+  const prefix  = `${year}-`;
   const entries = _data.calendar?.spendEntries ?? {};
   const hits = [];
   for (const [date, list] of Object.entries(entries)) {
@@ -60,7 +64,11 @@ function projectSpendEntries() {
 
 // Income entries stored separately: _data.projects.income[year]
 function projectIncome() {
-  return _data.projects?.income?.[String(_year)] ?? [];
+  return projectIncomeByYear(_year);
+}
+
+function projectIncomeByYear(year) {
+  return _data.projects?.income?.[String(year)] ?? [];
 }
 
 function saveProjectIncome(entries) {
@@ -333,6 +341,30 @@ function renderProjects() {
     addBtn.textContent = '+ Log income';
     addBtn.addEventListener('click', () => { _addingIncome = true; render(); });
     wrap.appendChild(addBtn);
+  }
+
+  // Last year review
+  const lastYear = _year - 1;
+  const lastYearSpend = projectSpendEntriesByYear(lastYear);
+  const lastYearIncome = projectIncomeByYear(lastYear);
+  const lastYearTotalSpend = lastYearSpend.reduce((s, e) => s + (e.amount ?? 0), 0);
+  const lastYearTotalIncome = lastYearIncome.reduce((s, e) => s + (e.amount ?? 0), 0);
+  const lastYearNet = lastYearTotalIncome - lastYearTotalSpend;
+
+  if (lastYearTotalSpend > 0 || lastYearTotalIncome > 0) {
+    const reviewSec = document.createElement('div'); reviewSec.className = 'proj-review-section';
+    const reviewHdr = document.createElement('div'); reviewHdr.className = 'proj-review-hdr';
+    reviewHdr.textContent = `← ${lastYear} Review`;
+    reviewSec.appendChild(reviewHdr);
+
+    const reviewSummary = document.createElement('div'); reviewSummary.className = 'proj-summary';
+    reviewSummary.innerHTML = `
+      <div class="proj-sum-item"><span class="proj-sum-lbl">Spent</span><span class="proj-sum-amt expense">−${fmt(lastYearTotalSpend)}</span></div>
+      <div class="proj-sum-item"><span class="proj-sum-lbl">Income</span><span class="proj-sum-amt income">+${fmt(lastYearTotalIncome)}</span></div>
+      <div class="proj-sum-item"><span class="proj-sum-lbl">Net</span><span class="proj-sum-amt ${lastYearNet >= 0 ? 'income' : 'expense'}">${lastYearNet >= 0 ? '+' : '−'}${fmt(lastYearNet)}</span></div>
+    `;
+    reviewSec.appendChild(reviewSummary);
+    wrap.appendChild(reviewSec);
   }
 
   return wrap;

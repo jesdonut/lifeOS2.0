@@ -296,3 +296,21 @@
 .proj-cancel-btn:hover { color: var(--text); }
 
 .proj-empty { font-size: var(--fs-xs); color: var(--text-3); line-height: 1.6; }
+
+/* Last year review */
+.proj-review-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: var(--s3) 0;
+  border-top: 1px solid var(--border-dim);
+  margin-top: var(--s4);
+}
+
+.proj-review-hdr {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  font-weight: 600;
+}
