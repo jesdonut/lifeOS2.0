@@ -25,10 +25,15 @@ function catSpent(catId) {
 
 // Find the project category by id='project' or name='Project'
 function projectCatIds() {
-  const cats = spendCats();
+  // Spend categories are the primary source, but users may have created a
+  // "Project" category under the calendar `settings.categories` list.
+  // Check both lists so we don't miss user-created project categories.
+  const spend = spendCats() || [];
+  const calendarCats = _data.settings?.categories ?? [];
+  const cats = [...spend, ...calendarCats];
   return new Set(
     cats
-      .filter(c => c.id === 'project' || c.name.toLowerCase() === 'project')
+      .filter(c => c && (c.id === 'project' || (c.name && c.name.toLowerCase() === 'project')))
       .map(c => c.id)
   );
 }
