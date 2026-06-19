@@ -2,10 +2,16 @@
 
 let _container, _data, _onSave;
 let _year, _month;
-let _editingCat = null;
+let _editingCat  = null;
+let _openProj    = {};   // { [projId]: true }
+let _addingEntry = null; // { projId, type: 'expense'|'income' } | null
+let _addingProj  = false;
 
-function spendCats() { return _data.settings?.spendCategories ?? []; }
-function budgets()   { return _data.settings?.monthlyBudgets  ?? {}; }
+function spendCats()  { return _data.settings?.spendCategories ?? []; }
+function budgets()    { return _data.settings?.monthlyBudgets  ?? {}; }
+function projects()   { return _data.projects?.list ?? []; }
+
+function uid() { return Math.random().toString(36).slice(2, 9); }
 
 function catSpent(catId) {
   const prefix  = `${_year}-${String(_month + 1).padStart(2, '0')}`;
@@ -20,15 +26,18 @@ function catSpent(catId) {
   return Math.round(total);
 }
 
-function fmt(n) {
-  return '¥' + Math.round(Math.abs(n)).toLocaleString();
-}
+function fmt(n) { return '¥' + Math.round(Math.abs(n)).toLocaleString(); }
 
 function saveBudget(catId, amount) {
   const next = { ...budgets() };
   if (amount == null) delete next[catId];
   else next[catId] = amount;
   _onSave({ settings: { ..._data.settings, monthlyBudgets: next } });
+}
+
+function saveProjects(list) {
+  _data = { ..._data, projects: { list } };
+  _onSave({ projects: { list } });
 }
 
 // ── Sub-view contract ──────────────────────────────────────────────
@@ -40,6 +49,8 @@ export function mount(container, data, onSave, year, month) {
   _year        = year;
   _month       = month;
   _editingCat  = null;
+  _addingEntry = null;
+  _addingProj  = false;
   _loadCss();
   render();
 }
@@ -66,6 +77,26 @@ function _loadCss() {
 function render() {
   _container.innerHTML = '';
 
+  const layout = document.createElement('div');
+  layout.className = 'bud-layout';
+
+  // Left: budget
+  const left = document.createElement('div');
+  left.className = 'bud-left';
+  left.appendChild(renderBudget());
+
+  // Right: projects
+  const right = document.createElement('div');
+  right.className = 'bud-right';
+  right.appendChild(renderProjects());
+
+  layout.append(left, right);
+  _container.appendChild(layout);
+}
+
+// ── Budget (left) ──────────────────────────────────────────────────
+
+function renderBudget() {
   const wrap = document.createElement('div');
   wrap.className = 'bud-wrap';
 
@@ -84,7 +115,7 @@ function render() {
     if (unbudgeted.length > 0) wrap.appendChild(renderUnbudgetedSection(unbudgeted));
   }
 
-  _container.appendChild(wrap);
+  return wrap;
 }
 
 function renderBudgetedSection(cats, bud) {
@@ -102,7 +133,7 @@ function renderBudgetedSection(cats, bud) {
     section.appendChild(makeCatRow(cat, target, spent));
   });
 
-  const totalRow   = document.createElement('div');
+  const totalRow = document.createElement('div');
   totalRow.className = 'bud-total-row';
 
   const totalLabel = document.createElement('span');
@@ -115,14 +146,11 @@ function renderBudgetedSection(cats, bud) {
 
   const remaining = totalBudget - totalSpent;
   const totalRem  = document.createElement('span');
-  totalRem.className = 'bud-total-rem' + (remaining < 0 ? ' over' : '');
-  totalRem.textContent = remaining < 0
-    ? `${fmt(remaining)} over`
-    : `${fmt(remaining)} left`;
+  totalRem.className   = 'bud-total-rem' + (remaining < 0 ? ' over' : '');
+  totalRem.textContent = remaining < 0 ? `${fmt(remaining)} over` : `${fmt(remaining)} left`;
 
   totalRow.append(totalLabel, totalAmt, totalRem);
   section.appendChild(totalRow);
-
   return section;
 }
 
@@ -136,10 +164,7 @@ function renderUnbudgetedSection(cats) {
   wrap.appendChild(label);
 
   cats.forEach(cat => {
-    if (_editingCat === cat.id) {
-      wrap.appendChild(makeEditRow(cat, null));
-      return;
-    }
+    if (_editingCat === cat.id) { wrap.appendChild(makeEditRow(cat, null)); return; }
 
     const row = document.createElement('div');
     row.className = 'bud-unbud-row';
@@ -169,17 +194,15 @@ function renderUnbudgetedSection(cats) {
   return wrap;
 }
 
-// ── Row builders ───────────────────────────────────────────────────
-
 function makeCatRow(cat, target, spent) {
   if (_editingCat === cat.id) return makeEditRow(cat, target);
 
   const row = document.createElement('div');
   row.className = 'bud-cat-row';
 
-  const pct  = target > 0 ? Math.min(spent / target, 1) : 0;
-  const rem  = target - spent;
-  const over = rem < 0;
+  const pct      = target > 0 ? Math.min(spent / target, 1) : 0;
+  const rem      = target - spent;
+  const over     = rem < 0;
   const barColor = pct >= 1 ? 'var(--red)' : pct >= 0.8 ? 'var(--amber)' : (cat.color ?? `var(--cat-${cat.id})`);
 
   const top = document.createElement('div');
@@ -300,4 +323,266 @@ function makeEditRow(cat, currentTarget) {
   row.append(top, controls);
   requestAnimationFrame(() => input.focus());
   return row;
+}
+
+// ── Projects (right) ───────────────────────────────────────────────
+
+function renderProjects() {
+  const wrap = document.createElement('div');
+  wrap.className = 'proj-wrap';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'proj-hdr';
+  const title = document.createElement('span');
+  title.className   = 'proj-title';
+  title.textContent = 'Projects';
+  const newBtn = document.createElement('button');
+  newBtn.className   = 'proj-new-btn';
+  newBtn.textContent = '+ New';
+  newBtn.addEventListener('click', () => { _addingProj = true; render(); });
+  hdr.append(title, newBtn);
+  wrap.appendChild(hdr);
+
+  if (_addingProj) wrap.appendChild(renderNewProjForm());
+
+  const list = projects();
+  if (!list.length && !_addingProj) {
+    const empty = document.createElement('div');
+    empty.className   = 'proj-empty';
+    empty.textContent = 'No projects yet. Track expenses and income for conventions, booth, merch, etc.';
+    wrap.appendChild(empty);
+    return wrap;
+  }
+
+  list.forEach(proj => wrap.appendChild(renderProjCard(proj)));
+  return wrap;
+}
+
+function renderNewProjForm() {
+  const card = document.createElement('div');
+  card.className = 'proj-card proj-new-form';
+
+  const inp = document.createElement('input');
+  inp.className   = 'proj-name-inp';
+  inp.type        = 'text';
+  inp.placeholder = 'Project name (e.g. Comiket 2025)';
+  inp.autocomplete = 'off';
+
+  const colorPick = document.createElement('input');
+  colorPick.type      = 'color';
+  colorPick.className = 'proj-color-pick';
+  colorPick.value     = '#c9a0b4';
+
+  const actions = document.createElement('div');
+  actions.className = 'proj-form-actions';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className   = 'proj-save-btn';
+  saveBtn.textContent = 'Add project';
+  saveBtn.addEventListener('click', () => {
+    const name = inp.value.trim();
+    if (!name) { inp.focus(); return; }
+    const list = [...projects(), { id: uid(), name, color: colorPick.value, entries: [] }];
+    saveProjects(list);
+    _addingProj = false;
+    render();
+  });
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className   = 'proj-cancel-btn';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', () => { _addingProj = false; render(); });
+
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  saveBtn.click();
+    if (e.key === 'Escape') cancelBtn.click();
+  });
+
+  actions.append(saveBtn, cancelBtn);
+  card.append(colorPick, inp, actions);
+  requestAnimationFrame(() => inp.focus());
+  return card;
+}
+
+function renderProjCard(proj) {
+  const isOpen = !!_openProj[proj.id];
+  const entries = proj.entries ?? [];
+  const totalIncome  = entries.filter(e => e.type === 'income').reduce((s, e) => s + (e.amount ?? 0), 0);
+  const totalExpense = entries.filter(e => e.type === 'expense').reduce((s, e) => s + (e.amount ?? 0), 0);
+  const net = totalIncome - totalExpense;
+
+  const card = document.createElement('div');
+  card.className = 'proj-card' + (isOpen ? ' open' : '');
+
+  // Card header
+  const head = document.createElement('div');
+  head.className = 'proj-card-head';
+
+  const dot = document.createElement('span');
+  dot.className = 'proj-dot';
+  dot.style.background = proj.color ?? 'var(--accent)';
+
+  const nameEl = document.createElement('span');
+  nameEl.className   = 'proj-card-name';
+  nameEl.textContent = proj.name;
+
+  const netEl = document.createElement('span');
+  netEl.className   = 'proj-card-net' + (net >= 0 ? ' pos' : ' neg');
+  netEl.textContent = `${net >= 0 ? '+' : '−'}${fmt(net)}`;
+
+  const chev = document.createElement('span');
+  chev.className  = 'proj-chev material-symbols-outlined';
+  chev.textContent = 'chevron_right';
+
+  head.append(dot, nameEl, netEl, chev);
+  head.addEventListener('click', () => {
+    _openProj[proj.id] = !isOpen;
+    _addingEntry = null;
+    render();
+  });
+  card.appendChild(head);
+
+  if (!isOpen) return card;
+
+  // Entry list
+  const body = document.createElement('div');
+  body.className = 'proj-body';
+
+  if (entries.length) {
+    const sorted = [...entries].sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''));
+    sorted.forEach(entry => {
+      const row = document.createElement('div');
+      row.className = 'proj-entry-row';
+
+      const dateEl = document.createElement('span');
+      dateEl.className   = 'proj-entry-date';
+      dateEl.textContent = entry.date ? fmtDate(entry.date) : '—';
+
+      const labelEl = document.createElement('span');
+      labelEl.className   = 'proj-entry-label';
+      labelEl.textContent = entry.label || '—';
+
+      const amtEl = document.createElement('span');
+      amtEl.className   = 'proj-entry-amt ' + entry.type;
+      amtEl.textContent = `${entry.type === 'income' ? '+' : '−'}${fmt(entry.amount ?? 0)}`;
+
+      const delBtn = document.createElement('button');
+      delBtn.className   = 'proj-entry-del';
+      delBtn.textContent = '×';
+      delBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        const list = projects().map(p => p.id !== proj.id ? p : {
+          ...p, entries: p.entries.filter(en => en.id !== entry.id)
+        });
+        saveProjects(list);
+        render();
+      });
+
+      row.append(dateEl, labelEl, amtEl, delBtn);
+      body.appendChild(row);
+    });
+
+    // Subtotals
+    const totals = document.createElement('div');
+    totals.className = 'proj-totals';
+    totals.innerHTML = `
+      <span class="proj-total-item"><span class="proj-total-lbl">Income</span><span class="proj-entry-amt income">+${fmt(totalIncome)}</span></span>
+      <span class="proj-total-item"><span class="proj-total-lbl">Expenses</span><span class="proj-entry-amt expense">−${fmt(totalExpense)}</span></span>
+      <span class="proj-total-item proj-total-net"><span class="proj-total-lbl">Net</span><span class="proj-entry-amt ${net >= 0 ? 'income' : 'expense'}">${net >= 0 ? '+' : '−'}${fmt(net)}</span></span>
+    `;
+    body.appendChild(totals);
+  }
+
+  // Add entry form or buttons
+  if (_addingEntry?.projId === proj.id) {
+    body.appendChild(renderAddEntryForm(proj, _addingEntry.type));
+  } else {
+    const btns = document.createElement('div');
+    btns.className = 'proj-add-btns';
+
+    const expBtn = document.createElement('button');
+    expBtn.className   = 'proj-add-exp-btn';
+    expBtn.textContent = '− Add expense';
+    expBtn.addEventListener('click', e => { e.stopPropagation(); _addingEntry = { projId: proj.id, type: 'expense' }; render(); });
+
+    const incBtn = document.createElement('button');
+    incBtn.className   = 'proj-add-inc-btn';
+    incBtn.textContent = '+ Add income';
+    incBtn.addEventListener('click', e => { e.stopPropagation(); _addingEntry = { projId: proj.id, type: 'income' }; render(); });
+
+    const delProjBtn = document.createElement('button');
+    delProjBtn.className   = 'proj-del-btn';
+    delProjBtn.textContent = 'Delete project';
+    delProjBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (!confirm(`Delete "${proj.name}"?`)) return;
+      saveProjects(projects().filter(p => p.id !== proj.id));
+      delete _openProj[proj.id];
+      render();
+    });
+
+    btns.append(expBtn, incBtn, delProjBtn);
+    body.appendChild(btns);
+  }
+
+  card.appendChild(body);
+  return card;
+}
+
+function renderAddEntryForm(proj, type) {
+  const form = document.createElement('div');
+  form.className = 'proj-entry-form';
+
+  const labelInp = document.createElement('input');
+  labelInp.className   = 'proj-entry-inp';
+  labelInp.type        = 'text';
+  labelInp.placeholder = type === 'income' ? 'e.g. Keychain sales day 1' : 'e.g. Booth fee, materials…';
+  labelInp.autocomplete = 'off';
+
+  const amtInp = document.createElement('input');
+  amtInp.className   = 'proj-entry-inp proj-entry-amt-inp';
+  amtInp.type        = 'number';
+  amtInp.min         = '0';
+  amtInp.placeholder = '¥0';
+
+  const dateInp = document.createElement('input');
+  dateInp.className = 'proj-entry-inp proj-entry-date-inp';
+  dateInp.type      = 'date';
+  dateInp.value     = new Date().toISOString().slice(0, 10);
+
+  const actions = document.createElement('div');
+  actions.className = 'proj-form-actions';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className   = 'proj-save-btn';
+  saveBtn.textContent = type === 'income' ? 'Add income' : 'Add expense';
+  saveBtn.addEventListener('click', () => {
+    const amount = parseFloat(amtInp.value);
+    if (isNaN(amount) || amount <= 0) { amtInp.focus(); return; }
+    const entry = { id: uid(), type, label: labelInp.value.trim() || null, amount, date: dateInp.value || null };
+    const list = projects().map(p => p.id !== proj.id ? p : { ...p, entries: [...(p.entries ?? []), entry] });
+    saveProjects(list);
+    _addingEntry = null;
+    render();
+  });
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className   = 'proj-cancel-btn';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', () => { _addingEntry = null; render(); });
+
+  amtInp.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  saveBtn.click();
+    if (e.key === 'Escape') cancelBtn.click();
+  });
+
+  actions.append(saveBtn, cancelBtn);
+  form.append(labelInp, amtInp, dateInp, actions);
+  requestAnimationFrame(() => labelInp.focus());
+  return form;
+}
+
+function fmtDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
 }
