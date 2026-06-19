@@ -23,15 +23,26 @@ function catSpent(catId) {
   return Math.round(total);
 }
 
-// All spend entries with categoryId === 'project' for _year
+// Find the project category by id='project' or name='Project'
+function projectCatIds() {
+  const cats = spendCats();
+  return new Set(
+    cats
+      .filter(c => c.id === 'project' || c.name.toLowerCase() === 'project')
+      .map(c => c.id)
+  );
+}
+
+// All spend entries tagged with any project category for _year
 function projectSpendEntries() {
+  const ids     = projectCatIds();
   const prefix  = `${_year}-`;
   const entries = _data.calendar?.spendEntries ?? {};
   const hits = [];
   for (const [date, list] of Object.entries(entries)) {
     if (!date.startsWith(prefix)) continue;
     for (const e of (list ?? [])) {
-      if (e.categoryId === 'project') hits.push({ date, ...e });
+      if (ids.has(e.categoryId)) hits.push({ date, ...e });
     }
   }
   return hits.sort((a, b) => a.date.localeCompare(b.date));
