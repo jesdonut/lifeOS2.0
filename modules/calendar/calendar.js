@@ -987,11 +987,15 @@ function buildTimeline(scroll) {
   const todayYear   = new Date().getFullYear();
   const tlEvts      = timelineEvents();
 
-  // Stable category order so lanes are consistent across all decades
-  const catOrder = cats().map(c => c.id);
+  // Timeline lane order: life (personal) → health → finance → education → work → rest
+  const TL_ORDER = ['personal', 'health', 'finance', 'education', 'work'];
+  const fallbackOrder = cats().map(c => c.id);
   function catSortKey(id) {
-    const i = catOrder.indexOf(id ?? 'personal');
-    return i === -1 ? catOrder.length : i;
+    const cat = id ?? 'personal';
+    const i = TL_ORDER.indexOf(cat);
+    if (i !== -1) return i;
+    const j = fallbackOrder.indexOf(cat);
+    return TL_ORDER.length + (j === -1 ? fallbackOrder.length : j);
   }
 
   for (let decade = firstDecade; decade <= lastDecade; decade += 10) {
