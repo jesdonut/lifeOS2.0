@@ -1,9 +1,12 @@
 // notes-tab.js — full Notes + Tasks tab
 
+import { buildDrawPane, updateDrawData, destroyDrawPane } from './draw-view.js';
+
 let _container, _data, _onSave;
 let _selectedId   = null;
 let _showArchived = false;
 let _addingTask   = false;
+let _tab          = 'notes'; // 'notes' | 'draw'
 
 // ── Module contract ────────────────────────────────────────────────
 export function init(container, data, onSave) {
@@ -21,6 +24,7 @@ export function selectNote(id) {
 }
 
 export function destroy() {
+  if (_tab === 'draw') destroyDrawPane();
   _container.innerHTML = '';
   _selectedId   = null;
   _showArchived = false;
@@ -30,6 +34,7 @@ export function destroy() {
 export function onDataChange(newData) {
   _data = newData;
   if (!_container) return;
+  if (_tab === 'draw') { updateDrawData(newData); return; }
   // If editing, only refresh the left pane to preserve textarea state
   const left = _container.querySelector('.nt-left');
   if (left && _selectedId) {
@@ -74,11 +79,32 @@ function patchNote(id, patch) {
 // ── Render ─────────────────────────────────────────────────────────
 function _render() {
   if (!_container) return;
+  if (_tab === 'draw') destroyDrawPane();
   _container.innerHTML = '';
-  const root = el('div', 'nt-root');
-  root.appendChild(_buildLeftPane());
-  root.appendChild(_buildRightPane());
-  _container.appendChild(root);
+
+  // Tab bar
+  const tabBar = el('div', 'nt-tab-bar');
+  ['notes', 'draw'].forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'nt-tab-btn' + (_tab === t ? ' active' : '');
+    b.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+    b.addEventListener('click', () => { _tab = t; _render(); });
+    tabBar.appendChild(b);
+  });
+  _container.appendChild(tabBar);
+
+  // Content
+  const body = el('div', 'nt-tab-body');
+  _container.appendChild(body);
+
+  if (_tab === 'draw') {
+    buildDrawPane(body, _data, _onSave);
+  } else {
+    const root = el('div', 'nt-root');
+    root.appendChild(_buildLeftPane());
+    root.appendChild(_buildRightPane());
+    body.appendChild(root);
+  }
 }
 
 // ── Left pane ──────────────────────────────────────────────────────

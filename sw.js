@@ -1,4 +1,4 @@
-const CACHE = 'seratus-v9';
+const CACHE = 'seratus-v10';
 
 const SHELL = [
   '/app.html',
@@ -35,6 +35,7 @@ const SHELL = [
   '/modules/notes/notes.js',
   '/modules/notes/notes.css',
   '/modules/notes/notes-tab.js',
+  '/modules/notes/draw-view.js',
   '/modules/notes/notes-tab.css',
   '/modules/notes/countdown-view.js',
   '/modules/budget/budget.js',
