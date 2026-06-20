@@ -10,7 +10,7 @@ const PALETTE = [
   '#c05880', '#ffffff',
 ];
 
-let _canvas, _ctx;
+let _canvas, _ctx, _wrapEl;
 let _tool  = 'pen';
 let _color = PALETTE[0];
 let _size  = 4;
@@ -18,6 +18,7 @@ let _history = [], _histIdx = -1;
 let _isDrawing = false;
 let _lastX = 0, _lastY = 0;
 let _currentId = null;
+let _fit = true;
 let _data, _onSave;
 let _leftEl = null;
 let _toolbarEl = null;
@@ -267,12 +268,20 @@ function buildToolbar() {
   // Undo / Redo / Clear
   const actions = document.createElement('div');
   actions.className = 'dr-group';
-  actions.append(
-    mkBtn('undo', 'Undo (⌘Z)',  undo),
-    mkBtn('redo', 'Redo (⌘⇧Z)', redo),
-    mkBtn('delete', 'Clear canvas', clearCanvas, 'dr-btn-danger'),
-  );
+
+  const undoBtn  = mkBtn('undo',   'Undo (⌘Z)',    undo);
+  const redoBtn  = mkBtn('redo',   'Redo (⌘⇧Z)',   redo);
+  const clearBtn = mkBtn('delete', 'Clear canvas', clearCanvas, 'dr-btn-danger');
+  actions.append(undoBtn, redoBtn, clearBtn);
   bar.appendChild(actions);
+
+  bar.appendChild(sep());
+
+  // Fit / actual size toggle
+  const fitBtn = mkBtn('fit_screen', 'Fit to screen', toggleFit);
+  fitBtn.dataset.tool = 'fit';
+  if (_fit) fitBtn.classList.add('dr-active');
+  bar.appendChild(fitBtn);
 
   return bar;
 }
@@ -292,11 +301,21 @@ function clearCanvas() {
   autoSave();
 }
 
+function toggleFit() {
+  _fit = !_fit;
+  if (_wrapEl) _wrapEl.classList.toggle('dr-fit', _fit);
+  if (_toolbarEl) {
+    const b = _toolbarEl.querySelector('[data-tool="fit"]');
+    if (b) b.classList.toggle('dr-active', _fit);
+  }
+}
+
 function initCanvas() {
   _canvas = document.createElement('canvas');
   _canvas.className = 'dr-canvas';
   _canvas.width  = CANVAS_W;
   _canvas.height = CANVAS_H;
+  _canvas.style.touchAction = 'none'; // prevent touch scroll hijack on tablet
   _ctx = _canvas.getContext('2d');
 
   _canvas.addEventListener('pointerdown', onPointerDown);
@@ -416,7 +435,8 @@ export function buildDrawPane(container, data, onSave) {
   right.appendChild(buildToolbar());
 
   const wrap = document.createElement('div');
-  wrap.className = 'dr-canvas-wrap';
+  wrap.className = 'dr-canvas-wrap' + (_fit ? ' dr-fit' : '');
+  _wrapEl = wrap;
   wrap.appendChild(initCanvas());
   right.appendChild(wrap);
 
@@ -448,7 +468,7 @@ export function updateDrawData(newData) {
 
 export function destroyDrawPane() {
   if (_removeKeys) { _removeKeys(); _removeKeys = null; }
-  _canvas = null; _ctx = null;
+  _canvas = null; _ctx = null; _wrapEl = null;
   _currentId = null;
   _history = []; _histIdx = -1;
   _leftEl = null; _toolbarEl = null;

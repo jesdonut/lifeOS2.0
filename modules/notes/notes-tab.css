@@ -559,14 +559,28 @@
   padding: var(--s4);
 }
 
+/* Fit mode: canvas scales to fill available space */
+.dr-canvas-wrap.dr-fit {
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s3);
+}
+.dr-canvas-wrap.dr-fit .dr-canvas {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+
 .dr-canvas {
   display: block;
-  max-width: 100%;
-  height: auto;
+  flex-shrink: 0;
   border-radius: var(--radius);
   box-shadow: 0 2px 16px color-mix(in srgb, #000 20%, transparent);
   cursor: crosshair;
   background: #ffffff;
+  touch-action: none;
 }
 
 .dr-list-card {
