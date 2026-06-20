@@ -1,4 +1,4 @@
-const CACHE = 'seratus-v8';
+const CACHE = 'seratus-v9';
 
 const SHELL = [
   '/app.html',
@@ -67,17 +67,28 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
 
-  // Skip Google Fonts — network only, don't block offline load
   const url = e.request.url;
   if (url.includes('fonts.googleapis.com') || url.includes('fonts.gstatic.com')) return;
 
+  // Network-first for JS and CSS so new code always loads; cache is offline fallback only
+  if (url.includes('.js') || url.includes('.css')) {
+    e.respondWith(
+      fetch(e.request)
+        .then(resp => {
+          if (resp.ok) caches.open(CACHE).then(c => c.put(e.request, resp.clone()));
+          return resp;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Cache-first for everything else (HTML, images, fonts)
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
       return fetch(e.request).then(resp => {
-        if (resp.ok) {
-          caches.open(CACHE).then(c => c.put(e.request, resp.clone()));
-        }
+        if (resp.ok) caches.open(CACHE).then(c => c.put(e.request, resp.clone()));
         return resp;
       });
     })
