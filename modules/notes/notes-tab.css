@@ -612,4 +612,34 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+  cursor: text;
 }
+.dr-list-title:hover { color: var(--text); }
+
+.dr-title-input {
+  font-size: var(--fs-xs);
+  color: var(--text);
+  background: var(--surface-3);
+  border: 1px solid var(--accent-2);
+  border-radius: 3px;
+  padding: 1px 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.dr-del-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-3);
+  border-radius: var(--radius-sm);
+  padding: 1px;
+  flex-shrink: 0;
+}
+.dr-del-btn .material-symbols-outlined { font-size: 13px; }
+.dr-del-btn:hover { color: var(--red, #c04); }
+.dr-list-card:hover .dr-del-btn { display: inline-flex; }

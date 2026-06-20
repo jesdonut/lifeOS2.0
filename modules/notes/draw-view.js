@@ -371,8 +371,47 @@ function refreshList() {
     const title = document.createElement('span');
     title.className = 'dr-list-title';
     title.textContent = d.title || 'Untitled';
+    title.title = 'Click to rename';
+    title.addEventListener('click', e => {
+      e.stopPropagation();
+      const input = document.createElement('input');
+      input.className = 'dr-title-input';
+      input.value = d.title || 'Untitled';
+      title.replaceWith(input);
+      input.focus();
+      input.select();
+      function commit() {
+        const val = input.value.trim() || 'Untitled';
+        const updated = allDrawings().map(x => x.id === d.id ? { ...x, title: val } : x);
+        _onSave({ notes: { ...notesBase(), drawings: updated } });
+        refreshList();
+      }
+      input.addEventListener('blur', commit);
+      input.addEventListener('keydown', e2 => {
+        if (e2.key === 'Enter') { e2.preventDefault(); input.blur(); }
+        if (e2.key === 'Escape') { refreshList(); }
+      });
+    });
 
-    card.append(thumb, title);
+    const delBtn = document.createElement('button');
+    delBtn.className = 'dr-del-btn';
+    delBtn.title = 'Delete drawing';
+    delBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
+    delBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const updated = allDrawings().filter(x => x.id !== d.id);
+      _onSave({ notes: { ...notesBase(), drawings: updated } });
+      if (_currentId === d.id) {
+        _currentId = null;
+        _history = []; _histIdx = -1;
+        if (_ctx) { _ctx.clearRect(0, 0, CANVAS_W, CANVAS_H); pushHistory(); }
+        const remaining = updated;
+        if (remaining.length) loadDrawing(remaining[remaining.length - 1].id);
+      }
+      refreshList();
+    });
+
+    card.append(thumb, title, delBtn);
     card.addEventListener('click', () => loadDrawing(d.id));
     _leftEl.appendChild(card);
   });
