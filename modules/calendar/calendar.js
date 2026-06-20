@@ -1032,7 +1032,10 @@ function buildTimeline(scroll) {
       presentCats.forEach(cat => {
         const catEvts = overlap
           .filter(e => (e.categoryId ?? 'personal') === cat)
-          .sort((a, b) => a.yearStart - b.yearStart);
+          .sort((a, b) => {
+            if (a.yearStart !== b.yearStart) return a.yearStart - b.yearStart;
+            return (a.yearEnd - a.yearStart) - (b.yearEnd - b.yearStart);
+          });
         catEvts.forEach((evt, si) => {
           evtLaneMap.set(evt.id, totalLanes + si);
         });
