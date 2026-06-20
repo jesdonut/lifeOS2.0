@@ -981,12 +981,10 @@ function buildTimeline(scroll) {
   scroll.innerHTML = '';
   scroll.className = 'cal-scroll tl-scroll';
 
-  const birthYear   = _data.settings?.birthYear ?? new Date().getFullYear() - 25;
-  const firstDecade = Math.floor(birthYear / 10) * 10;
-  const lastYear    = birthYear + 100;
-  const lastDecade  = Math.floor(lastYear / 10) * 10;
-  const todayYear   = new Date().getFullYear();
-  const tlEvts      = timelineEvents();
+  const birthYear = _data.settings?.birthYear ?? new Date().getFullYear() - 25;
+  const lastYear  = birthYear + 100;
+  const todayYear = new Date().getFullYear();
+  const tlEvts    = timelineEvents();
 
   // Timeline lane order: life (personal) → health → finance → education → work → rest
   const TL_ORDER = ['personal', 'health', 'finance', 'education', 'work'];
@@ -999,10 +997,11 @@ function buildTimeline(scroll) {
     return TL_ORDER.length + (j === -1 ? fallbackOrder.length : j);
   }
 
-  for (let decade = firstDecade; decade <= lastDecade; decade += 10) {
+  for (let rowStart = birthYear; rowStart <= lastYear; rowStart += 10) {
+    const decade = rowStart; // kept as alias so rest of code is unchanged
     const decadeEl = document.createElement('div');
     decadeEl.className = 'tl-decade';
-    decadeEl.dataset.decade = decade;
+    decadeEl.dataset.decade = rowStart;
 
     const yearRow = document.createElement('div');
     yearRow.className = 'tl-year-row';
@@ -1011,7 +1010,7 @@ function buildTimeline(scroll) {
       const cell = document.createElement('div');
       cell.className = 'tl-year-cell';
       if (y === todayYear) cell.classList.add('tl-year-today');
-      if (y < birthYear || y > lastYear) cell.classList.add('tl-year-out');
+      if (y > lastYear) cell.classList.add('tl-year-out');
       cell.textContent = y;
       cell.addEventListener('click', () => openTimelineModal(y));
       yearRow.appendChild(cell);
@@ -1122,8 +1121,9 @@ function buildTimeline(scroll) {
 function scrollToTimelineYear(year) {
   const scroll = _container.querySelector('#cal-scroll');
   if (!scroll) return;
-  const decade = Math.floor(year / 10) * 10;
-  const el = scroll.querySelector(`[data-decade="${decade}"]`);
+  const birthYear = _data.settings?.birthYear ?? new Date().getFullYear() - 25;
+  const rowStart = birthYear + Math.floor((year - birthYear) / 10) * 10;
+  const el = scroll.querySelector(`[data-decade="${rowStart}"]`);
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
