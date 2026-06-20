@@ -272,6 +272,14 @@
     window.location.replace('mobile.html');
   }
 
+  // ── Returning user: swap "Get started" → "Open app" ──────────
+  if (localStorage.getItem('lifeOS_data')) {
+    document.querySelectorAll('a[href="setup.html"]').forEach(a => {
+      a.href = 'app.html';
+      a.textContent = 'Open app';
+    });
+  }
+
 
   // Builds May 2026 mini calendar HTML (starts Friday, period days 6-9)
   function mkPeriodCal() {
