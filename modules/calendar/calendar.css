@@ -1069,11 +1069,12 @@
 
 /* ── Timeline ── */
 .tl-scroll {
-  padding: var(--s5) var(--s5) var(--s8);
+  padding: 0;
 }
 
 .tl-decade {
   margin-bottom: var(--s4);
+  padding: 0 var(--s5);
 }
 
 .tl-year-row {
