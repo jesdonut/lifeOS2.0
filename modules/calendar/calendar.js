@@ -188,8 +188,8 @@ function render() {
   if (_view === 'timeline') {
     yearLabel.className = 'cal-year-label';
     yearLabel.textContent = 'Timeline';
-    prevBtn.style.display = 'none';
-    nextBtn.style.display = 'none';
+    prevBtn.style.visibility = 'hidden';
+    nextBtn.style.visibility = 'hidden';
     todayBtn.addEventListener('click', () => scrollToTimelineYear(new Date().getFullYear()));
   } else if (_view === 'week') {
     if (!_weekStart) _weekStart = getWeekStart(new Date());
