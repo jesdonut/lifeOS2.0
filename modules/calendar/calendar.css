@@ -1066,3 +1066,79 @@
   border-color: color-mix(in srgb, var(--chip-color, var(--accent)) 50%, transparent);
   color: var(--text);
 }
+
+/* ── Timeline ── */
+.tl-scroll {
+  padding: var(--s5) var(--s5) var(--s8);
+}
+
+.tl-decade {
+  margin-bottom: var(--s4);
+}
+
+.tl-year-row {
+  display: grid;
+  grid-template-columns: 52px repeat(10, 1fr);
+}
+
+.tl-decade-label {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding-top: var(--s2);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.tl-year-cell {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  text-align: center;
+  padding: var(--s2) 0;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-fast), color var(--dur-fast);
+  font-variant-numeric: tabular-nums;
+}
+.tl-year-cell:hover { background: var(--surface-2); color: var(--text); }
+.tl-year-today { color: var(--accent); font-weight: 600; }
+.tl-year-out { opacity: 0.25; pointer-events: none; }
+
+.tl-evt-area {
+  position: relative;
+  margin-left: 52px;
+  margin-top: var(--s1);
+  margin-bottom: var(--s1);
+}
+
+.tl-evt-bar {
+  position: absolute;
+  height: 20px;
+  border-radius: 3px;
+  font-size: 11px;
+  line-height: 20px;
+  padding: 0 6px;
+  cursor: pointer;
+  overflow: hidden;
+  color: var(--bg);
+  transition: opacity var(--dur-fast), filter var(--dur-fast);
+  box-sizing: border-box;
+}
+.tl-evt-bar:hover { filter: brightness(1.1); }
+.tl-evt-bar span {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tl-modal-year-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s2);
+}
+
+.tl-modal-year-input {
+  width: 90px;
+  flex-shrink: 0;
+}

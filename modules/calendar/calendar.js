@@ -44,6 +44,7 @@ let _weekStart = null; // Monday of displayed week; null until first week render
 let _modal = null;
 let _spendModal = null;
 let _searchPanel = null;
+let _tlModal = null;
 
 // ── Helpers ────────────────────────────────────────────────────────
 
@@ -145,6 +146,7 @@ export function destroy() {
   _container.innerHTML = '';
   _modal = null;
   _spendModal = null;
+  _tlModal = null;
 }
 
 export function onDataChange(newData) {
@@ -182,7 +184,13 @@ function render() {
   todayBtn.className = 'cal-today-btn';
   todayBtn.textContent = 'today';
 
-  if (_view === 'week') {
+  if (_view === 'timeline') {
+    yearLabel.className = 'cal-year-label';
+    yearLabel.textContent = 'Timeline';
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    todayBtn.addEventListener('click', () => scrollToTimelineYear(new Date().getFullYear()));
+  } else if (_view === 'week') {
     if (!_weekStart) _weekStart = getWeekStart(new Date());
     yearLabel.className = 'cal-week-label';
     const wEnd = addDays(_weekStart, 6);
@@ -208,7 +216,7 @@ function render() {
   // View toggle
   const viewToggle = document.createElement('div');
   viewToggle.className = 'cal-view-toggle';
-  ['week', 'month', 'year'].forEach(v => {
+  ['week', 'month', 'year', 'timeline'].forEach(v => {
     const btn = document.createElement('button');
     btn.className = 'cal-view-btn' + (_view === v ? ' active' : '');
     btn.textContent = v.charAt(0).toUpperCase() + v.slice(1);
@@ -220,7 +228,9 @@ function render() {
   addBtn.className = 'cal-add-btn';
   addBtn.textContent = '+ add event';
   addBtn.addEventListener('click', () => {
-    if (_view === 'week' && _weekStart) {
+    if (_view === 'timeline') {
+      openTimelineModal(new Date().getFullYear());
+    } else if (_view === 'week' && _weekStart) {
       const tk = todayStr();
       const wEnd = addDays(_weekStart, 6);
       const inWeek = tk >= dateStrFromDate(_weekStart) && tk <= dateStrFromDate(wEnd);
@@ -254,6 +264,9 @@ function render() {
     }
   } else if (_view === 'week') {
     buildWeek(scroll);
+  } else if (_view === 'timeline') {
+    buildTimeline(scroll);
+    requestAnimationFrame(() => scrollToTimelineYear(new Date().getFullYear()));
   } else {
     buildYear(scroll);
   }
@@ -268,6 +281,8 @@ function renderGrid() {
     const top = scroll.scrollTop;
     buildMonths(scroll);
     scroll.scrollTop = top;
+  } else if (_view === 'timeline') {
+    buildTimeline(scroll);
   } else {
     buildYear(scroll);
   }
@@ -935,6 +950,278 @@ function openModal(date, editId = null) {
 function closeModal() {
   _modal?.remove();
   _modal = null;
+}
+
+// ── Timeline ───────────────────────────────────────────────────────
+
+function timelineEvents() {
+  return _data.calendar?.timelineEvents ?? [];
+}
+
+function saveTimelineEvent(evt) {
+  const evts = [...timelineEvents()];
+  const idx  = evts.findIndex(e => e.id === evt.id);
+  const now  = new Date().toISOString();
+  if (idx >= 0) {
+    evts[idx] = { ...evt, createdAt: evts[idx].createdAt ?? now, updatedAt: now };
+  } else {
+    evts.push({ ...evt, createdAt: now });
+  }
+  _onSave({ calendar: { ...calData(), timelineEvents: evts } });
+}
+
+function removeTimelineEvent(id) {
+  _onSave({ calendar: { ...calData(), timelineEvents: timelineEvents().filter(e => e.id !== id) } });
+}
+
+function tlUid() { return 'tl_' + Math.random().toString(36).slice(2, 9); }
+
+function buildTimeline(scroll) {
+  scroll.innerHTML = '';
+  scroll.className = 'cal-scroll tl-scroll';
+
+  const birthYear = _data.settings?.birthYear ?? new Date().getFullYear() - 25;
+  const firstDecade = Math.floor(birthYear / 10) * 10;
+  const lastYear    = birthYear + 100;
+  const lastDecade  = Math.floor(lastYear / 10) * 10;
+  const todayYear   = new Date().getFullYear();
+  const tlEvts      = timelineEvents();
+
+  for (let decade = firstDecade; decade <= lastDecade; decade += 10) {
+    const decadeEl = document.createElement('div');
+    decadeEl.className = 'tl-decade';
+    decadeEl.dataset.decade = decade;
+
+    const yearRow = document.createElement('div');
+    yearRow.className = 'tl-year-row';
+
+    const decadeLabel = document.createElement('div');
+    decadeLabel.className = 'tl-decade-label';
+    decadeLabel.textContent = `${decade}s`;
+    yearRow.appendChild(decadeLabel);
+
+    for (let y = decade; y < decade + 10; y++) {
+      const cell = document.createElement('div');
+      cell.className = 'tl-year-cell';
+      if (y === todayYear) cell.classList.add('tl-year-today');
+      if (y < birthYear || y > lastYear) cell.classList.add('tl-year-out');
+      cell.textContent = y;
+      cell.addEventListener('click', () => openTimelineModal(y));
+      yearRow.appendChild(cell);
+    }
+    decadeEl.appendChild(yearRow);
+
+    const overlap = tlEvts.filter(e => e.yearStart <= decade + 9 && e.yearEnd >= decade);
+    if (overlap.length > 0) {
+      const evtArea = document.createElement('div');
+      evtArea.className = 'tl-evt-area';
+
+      // Greedy lane assignment
+      const lanes = [];
+      const sorted = [...overlap].sort((a, b) => a.yearStart - b.yearStart);
+      sorted.forEach(evt => {
+        const segStart = Math.max(evt.yearStart, decade);
+        const segEnd   = Math.min(evt.yearEnd,   decade + 9);
+        let li = lanes.findIndex(lane =>
+          !lane.some(e => {
+            const es = Math.max(e.yearStart, decade);
+            const ee = Math.min(e.yearEnd,   decade + 9);
+            return es <= segEnd && ee >= segStart;
+          })
+        );
+        if (li === -1) { li = lanes.length; lanes.push([]); }
+        lanes[li].push(evt);
+      });
+
+      evtArea.style.height = `${lanes.length * 26}px`;
+
+      lanes.forEach((lane, li) => {
+        lane.forEach(evt => {
+          const segStart  = Math.max(evt.yearStart, decade);
+          const segEnd    = Math.min(evt.yearEnd,   decade + 9);
+          const leftPct   = ((segStart - decade) / 10) * 100;
+          const widthPct  = ((segEnd - segStart + 1) / 10) * 100;
+          const bar       = document.createElement('div');
+          bar.className   = 'tl-evt-bar';
+          const color     = catColor(evt.categoryId ?? 'personal');
+          bar.style.cssText = `
+            left:${leftPct}%;
+            width:${widthPct}%;
+            top:${li * 26}px;
+            background:${color};
+          `.trim();
+          bar.title = `${evt.title} (${evt.yearStart}${evt.yearEnd !== evt.yearStart ? '–' + evt.yearEnd : ''})`;
+          const label = document.createElement('span');
+          label.textContent = evt.title;
+          bar.appendChild(label);
+          bar.addEventListener('click', e => { e.stopPropagation(); openTimelineModal(evt.yearStart, evt.id); });
+          evtArea.appendChild(bar);
+        });
+      });
+
+      decadeEl.appendChild(evtArea);
+    }
+
+    scroll.appendChild(decadeEl);
+  }
+}
+
+function scrollToTimelineYear(year) {
+  const scroll = _container.querySelector('#cal-scroll');
+  if (!scroll) return;
+  const decade = Math.floor(year / 10) * 10;
+  const el = scroll.querySelector(`[data-decade="${decade}"]`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function openTimelineModal(defaultYear, editId = null) {
+  closeTimelineModal();
+
+  const editing = editId ? timelineEvents().find(e => e.id === editId) : null;
+
+  _tlModal = document.createElement('div');
+  _tlModal.className = 'cal-modal';
+
+  const card = document.createElement('div');
+  card.className = 'cal-modal-card';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'cal-modal-hdr';
+  const titleSpan = document.createElement('span');
+  titleSpan.className = 'cal-modal-date';
+  titleSpan.textContent = editing ? 'Edit life event' : 'New life event';
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'cal-modal-close';
+  closeBtn.textContent = '✕';
+  closeBtn.addEventListener('click', closeTimelineModal);
+  hdr.append(titleSpan, closeBtn);
+  card.appendChild(hdr);
+
+  const form = document.createElement('div');
+  form.className = 'cal-modal-form';
+
+  const titleInput = document.createElement('input');
+  titleInput.className = 'cal-modal-input';
+  titleInput.type = 'text';
+  titleInput.placeholder = 'Event title';
+  titleInput.value = editing?.title ?? '';
+  titleInput.autocomplete = 'off';
+  form.appendChild(titleInput);
+
+  const yearRow = document.createElement('div');
+  yearRow.className = 'tl-modal-year-row';
+
+  const yearStartInput = document.createElement('input');
+  yearStartInput.className = 'cal-modal-input tl-modal-year-input';
+  yearStartInput.type = 'number';
+  yearStartInput.placeholder = 'Start year';
+  yearStartInput.value = editing?.yearStart ?? defaultYear;
+  yearStartInput.min = 1900; yearStartInput.max = 2200;
+
+  const yearSep = document.createElement('span');
+  yearSep.className = 'cal-modal-time-sep';
+  yearSep.textContent = 'to';
+
+  const yearEndInput = document.createElement('input');
+  yearEndInput.className = 'cal-modal-input tl-modal-year-input';
+  yearEndInput.type = 'number';
+  yearEndInput.placeholder = 'End year';
+  yearEndInput.value = editing?.yearEnd ?? defaultYear;
+  yearEndInput.min = 1900; yearEndInput.max = 2200;
+
+  yearRow.append(yearStartInput, yearSep, yearEndInput);
+  form.appendChild(yearRow);
+
+  const noteInput = document.createElement('textarea');
+  noteInput.className = 'cal-modal-input cal-modal-notes-input';
+  noteInput.placeholder = 'Note (optional)';
+  noteInput.value = editing?.note ?? '';
+  noteInput.rows = 2;
+  noteInput.addEventListener('click', e => e.stopPropagation());
+  noteInput.addEventListener('keydown', e => { if (e.key === 'Escape') closeTimelineModal(); });
+  form.appendChild(noteInput);
+
+  let selectedCat = editing?.categoryId ?? 'personal';
+  const catGrid = document.createElement('div');
+  catGrid.className = 'cal-cat-grid';
+  cats().forEach(c => {
+    const bg   = catBg(c.id);
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = `cal-cat-chip${bg ? '' : ` evt-${c.id}`}${selectedCat === c.id ? ' selected' : ''}`;
+    chip.dataset.cat = c.id;
+    chip.textContent = c.name;
+    if (bg) {
+      chip.style.background = bg;
+      chip.style.color = catColor(c.id);
+      if (selectedCat === c.id) chip.style.borderColor = catColor(c.id);
+    }
+    chip.addEventListener('click', () => {
+      selectedCat = c.id;
+      catGrid.querySelectorAll('.cal-cat-chip').forEach(b => {
+        const isSelected = b.dataset.cat === c.id;
+        b.classList.toggle('selected', isSelected);
+        const bcat = cats().find(x => x.id === b.dataset.cat);
+        if (bcat?.isCustom && bcat.color) b.style.borderColor = isSelected ? bcat.color : '';
+      });
+    });
+    catGrid.appendChild(chip);
+  });
+  form.appendChild(catGrid);
+
+  const actions = document.createElement('div');
+  actions.className = 'cal-modal-actions';
+
+  if (editing) {
+    const delBtn = document.createElement('button');
+    delBtn.className = 'cal-del-btn';
+    delBtn.textContent = 'Delete';
+    delBtn.addEventListener('click', () => {
+      removeTimelineEvent(editing.id);
+      closeTimelineModal();
+      renderGrid();
+    });
+    actions.appendChild(delBtn);
+  }
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'cal-save-btn';
+  saveBtn.textContent = editing ? 'Save' : 'Add';
+  saveBtn.addEventListener('click', () => {
+    const title = titleInput.value.trim();
+    if (!title) { titleInput.focus(); return; }
+    const yStart = parseInt(yearStartInput.value, 10);
+    const yEnd   = parseInt(yearEndInput.value,   10);
+    if (!yStart || !yEnd) return;
+    saveTimelineEvent({
+      id:         editing?.id ?? tlUid(),
+      title,
+      yearStart:  Math.min(yStart, yEnd),
+      yearEnd:    Math.max(yStart, yEnd),
+      categoryId: selectedCat,
+      note:       noteInput.value.trim() || null,
+    });
+    closeTimelineModal();
+    renderGrid();
+  });
+
+  titleInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); saveBtn.click(); }
+    if (e.key === 'Escape') closeTimelineModal();
+  });
+
+  actions.appendChild(saveBtn);
+  form.appendChild(actions);
+  card.appendChild(form);
+  _tlModal.appendChild(card);
+  _container.appendChild(_tlModal);
+  _tlModal.addEventListener('click', e => { if (e.target === _tlModal) closeTimelineModal(); });
+  requestAnimationFrame(() => titleInput.focus());
+}
+
+function closeTimelineModal() {
+  _tlModal?.remove();
+  _tlModal = null;
 }
 
 // ── Search ─────────────────────────────────────────────────────────
