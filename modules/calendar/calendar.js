@@ -995,11 +995,6 @@ function buildTimeline(scroll) {
     const yearRow = document.createElement('div');
     yearRow.className = 'tl-year-row';
 
-    const decadeLabel = document.createElement('div');
-    decadeLabel.className = 'tl-decade-label';
-    decadeLabel.textContent = `${decade}s`;
-    yearRow.appendChild(decadeLabel);
-
     for (let y = decade; y < decade + 10; y++) {
       const cell = document.createElement('div');
       cell.className = 'tl-year-cell';

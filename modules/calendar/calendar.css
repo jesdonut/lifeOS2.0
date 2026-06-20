@@ -1078,16 +1078,9 @@
 
 .tl-year-row {
   display: grid;
-  grid-template-columns: 52px repeat(10, 1fr);
+  grid-template-columns: repeat(10, 1fr);
 }
 
-.tl-decade-label {
-  font-size: var(--fs-xs);
-  color: var(--text-3);
-  padding-top: var(--s2);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0;
-}
 
 .tl-year-cell {
   font-size: var(--fs-xs);
@@ -1105,7 +1098,6 @@
 
 .tl-evt-area {
   position: relative;
-  margin-left: 52px;
   margin-top: var(--s1);
   margin-bottom: var(--s1);
 }
