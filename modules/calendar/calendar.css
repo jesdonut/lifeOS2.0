@@ -1110,11 +1110,12 @@
   font-size: 11px;
   line-height: 20px;
   padding: 0 6px;
-  cursor: pointer;
+  cursor: grab;
   overflow: hidden;
   color: var(--bg);
-  transition: opacity var(--dur-fast), filter var(--dur-fast);
+  transition: filter var(--dur-fast);
   box-sizing: border-box;
+  user-select: none;
 }
 .tl-evt-bar:hover { filter: brightness(1.1); }
 .tl-evt-bar span {

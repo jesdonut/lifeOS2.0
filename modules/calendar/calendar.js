@@ -980,12 +980,19 @@ function buildTimeline(scroll) {
   scroll.innerHTML = '';
   scroll.className = 'cal-scroll tl-scroll';
 
-  const birthYear = _data.settings?.birthYear ?? new Date().getFullYear() - 25;
+  const birthYear   = _data.settings?.birthYear ?? new Date().getFullYear() - 25;
   const firstDecade = Math.floor(birthYear / 10) * 10;
   const lastYear    = birthYear + 100;
   const lastDecade  = Math.floor(lastYear / 10) * 10;
   const todayYear   = new Date().getFullYear();
   const tlEvts      = timelineEvents();
+
+  // Stable category order so lanes are consistent across all decades
+  const catOrder = cats().map(c => c.id);
+  function catSortKey(id) {
+    const i = catOrder.indexOf(id ?? 'personal');
+    return i === -1 ? catOrder.length : i;
+  }
 
   for (let decade = firstDecade; decade <= lastDecade; decade += 10) {
     const decadeEl = document.createElement('div');
@@ -1011,47 +1018,84 @@ function buildTimeline(scroll) {
       const evtArea = document.createElement('div');
       evtArea.className = 'tl-evt-area';
 
-      // Greedy lane assignment
-      const lanes = [];
-      const sorted = [...overlap].sort((a, b) => a.yearStart - b.yearStart);
-      sorted.forEach(evt => {
+      // One lane per category, ordered by cats() definition
+      const catLaneMap = {};
+      let nextLane = 0;
+      [...overlap]
+        .sort((a, b) => catSortKey(a.categoryId) - catSortKey(b.categoryId))
+        .forEach(evt => {
+          const cat = evt.categoryId ?? 'personal';
+          if (!(cat in catLaneMap)) catLaneMap[cat] = nextLane++;
+        });
+
+      evtArea.style.height = `${nextLane * 26}px`;
+
+      overlap.forEach(evt => {
+        const cat      = evt.categoryId ?? 'personal';
+        const li       = catLaneMap[cat];
         const segStart = Math.max(evt.yearStart, decade);
         const segEnd   = Math.min(evt.yearEnd,   decade + 9);
-        let li = lanes.findIndex(lane =>
-          !lane.some(e => {
-            const es = Math.max(e.yearStart, decade);
-            const ee = Math.min(e.yearEnd,   decade + 9);
-            return es <= segEnd && ee >= segStart;
-          })
-        );
-        if (li === -1) { li = lanes.length; lanes.push([]); }
-        lanes[li].push(evt);
-      });
+        const leftPct  = ((segStart - decade) / 10) * 100;
+        const widthPct = ((segEnd - segStart + 1) / 10) * 100;
 
-      evtArea.style.height = `${lanes.length * 26}px`;
+        const bar = document.createElement('div');
+        bar.className = 'tl-evt-bar';
+        const color = catColor(cat);
+        bar.style.cssText = `left:${leftPct}%;width:${widthPct}%;top:${li * 26}px;background:${color};`;
+        bar.title = `${evt.title} (${evt.yearStart}${evt.yearEnd !== evt.yearStart ? '–' + evt.yearEnd : ''})`;
 
-      lanes.forEach((lane, li) => {
-        lane.forEach(evt => {
-          const segStart  = Math.max(evt.yearStart, decade);
-          const segEnd    = Math.min(evt.yearEnd,   decade + 9);
-          const leftPct   = ((segStart - decade) / 10) * 100;
-          const widthPct  = ((segEnd - segStart + 1) / 10) * 100;
-          const bar       = document.createElement('div');
-          bar.className   = 'tl-evt-bar';
-          const color     = catColor(evt.categoryId ?? 'personal');
-          bar.style.cssText = `
-            left:${leftPct}%;
-            width:${widthPct}%;
-            top:${li * 26}px;
-            background:${color};
-          `.trim();
-          bar.title = `${evt.title} (${evt.yearStart}${evt.yearEnd !== evt.yearStart ? '–' + evt.yearEnd : ''})`;
-          const label = document.createElement('span');
-          label.textContent = evt.title;
-          bar.appendChild(label);
-          bar.addEventListener('click', e => { e.stopPropagation(); openTimelineModal(evt.yearStart, evt.id); });
-          evtArea.appendChild(bar);
+        const label = document.createElement('span');
+        label.textContent = evt.title;
+        bar.appendChild(label);
+
+        // Drag to shift years
+        let didDrag = false;
+        let startX = 0, startYearStart = 0, startYearEnd = 0;
+
+        bar.addEventListener('pointerdown', e => {
+          if (e.button !== 0) return;
+          didDrag = false;
+          startX = e.clientX;
+          startYearStart = evt.yearStart;
+          startYearEnd   = evt.yearEnd;
+          bar.setPointerCapture(e.pointerId);
+          bar.style.cursor = 'grabbing';
+          bar.style.opacity = '0.75';
+          e.stopPropagation();
         });
+
+        bar.addEventListener('pointermove', e => {
+          if (!bar.hasPointerCapture(e.pointerId)) return;
+          const pxPerYear = evtArea.getBoundingClientRect().width / 10;
+          const delta = Math.round((e.clientX - startX) / pxPerYear);
+          if (delta !== 0) didDrag = true;
+          const newStart = startYearStart + delta;
+          const newEnd   = startYearEnd   + delta;
+          const segS = Math.max(newStart, decade);
+          const segE = Math.min(newEnd,   decade + 9);
+          bar.style.left  = `${((segS - decade) / 10) * 100}%`;
+          bar.style.width = `${((Math.max(segE - segS + 1, 1)) / 10) * 100}%`;
+        });
+
+        bar.addEventListener('pointerup', e => {
+          if (!bar.hasPointerCapture(e.pointerId)) return;
+          bar.releasePointerCapture(e.pointerId);
+          bar.style.cursor = '';
+          bar.style.opacity = '';
+          const pxPerYear = evtArea.getBoundingClientRect().width / 10;
+          const delta = Math.round((e.clientX - startX) / pxPerYear);
+          if (delta !== 0) {
+            saveTimelineEvent({ ...evt, yearStart: startYearStart + delta, yearEnd: startYearEnd + delta });
+          }
+        });
+
+        bar.addEventListener('click', e => {
+          if (didDrag) { didDrag = false; return; }
+          e.stopPropagation();
+          openTimelineModal(evt.yearStart, evt.id);
+        });
+
+        evtArea.appendChild(bar);
       });
 
       decadeEl.appendChild(evtArea);
