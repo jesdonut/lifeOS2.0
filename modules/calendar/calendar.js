@@ -1031,7 +1031,8 @@ function buildTimeline(scroll) {
         const subLaneEnd = [];
         catEvts.forEach(evt => {
           const segStart = Math.max(evt.yearStart, decade);
-          let si = subLaneEnd.findIndex(end => end < segStart);
+          // treat yearEnd as exclusive boundary so adjacent events share a lane
+          let si = subLaneEnd.findIndex(end => end <= segStart);
           if (si === -1) { si = subLaneEnd.length; subLaneEnd.push(-Infinity); }
           subLaneEnd[si] = Math.min(evt.yearEnd, decade + 9);
           evtLaneMap.set(evt.id, totalLanes + si);
@@ -1047,7 +1048,8 @@ function buildTimeline(scroll) {
         const segStart = Math.max(evt.yearStart, decade);
         const segEnd   = Math.min(evt.yearEnd,   decade + 9);
         const leftPct  = ((segStart - decade) / 10) * 100;
-        const widthPct = ((segEnd - segStart + 1) / 10) * 100;
+        // use exclusive end so adjacent events sit flush; min 1 year wide
+        const widthPct = (Math.max(segEnd - segStart, 1) / 10) * 100;
 
         const bar = document.createElement('div');
         bar.className = 'tl-evt-bar';
@@ -1085,7 +1087,7 @@ function buildTimeline(scroll) {
           const segS = Math.max(newStart, decade);
           const segE = Math.min(newEnd,   decade + 9);
           bar.style.left  = `${((segS - decade) / 10) * 100}%`;
-          bar.style.width = `${((Math.max(segE - segS + 1, 1)) / 10) * 100}%`;
+          bar.style.width = `${(Math.max(segE - segS, 1) / 10) * 100}%`;
         });
 
         bar.addEventListener('pointerup', e => {
