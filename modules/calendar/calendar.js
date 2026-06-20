@@ -126,6 +126,7 @@ export function init(container, data, onSave) {
   _container = container;
   _data = data;
   _onSave = onSave;
+  _view = data.calendar?.lastView ?? 'week';
 
   const cssHref = new URL('./calendar.css', import.meta.url).href;
   if (!document.querySelector(`link[href="${cssHref}"]`)) {
@@ -220,7 +221,7 @@ function render() {
     const btn = document.createElement('button');
     btn.className = 'cal-view-btn' + (_view === v ? ' active' : '');
     btn.textContent = v.charAt(0).toUpperCase() + v.slice(1);
-    btn.addEventListener('click', () => { _view = v; render(); });
+    btn.addEventListener('click', () => { _view = v; _onSave({ calendar: { ...calData(), lastView: v } }); render(); });
     viewToggle.appendChild(btn);
   });
 
