@@ -1018,21 +1018,32 @@ function buildTimeline(scroll) {
       const evtArea = document.createElement('div');
       evtArea.className = 'tl-evt-area';
 
-      // One lane per category, ordered by cats() definition
-      const catLaneMap = {};
-      let nextLane = 0;
-      [...overlap]
-        .sort((a, b) => catSortKey(a.categoryId) - catSortKey(b.categoryId))
-        .forEach(evt => {
-          const cat = evt.categoryId ?? 'personal';
-          if (!(cat in catLaneMap)) catLaneMap[cat] = nextLane++;
-        });
+      // Lane per category; overlapping events within same category get sub-lanes
+      const presentCats = [...new Set(overlap.map(e => e.categoryId ?? 'personal'))]
+        .sort((a, b) => catSortKey(a) - catSortKey(b));
 
-      evtArea.style.height = `${nextLane * 26}px`;
+      const evtLaneMap = new Map();
+      let totalLanes = 0;
+      presentCats.forEach(cat => {
+        const catEvts = overlap
+          .filter(e => (e.categoryId ?? 'personal') === cat)
+          .sort((a, b) => a.yearStart - b.yearStart);
+        const subLaneEnd = [];
+        catEvts.forEach(evt => {
+          const segStart = Math.max(evt.yearStart, decade);
+          let si = subLaneEnd.findIndex(end => end < segStart);
+          if (si === -1) { si = subLaneEnd.length; subLaneEnd.push(-Infinity); }
+          subLaneEnd[si] = Math.min(evt.yearEnd, decade + 9);
+          evtLaneMap.set(evt.id, totalLanes + si);
+        });
+        totalLanes += subLaneEnd.length;
+      });
+
+      evtArea.style.height = `${totalLanes * 26}px`;
 
       overlap.forEach(evt => {
         const cat      = evt.categoryId ?? 'personal';
-        const li       = catLaneMap[cat];
+        const li       = evtLaneMap.get(evt.id);
         const segStart = Math.max(evt.yearStart, decade);
         const segEnd   = Math.min(evt.yearEnd,   decade + 9);
         const leftPct  = ((segStart - decade) / 10) * 100;
