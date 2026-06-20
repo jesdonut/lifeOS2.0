@@ -12,10 +12,10 @@ const TABS = _periodOn
   : ['calendar', 'finance', 'notes'];
 
 const MODULE_MAP = {
-  calendar: () => import('../modules/calendar/calendar.js'),
-  period:   () => import('../modules/period/period-ui.js'),
-  finance:  () => import('../modules/finance/finance.js'),
-  notes:    () => import('../modules/notes/notes-tab.js'),
+  calendar: () => import('../modules/calendar/calendar.js?v=5'),
+  period:   () => import('../modules/period/period-ui.js?v=5'),
+  finance:  () => import('../modules/finance/finance.js?v=5'),
+  notes:    () => import('../modules/notes/notes-tab.js?v=5'),
 };
 
 // ── DOM refs ───────────────────────────────────────────────────────
