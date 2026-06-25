@@ -191,6 +191,10 @@ function _buildFundCard(fund) {
     const valEl   = div('nisa-fund-val'); valEl.textContent = fmtJPY(fund.currentValue ?? 0);
     const editBtn = btn('nisa-val-edit-btn', '', e => {
       e.stopPropagation(); _editValueFundId = fund.id; _render();
+      requestAnimationFrame(() => {
+        const inp = _container.querySelector('.nisa-inline-row input');
+        if (inp) { inp.focus(); inp.select(); }
+      });
     });
     editBtn.innerHTML = '<span class="material-symbols-outlined">edit</span>';
     editBtn.title = 'Update value';
