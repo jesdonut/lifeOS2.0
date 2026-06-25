@@ -27,47 +27,61 @@ const FLOW_OPTS = [
 ];
 
 const SYM_LEFT = [
-  { group: 'mood', label: 'Mood', items: [
-    { key: 'calm',       label: 'Calm' },
-    { key: 'happy',      label: 'Happy' },
-    { key: 'irritable',  label: 'Irritable' },
-    { key: 'low_energy', label: 'Low energy' },
-    { key: 'anxious',    label: 'Anxious' },
-    { key: 'foggy',      label: 'Foggy' },
-    { key: 'sad',        label: 'Sad' },
+  { group: 'general', label: 'General', items: [
+    { key: 'appetite_change', label: 'Appetite change' },
+    { key: 'mood_change',     label: 'Mood change' },
+    { key: 'sleep_change',    label: 'Sleep change' },
+    { key: 'fatigue',         label: 'Fatigue' },
+    { key: 'memory_lapse',    label: 'Memory lapse' },
+    { key: 'hot_flashes',     label: 'Hot flashes' },
+    { key: 'night_sweats',    label: 'Night sweats' },
+    { key: 'chills',          label: 'Chills' },
   ]},
-  { group: 'body', label: 'Body', items: [
-    { key: 'tired',      label: 'Tired' },
-    { key: 'cant_sleep', label: "Can't sleep" },
-    { key: 'bloated',    label: 'Bloated' },
-    { key: 'cravings',   label: 'Cravings' },
-    { key: 'acne',       label: 'Acne' },
-    { key: 'nausea',     label: 'Nausea' },
+  { group: 'skin', label: 'Skin & Hair', items: [
+    { key: 'acne',      label: 'Acne' },
+    { key: 'dry_skin',  label: 'Dry skin' },
+    { key: 'hair_loss', label: 'Hair loss' },
+    { key: 'itchy',     label: 'Itchy' },
   ]},
 ];
 
 const SYM_RIGHT = [
   { group: 'pain', label: 'Pain', items: [
-    { key: 'cramps',         label: 'Cramps' },
-    { key: 'headache',       label: 'Headache' },
-    { key: 'back_pain',      label: 'Back pain' },
-    { key: 'tender_breasts', label: 'Tender breasts' },
+    { key: 'abdominal_cramp', label: 'Abdominal cramp' },
+    { key: 'breast_pain',     label: 'Breast pain' },
+    { key: 'headache',        label: 'Headache' },
+    { key: 'lower_back_pain', label: 'Lower back pain' },
+    { key: 'pelvic_pain',     label: 'Pelvic pain' },
+  ]},
+  { group: 'digestive', label: 'Digestive & Other', items: [
+    { key: 'bloating',              label: 'Bloating' },
+    { key: 'constipation',          label: 'Constipation' },
+    { key: 'diarrhea',              label: 'Diarrhea' },
+    { key: 'nausea',                label: 'Nausea' },
+    { key: 'cravings',              label: 'Cravings' },
+    { key: 'vaginal_dryness',       label: 'Vaginal dryness' },
+    { key: 'bladder_incontinence',  label: 'Bladder incontinence' },
   ]},
 ];
 
 const SYM_EMOJI = {
-  calm:'😌', happy:'😊', irritable:'😤', low_energy:'😩',
-  anxious:'😰', foggy:'🌫', sad:'😔',
-  tired:'😴', cant_sleep:'💤', bloated:'🫧', cravings:'🍫', acne:'😬', nausea:'🤢',
-  cramps:'😣', headache:'🤕', back_pain:'😖', tender_breasts:'😵',
+  appetite_change:'🍽️', mood_change:'🌊', sleep_change:'🌙',
+  fatigue:'😩', memory_lapse:'🌫️', hot_flashes:'🔥', night_sweats:'💦', chills:'🥶',
+  acne:'😬', dry_skin:'🏜️', hair_loss:'💇', itchy:'🤌',
+  abdominal_cramp:'😣', breast_pain:'😵', headache:'🤕', lower_back_pain:'😖', pelvic_pain:'😓',
+  bloating:'🫧', constipation:'😤', diarrhea:'💩', nausea:'🤢',
+  cravings:'🍫', vaginal_dryness:'🌵', bladder_incontinence:'💧',
 };
 
 const SYM_LABEL = {
-  calm:'Calm', happy:'Happy', irritable:'Irritable', low_energy:'Low energy',
-  anxious:'Anxious', foggy:'Foggy', sad:'Sad',
-  tired:'Tired', cant_sleep:"Can't sleep", bloated:'Bloated',
-  cravings:'Cravings', acne:'Acne', nausea:'Nausea',
-  cramps:'Cramps', headache:'Headache', back_pain:'Back pain', tender_breasts:'Tender breasts',
+  appetite_change:'Appetite change', mood_change:'Mood change', sleep_change:'Sleep change',
+  fatigue:'Fatigue', memory_lapse:'Memory lapse', hot_flashes:'Hot flashes',
+  night_sweats:'Night sweats', chills:'Chills',
+  acne:'Acne', dry_skin:'Dry skin', hair_loss:'Hair loss', itchy:'Itchy',
+  abdominal_cramp:'Abdominal cramp', breast_pain:'Breast pain', headache:'Headache',
+  lower_back_pain:'Lower back pain', pelvic_pain:'Pelvic pain',
+  bloating:'Bloating', constipation:'Constipation', diarrhea:'Diarrhea', nausea:'Nausea',
+  cravings:'Cravings', vaginal_dryness:'Vaginal dryness', bladder_incontinence:'Bladder incontinence',
 };
 
 const PHASE_DATA = {
