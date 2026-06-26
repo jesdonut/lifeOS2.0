@@ -215,8 +215,7 @@ function showLoginScreen() {
           overlay.querySelector('#login-email').value,
           overlay.querySelector('#login-pw').value
         );
-        overlay.remove();
-        resolve();
+        window.location.reload();
       } catch (e) {
         err.textContent = e.message;
         btn.disabled = false;

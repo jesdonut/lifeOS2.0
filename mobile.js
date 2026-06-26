@@ -475,7 +475,7 @@ function _showMobileLogin() {
       err.textContent = '';
       try {
         await signIn(app.querySelector('#mob-email').value, app.querySelector('#mob-pw').value);
-        resolve();
+        window.location.reload();
       } catch (ex) {
         err.textContent = ex.message;
         btn.disabled = false;
