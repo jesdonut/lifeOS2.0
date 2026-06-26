@@ -119,12 +119,12 @@ const PHASE_DATA = {
 let _container   = null;
 let _data        = null;
 let _onSave      = null;
-let _view        = 'overview';
+let _view        = 'month';
+let _navDate     = null;
 let _entries     = [];
 let _stats       = null;
 let _tipEl       = null;
 let _dayModal    = null;
-let _yearView    = null;
 
 // ── Module contract ────────────────────────────────────────────────
 export function init(container, data, onSave) {
@@ -151,6 +151,7 @@ export function init(container, data, onSave) {
   }
 
   _data    = data;
+  _navDate = _todayStr();
   _entries = getPeriodEntries(data);
   _stats   = periodStats(_entries);
   _render();
@@ -163,7 +164,7 @@ export function destroy() {
   _container = null;
   _data      = null;
   _onSave    = null;
-  _yearView  = null;
+  _navDate   = null;
 }
 
 export function onDataChange(newData) {
@@ -182,8 +183,11 @@ function _render() {
   root.appendChild(_buildTop());
   const content = document.createElement('div');
   content.className = 'pr-content';
-  if (_view === 'cycles') _buildCycles(content);
-  else                    _buildOverview(content);
+  if      (_view === 'day')    _buildDayView(content);
+  else if (_view === 'week')   _buildWeekView(content);
+  else if (_view === 'month')  _buildMonthView(content);
+  else if (_view === 'cycles') _buildCycles(content);
+  else                         _buildOverview(content);
   root.appendChild(content);
   _container.appendChild(root);
 }
@@ -193,58 +197,196 @@ function _buildTop() {
   const top = document.createElement('div');
   top.className = 'pr-top';
 
+  // Navigation controls (context-aware per view)
+  const today = _todayStr();
+
+  if (_view === 'cycles') {
+    const cycleDay = _cycleDay(today);
+    const cycleNum = _entries.length;
+    const meta = document.createElement('div');
+    meta.className = 'pr-meta';
+    meta.innerHTML = `
+      <span>${_fmtDate(today)}</span>
+      ${cycleDay ? `<span class="pr-dot">·</span><span>Day <strong>${cycleDay}</strong> of cycle</span>` : ''}
+      ${cycleNum ? `<span class="pr-dot">·</span><span><strong>${cycleNum}</strong> ${cycleNum === 1 ? 'cycle' : 'cycles'} tracked</span>` : ''}
+    `;
+    top.appendChild(meta);
+  } else {
+    const prevBtn = document.createElement('button'); prevBtn.className = 'cal-year-btn'; prevBtn.textContent = '‹';
+    const lbl     = document.createElement('span');   lbl.className = 'cal-year-label';
+    const nextBtn = document.createElement('button'); nextBtn.className = 'cal-year-btn'; nextBtn.textContent = '›';
+    const todBtn  = document.createElement('button'); todBtn.className  = 'cal-today-btn'; todBtn.textContent = 'today';
+
+    if (_view === 'day') {
+      lbl.textContent = new Date(_navDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      prevBtn.addEventListener('click', () => { _navDate = dStr(addD(D(_navDate), -1)); _render(); });
+      nextBtn.addEventListener('click', () => { _navDate = dStr(addD(D(_navDate),  1)); _render(); });
+      const onToday = _navDate === today;
+      todBtn.disabled = onToday; todBtn.style.opacity = onToday ? '0.35' : '1';
+      todBtn.addEventListener('click', () => { _navDate = today; _render(); });
+    } else if (_view === 'week') {
+      const { mon, sun } = _weekBounds(_navDate);
+      const fs = s => new Date(s + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      lbl.textContent = `${fs(mon)} – ${fs(sun)}`;
+      prevBtn.addEventListener('click', () => { _navDate = dStr(addD(D(_weekBounds(_navDate).mon), -7)); _render(); });
+      nextBtn.addEventListener('click', () => { _navDate = dStr(addD(D(_weekBounds(_navDate).mon),  7)); _render(); });
+      const onWeek = mon <= today && today <= sun;
+      todBtn.disabled = onWeek; todBtn.style.opacity = onWeek ? '0.35' : '1';
+      todBtn.addEventListener('click', () => { _navDate = today; _render(); });
+    } else if (_view === 'month') {
+      const [y, m] = _navDate.split('-').map(Number);
+      lbl.textContent = `${MONTHS[m - 1]} ${y}`;
+      prevBtn.addEventListener('click', () => { _navDate = _shiftMonth(_navDate, -1); _render(); });
+      nextBtn.addEventListener('click', () => { _navDate = _shiftMonth(_navDate,  1); _render(); });
+      const onMonth = _navDate.slice(0, 7) === today.slice(0, 7);
+      todBtn.disabled = onMonth; todBtn.style.opacity = onMonth ? '0.35' : '1';
+      todBtn.addEventListener('click', () => { _navDate = today; _render(); });
+    } else { // year
+      const y         = parseInt(_navDate.slice(0, 4));
+      const curYear   = parseInt(today.slice(0, 4));
+      const birthYear = _data?.settings?.birthYear ?? null;
+      const minYear   = birthYear ? Math.max(birthYear, curYear - 50) : curYear - 10;
+      lbl.textContent  = String(y);
+      prevBtn.disabled = y <= minYear;
+      nextBtn.disabled = y >= curYear + 1;
+      prevBtn.addEventListener('click', () => { _navDate = _shiftYear(_navDate, -1); _render(); });
+      nextBtn.addEventListener('click', () => { _navDate = _shiftYear(_navDate,  1); _render(); });
+      const onYear = y === curYear;
+      todBtn.disabled = onYear; todBtn.style.opacity = onYear ? '0.35' : '1';
+      todBtn.addEventListener('click', () => { _navDate = today; _render(); });
+    }
+    top.append(prevBtn, lbl, nextBtn, todBtn);
+  }
+
+  // View toggle
   const tabs = document.createElement('div');
   tabs.className = 'cal-view-toggle';
-  [{ v: 'overview', label: 'Overview' }, { v: 'cycles', label: 'Cycles' }].forEach(({ v, label }) => {
+  [
+    { v: 'day',    label: 'Day' },
+    { v: 'week',   label: 'Week' },
+    { v: 'month',  label: 'Month' },
+    { v: 'year',   label: 'Year' },
+    { v: 'cycles', label: 'Cycles' },
+  ].forEach(({ v, label }) => {
     const btn = document.createElement('button');
     btn.className = 'cal-view-btn' + (_view === v ? ' active' : '');
     btn.textContent = label;
     btn.addEventListener('click', () => { if (_view !== v) { _view = v; _render(); } });
     tabs.appendChild(btn);
   });
+  top.appendChild(tabs);
 
-  const meta = document.createElement('div');
-  meta.className = 'pr-meta';
-  const today    = _todayStr();
-  const cycleDay = _cycleDay(today);
-  const cycleNum = _entries.length;
-  meta.innerHTML = `
-    <span>${_fmtDate(today)}</span>
-    ${cycleDay ? `<span class="pr-dot">·</span><span>Day <strong>${cycleDay}</strong> of cycle</span>` : ''}
-    ${cycleNum ? `<span class="pr-dot">·</span><span><strong>${cycleNum}</strong> ${cycleNum === 1 ? 'cycle' : 'cycles'} tracked</span>` : ''}
-  `;
-  const curYear   = parseInt(today.slice(0, 4));
-  if (_yearView === null) _yearView = curYear;
-  const year      = _yearView;
-  const birthYear = _data?.settings?.birthYear ?? null;
-  const minYear   = birthYear ? Math.max(birthYear, curYear - 50) : curYear - 10;
-
-  const prevBtn = document.createElement('button'); prevBtn.className = 'cal-year-btn';
-  prevBtn.textContent = '‹';
-  prevBtn.disabled = year <= minYear;
-  prevBtn.addEventListener('click', () => { _yearView = year - 1; _render(); });
-
-  const yearLbl = document.createElement('span'); yearLbl.className = 'cal-year-label';
-  yearLbl.textContent = String(year);
-
-  const nextBtn = document.createElement('button'); nextBtn.className = 'cal-year-btn';
-  nextBtn.textContent = '›';
-  nextBtn.disabled = year >= curYear + 1;
-  nextBtn.addEventListener('click', () => { _yearView = year + 1; _render(); });
-
-  const todayBtn = document.createElement('button'); todayBtn.className = 'cal-today-btn';
-  todayBtn.textContent = 'today';
-  todayBtn.disabled = year === curYear;
-  todayBtn.style.opacity = year === curYear ? '0.35' : '1';
-  todayBtn.addEventListener('click', () => { _yearView = curYear; _render(); });
-
-  top.append(prevBtn, yearLbl, nextBtn, todayBtn);
-
-  top.append(tabs, meta);
   return top;
 }
 
-// ── Overview ───────────────────────────────────────────────────────
+// ── Date nav helpers ───────────────────────────────────────────────
+function _weekBounds(date) {
+  const d   = D(date);
+  const dow = (d.getDay() + 6) % 7; // 0=Mon
+  return { mon: dStr(addD(d, -dow)), sun: dStr(addD(d, 6 - dow)) };
+}
+
+function _shiftMonth(date, n) {
+  const [y, m, day] = date.split('-').map(Number);
+  let ny = y, nm = m + n;
+  while (nm > 12) { nm -= 12; ny++; }
+  while (nm < 1)  { nm += 12; ny--; }
+  const max = new Date(ny, nm, 0).getDate();
+  return `${ny}-${String(nm).padStart(2, '0')}-${String(Math.min(day, max)).padStart(2, '0')}`;
+}
+
+function _shiftYear(date, n) {
+  const [y, m, day] = date.split('-').map(Number);
+  const ny  = y + n;
+  const max = new Date(ny, m, 0).getDate();
+  return `${ny}-${String(m).padStart(2, '0')}-${String(Math.min(day, max)).padStart(2, '0')}`;
+}
+
+// ── Day view ───────────────────────────────────────────────────────
+function _buildDayView(el) {
+  const today  = _todayStr();
+  const ds     = _navDate;
+  const counts = _countSymptoms();
+
+  const wrap = document.createElement('div');
+  wrap.className = 'pr-day-view';
+
+  // Phase/status info if viewing today
+  if (ds === today) {
+    const phasePanel = _buildPhasePanel();
+    if (phasePanel) wrap.appendChild(phasePanel);
+  }
+
+  const grid = document.createElement('div'); grid.className = 'pr-log-grid';
+  const left  = document.createElement('div'); left.className  = 'pr-log-col';
+  const right = document.createElement('div'); right.className = 'pr-log-col';
+
+  left.appendChild(_buildFlowChips(ds));
+  SYM_LEFT.forEach(g  => left.appendChild(_buildSymGroup(g, ds, counts)));
+  right.appendChild(_buildBbtInput(ds));
+  SYM_RIGHT.forEach(g => right.appendChild(_buildSymGroup(g, ds, counts)));
+
+  grid.append(left, right);
+  wrap.appendChild(grid);
+  el.appendChild(wrap);
+}
+
+// ── Week view ──────────────────────────────────────────────────────
+function _buildWeekView(el) {
+  const today = _todayStr();
+  const cache = _buildDayCache();
+  const { mon } = _weekBounds(_navDate);
+
+  const strip = document.createElement('div');
+  strip.className = 'pr-week-strip';
+
+  for (let i = 0; i < 7; i++) {
+    const ds  = dStr(addD(D(mon), i));
+    const d   = D(ds);
+    const col = document.createElement('div');
+    col.className = 'pr-week-col' + (ds === _navDate ? ' selected' : '') + (ds === today ? ' today' : '');
+
+    const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+    const dayNum  = d.getDate();
+
+    const nameEl = document.createElement('div'); nameEl.className = 'pr-wk-name'; nameEl.textContent = dayName;
+    const numEl  = document.createElement('div'); numEl  .className = 'pr-wk-num';  numEl.textContent  = dayNum;
+
+    const indicator = document.createElement('div'); indicator.className = 'pr-wk-ind';
+    if (cache.periodDays[ds])            indicator.classList.add('period', `flow-${cache.periodDays[ds]}`);
+    else if (cache.spottingSet.has(ds))  indicator.classList.add('spotting');
+    else if (cache.predictedSet.has(ds)) indicator.classList.add('predicted');
+    else if (cache.fertileSet.has(ds))   indicator.classList.add('fertile');
+
+    if (cache.symptomDays[ds]?.length) {
+      const dot = document.createElement('span'); dot.className = 'pr-wk-symdot';
+      col.appendChild(dot);
+    }
+
+    col.append(nameEl, numEl, indicator);
+    col.addEventListener('click', () => { _navDate = ds; _view = 'day'; _render(); });
+    strip.appendChild(col);
+  }
+
+  el.appendChild(strip);
+}
+
+// ── Month view ─────────────────────────────────────────────────────
+function _buildMonthView(el) {
+  const today   = _todayStr();
+  const [y, m]  = _navDate.split('-').map(Number);
+  const cache   = _buildDayCache();
+
+  const phasePanel = _buildPhasePanel();
+  if (phasePanel) el.appendChild(phasePanel);
+
+  const card = document.createElement('div');
+  card.className = 'pr-month-single';
+  _calGrid(card, y, m - 1, today, cache, true);
+  el.appendChild(card);
+}
+
+// ── Year view (was Overview) ───────────────────────────────────────
 function _buildOverview(el) {
   const phasePanel = _buildPhasePanel();
   if (phasePanel) {
@@ -273,12 +415,11 @@ function _buildOverview(el) {
   const ys = document.createElement('div'); ys.className = 'pr-year-section';
 
   const today   = _todayStr();
-  const curYear = parseInt(today.slice(0, 4));
-  if (_yearView === null) _yearView = curYear;
+  const year    = parseInt(_navDate.slice(0, 4));
 
   const grid = document.createElement('div'); grid.className = 'pr-year-grid';
   const cache = _buildDayCache();
-  for (let m = 0; m < 12; m++) grid.appendChild(_buildMonthCard(_yearView, m, today, cache));
+  for (let m = 0; m < 12; m++) grid.appendChild(_buildMonthCard(year, m, today, cache));
   ys.appendChild(grid);
   el.appendChild(ys);
 }

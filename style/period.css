@@ -874,6 +874,83 @@
   line-height: 1.3;
 }
 
+/* ── Day view ── */
+.pr-day-view {
+  padding: var(--s4) var(--s5);
+}
+
+/* ── Week view ── */
+.pr-week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--s2);
+  padding: var(--s4) var(--s5);
+}
+
+.pr-week-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s1);
+  padding: var(--s2) 0 var(--s3);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--dur-fast);
+  position: relative;
+}
+.pr-week-col:hover  { background: var(--surface-2); }
+.pr-week-col.selected { background: color-mix(in srgb, var(--flow-medium) 12%, var(--surface-2)); }
+.pr-week-col.today .pr-wk-num { color: var(--accent); font-weight: 700; }
+
+.pr-wk-name {
+  font-size: 10px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pr-wk-num {
+  font-size: var(--fs-base);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.pr-wk-ind {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-dim);
+}
+.pr-wk-ind.period { background: var(--flow-medium); }
+.pr-wk-ind.spotting { background: color-mix(in srgb, var(--flow-medium) 50%, transparent); }
+.pr-wk-ind.predicted { background: color-mix(in srgb, var(--flow-medium) 30%, transparent); border: 1px dashed var(--flow-light); }
+.pr-wk-ind.fertile { background: var(--green); opacity: 0.5; }
+
+.pr-wk-symdot {
+  position: absolute;
+  top: var(--s1);
+  right: var(--s2);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* ── Month single view ── */
+.pr-month-single {
+  padding: var(--s3) var(--s5);
+}
+
+.pr-month-single .pr-cal-row {
+  gap: 4px;
+}
+
+.pr-month-single .pr-day-lg {
+  font-size: var(--fs-sm);
+  height: 36px;
+  width: 36px;
+}
+
 /* ── Responsive ── */
 @media (max-width: 960px) {
   .pr-year-grid { grid-template-columns: repeat(3, 1fr); }
