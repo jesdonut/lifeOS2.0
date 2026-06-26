@@ -1,6 +1,13 @@
-// store.js — localStorage load/save, pub/sub
+// store.js — Supabase-backed load/save, pub/sub
 
-const KEY = 'lifeOS_data';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = 'https://gexqhppvqkokaxmgyonb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdleHFocHB2cWtva2F4bWd5b25iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjMyMjEsImV4cCI6MjA5Nzk5OTIyMX0.h4mBPSPEUlRGq6JBMPtZLtUr5dYSTxTMeUr33BhcOI4';
+
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const MODULE_KEYS = ['settings', 'period', 'finance', 'currency', 'nisa', 'savings', 'notes', 'tasks'];
 
 function defaultData() {
   return {
@@ -36,58 +43,218 @@ function defaultData() {
 let _data = null;
 const _subs = new Set();
 
-export function load() {
-  if (_data) return _data;
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const defaults = defaultData();
-      const stored   = JSON.parse(raw);
-      _data = { ...defaults, ...stored, settings: { ...defaults.settings, ...(stored.settings ?? {}) } };
+// ── Fetch all data from Supabase ───────────────────────────────────────────
+async function fetchFromSupabase() {
+  const data = defaultData();
+
+  const [modRes, evtRes, spendRes] = await Promise.all([
+    sb.from('modules').select('*'),
+    sb.from('calendar_events').select('data'),
+    sb.from('spend_entries').select('*'),
+  ]);
+
+  if (modRes.error)   throw modRes.error;
+  if (evtRes.error)   throw evtRes.error;
+  if (spendRes.error) throw spendRes.error;
+
+  // Modules
+  for (const row of modRes.data ?? []) {
+    if (row.module === 'settings') {
+      data.settings = { ...data.settings, ...row.data };
     } else {
-      _data = defaultData();
+      data[row.module] = row.data;
     }
-  } catch {
-    _data = defaultData();
   }
-  // Migration: if user created a `Project` category under `settings.categories`
-  // (calendar categories), ensure it's present in `settings.spendCategories`
-  try {
-    const cats = _data.settings?.categories ?? [];
-    const spend = _data.settings?.spendCategories ?? [];
-    const spendIds = new Set(spend.map(c => c.id));
-    let migrated = false;
-    for (const c of cats) {
-      if (!c || !c.name) continue;
-      const name = c.name.toLowerCase();
-      if (name.startsWith('project') && !spendIds.has(c.id)) {
-        spend.push({ id: c.id, name: c.name, color: c.color ?? '#c49a73', sub: c.sub ?? [], isCustom: !!c.isCustom });
-        spendIds.add(c.id);
-        migrated = true;
+
+  // Calendar events
+  data.calendar.events = (evtRes.data ?? []).map(r => r.data);
+
+  // Spend entries — rebuild the date-keyed dict
+  const spendDict = {};
+  for (const row of spendRes.data ?? []) {
+    if (!spendDict[row.date]) spendDict[row.date] = [];
+    spendDict[row.date].push(row.data);
+  }
+  data.calendar.spendEntries = spendDict;
+
+  // First-time migration: if Supabase is empty but localStorage has data, push it up
+  const isEmpty = (modRes.data ?? []).length === 0
+    && (evtRes.data ?? []).length === 0
+    && (spendRes.data ?? []).length === 0;
+
+  if (isEmpty) {
+    try {
+      const raw = localStorage.getItem('lifeOS_data');
+      if (raw) {
+        const stored = JSON.parse(raw);
+        Object.assign(data, stored, { settings: { ...data.settings, ...(stored.settings ?? {}) } });
+        await pushToSupabase(data);
+        console.log('[store] migrated localStorage to Supabase');
+      }
+    } catch (e) {
+      console.warn('[store] migration failed', e);
+    }
+  }
+
+  return data;
+}
+
+// ── Push full data set to Supabase (migration / import) ───────────────────
+async function pushToSupabase(data) {
+  const moduleWrites = MODULE_KEYS
+    .filter(k => data[k] !== undefined)
+    .map(k => sb.from('modules').upsert({ module: k, data: data[k], updated_at: new Date().toISOString() }));
+
+  const eventRows = (data.calendar?.events ?? []).map(e => ({
+    id: e.id, date: e.date, title: e.title ?? '', category: e.category ?? 'personal', data: e,
+  }));
+
+  const spendRows = [];
+  for (const [date, entries] of Object.entries(data.calendar?.spendEntries ?? {})) {
+    for (const e of entries ?? []) {
+      if (!e?.id) continue;
+      spendRows.push({ id: e.id, date, category_id: e.categoryId ?? null, subcategory: e.subcategory ?? null, amount: e.amount ?? 0, currency: e.currency ?? 'JPY', note: e.note ?? null, data: e });
+    }
+  }
+
+  await Promise.all([
+    ...moduleWrites,
+    eventRows.length  ? sb.from('calendar_events').upsert(eventRows)  : Promise.resolve(),
+    spendRows.length  ? sb.from('spend_entries').upsert(spendRows)    : Promise.resolve(),
+  ]);
+}
+
+// ── Write partial update to Supabase ──────────────────────────────────────
+async function writePartial(partial, prevCalendar) {
+  const writes = [];
+
+  for (const [key, value] of Object.entries(partial)) {
+    if (key === 'calendar') {
+      writes.push(writeCalendar(value, prevCalendar));
+    } else if (MODULE_KEYS.includes(key)) {
+      writes.push(
+        sb.from('modules').upsert({ module: key, data: value, updated_at: new Date().toISOString() })
+      );
+    }
+  }
+
+  await Promise.all(writes);
+}
+
+async function writeCalendar(newCal, prevCal) {
+  const writes = [];
+
+  // Events: upsert additions/edits, delete removals
+  if (newCal.events !== undefined) {
+    if (newCal.events.length > 0) {
+      const rows = newCal.events.map(e => ({
+        id: e.id, date: e.date, title: e.title ?? '', category: e.category ?? 'personal', data: e,
+      }));
+      writes.push(sb.from('calendar_events').upsert(rows));
+    }
+    const newIds  = new Set(newCal.events.map(e => e.id));
+    const removed = (prevCal?.events ?? []).map(e => e.id).filter(id => !newIds.has(id));
+    if (removed.length) writes.push(sb.from('calendar_events').delete().in('id', removed));
+  }
+
+  // Spend entries: upsert additions/edits, delete removals
+  if (newCal.spendEntries !== undefined) {
+    const newRows = [];
+    const newIds  = new Set();
+
+    for (const [date, entries] of Object.entries(newCal.spendEntries)) {
+      for (const e of entries ?? []) {
+        if (!e?.id) continue;
+        newIds.add(e.id);
+        newRows.push({ id: e.id, date, category_id: e.categoryId ?? null, subcategory: e.subcategory ?? null, amount: e.amount ?? 0, currency: e.currency ?? 'JPY', note: e.note ?? null, data: e });
       }
     }
-    if (migrated) {
-      _data.settings = { ..._data.settings, spendCategories: spend };
-      // Persist migration so the app sees the category consistently
-      localStorage.setItem(KEY, JSON.stringify(_data));
-    }
-  } catch (e) {
-    // migration best-effort — ignore errors
+
+    if (newRows.length) writes.push(sb.from('spend_entries').upsert(newRows));
+
+    const removed = Object.values(prevCal?.spendEntries ?? {})
+      .flat()
+      .map(e => e?.id)
+      .filter(id => id && !newIds.has(id));
+    if (removed.length) writes.push(sb.from('spend_entries').delete().in('id', removed));
   }
-  return _data;
+
+  await Promise.all(writes);
 }
+
+// ── Public API ─────────────────────────────────────────────────────────────
+
+function loadFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem('lifeOS_data');
+    const stored = raw ? JSON.parse(raw) : {};
+    return { ...defaultData(), ...stored, settings: { ...defaultData().settings, ...(stored.settings ?? {}) } };
+  } catch {
+    return defaultData();
+  }
+}
+
+export function load() {
+  if (_data) return _data;
+  // Check if there's a Supabase session — if yes, use Supabase; otherwise localStorage
+  return sb.auth.getSession().then(({ data: { session } }) => {
+    if (!session) {
+      _data = loadFromLocalStorage();
+      return _data;
+    }
+    return fetchFromSupabase().then(data => {
+      _data = data;
+      return _data;
+    }).catch(err => {
+      console.error('[store] Supabase load failed, falling back to localStorage', err);
+      _data = loadFromLocalStorage();
+      return _data;
+    });
+  });
+}
+
+export function get() { return _data ?? defaultData(); }
 
 export function save(partial) {
-  Object.assign(_data, partial);
-  localStorage.setItem(KEY, JSON.stringify(_data));
-  _subs.forEach(fn => fn(_data));
-}
+  if (!_data) { load().then(() => save(partial)); return; }
 
-export function get() { return _data ?? load(); }
+  const prevCalendar = _data.calendar ? { events: [...(_data.calendar.events ?? [])], spendEntries: { ...(_data.calendar.spendEntries ?? {}) } } : null;
+
+  Object.assign(_data, partial);
+  _subs.forEach(fn => fn(_data));
+
+  // Write to Supabase if authenticated, otherwise localStorage
+  sb.auth.getSession().then(({ data: { session } }) => {
+    if (session) {
+      writePartial(partial, prevCalendar).catch(e => console.error('[store] write failed', e));
+    } else {
+      try { localStorage.setItem('lifeOS_data', JSON.stringify(_data)); } catch (e) { console.error('[store] localStorage write failed', e); }
+    }
+  });
+}
 
 export function subscribe(fn) {
   _subs.add(fn);
   return () => _subs.delete(fn);
+}
+
+export async function getSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  return session;
+}
+
+export async function signIn(email, password) {
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  _data = null; // force fresh load from Supabase
+  await load();
+  _subs.forEach(fn => fn(_data));
+  return data.session;
+}
+
+export async function signOut() {
+  await sb.auth.signOut();
+  _data = null;
 }
 
 export function exportBackup() {
@@ -104,13 +271,14 @@ export function exportBackup() {
 export function importBackup(file) {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
-    r.onload = e => {
+    r.onload = async e => {
       try {
-        _data = JSON.parse(e.target.result);
-        localStorage.setItem(KEY, JSON.stringify(_data));
+        const imported = JSON.parse(e.target.result);
+        _data = { ...defaultData(), ...imported, settings: { ...defaultData().settings, ...(imported.settings ?? {}) } };
+        await pushToSupabase(_data);
         _subs.forEach(fn => fn(_data));
         resolve(_data);
-      } catch { reject(new Error('Invalid JSON')); }
+      } catch (err) { reject(err); }
     };
     r.readAsText(file);
   });

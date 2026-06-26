@@ -1,7 +1,9 @@
 // mobile.js — LifeOS mobile companion
-// Reads/writes lifeOS_data (same store as desktop)
+// Reads/writes via Supabase store (same data as desktop)
 
-const DATA_KEY = 'lifeOS_data';
+import { load, get, save, getSession, signIn } from './core/store.js';
+
+let _mobileData = null;
 
 const SYMPTOM_GROUPS = [
   { label: 'General', items: [
@@ -46,21 +48,18 @@ let _expandedNote = null;
 
 // ── Data ────────────────────────────────────────────────────────────
 function _D() {
-  try { return JSON.parse(localStorage.getItem(DATA_KEY)) || {}; } catch { return {}; }
+  return _mobileData ?? get();
 }
 
 function _saveD(d) {
-  localStorage.setItem(DATA_KEY, JSON.stringify(d));
+  _mobileData = d;
+  save({ period: d.period });
   _render();
 }
 
 function _todayStr() {
-  try {
-    const tz = JSON.parse(localStorage.getItem(DATA_KEY))?.settings?.timezone ?? 'Asia/Tokyo';
-    return new Date().toLocaleDateString('sv-SE', { timeZone: tz });
-  } catch {
-    return new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
-  }
+  const tz = get().settings?.timezone ?? 'Asia/Tokyo';
+  return new Date().toLocaleDateString('sv-SE', { timeZone: tz });
 }
 
 function _ds(y, m, d) {
@@ -446,13 +445,66 @@ function _buildBottomNav() {
   return nav;
 }
 
-// ── Render ───────────────────────────────────────────────────────────
+// ── Render (defined below with tap handler) ───────────────────────────────
+
+function _showMobileLogin() {
+  return new Promise(resolve => {
+    const app = document.getElementById('mob-app');
+    app.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:24px;">
+        <form id="mob-login" style="display:flex;flex-direction:column;gap:16px;width:100%;max-width:320px;">
+          <span style="font-size:20px;font-weight:600;margin-bottom:8px;">Seratus</span>
+          <input id="mob-email" type="email" placeholder="Email" autocomplete="email"
+            style="padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;">
+          <input id="mob-pw" type="password" placeholder="Password" autocomplete="current-password"
+            style="padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;">
+          <button type="submit"
+            style="padding:12px 16px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:15px;font-weight:600;">
+            Sign in
+          </button>
+          <p id="mob-err" style="color:var(--red);font-size:13px;margin:0;min-height:1em;"></p>
+        </form>
+      </div>
+    `;
+    app.querySelector('#mob-login').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = app.querySelector('button[type=submit]');
+      const err = app.querySelector('#mob-err');
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+      err.textContent = '';
+      try {
+        await signIn(app.querySelector('#mob-email').value, app.querySelector('#mob-pw').value);
+        resolve();
+      } catch (ex) {
+        err.textContent = ex.message;
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+      }
+    });
+  });
+}
+
+let _mobTaps = 0, _mobTapTimer = null;
+
+function _onTitleTap() {
+  _mobTaps++;
+  clearTimeout(_mobTapTimer);
+  _mobTapTimer = setTimeout(() => { _mobTaps = 0; }, 2000);
+  if (_mobTaps >= 10) {
+    _mobTaps = 0;
+    getSession().then(s => { if (!s) _showMobileLogin().then(() => load().then(d => { _mobileData = d; _render(); })); });
+  }
+}
+
 function _render() {
   const app = document.getElementById('mob-app');
   app.innerHTML = '';
 
   const hdr = el('div', 'mob-header');
-  hdr.appendChild(el('span', 'mob-title', 'LifeOS'));
+  const title = el('span', 'mob-title', 'LifeOS');
+  title.addEventListener('click', _onTitleTap);
+  hdr.appendChild(title);
   app.appendChild(hdr);
 
   const main = el('div', 'mob-main');
@@ -464,4 +516,4 @@ function _render() {
   app.appendChild(_buildBottomNav());
 }
 
-_render();
+load().then(data => { _mobileData = data; _render(); });

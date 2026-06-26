@@ -1,10 +1,10 @@
 // app.js — tab routing, gesture navigation, notes sidebar, theme
 
-import { load, save, subscribe } from './store.js';
+import { load, get, save, subscribe, getSession, signIn, signOut } from './store.js';
 import { initGestures } from './gestures.js';
 import { openSettings, applyAccent } from './settings.js';
 
-const _bootData = load();
+const _bootData = await load();
 const _periodOn = _bootData.settings?.periodEnabled ?? false;
 
 const TABS = _periodOn
@@ -182,6 +182,50 @@ themeBtn.addEventListener('click', e => {
 tabRight.append(themeBtn, settingsBtn);
 tabBar.appendChild(tabRight);
 
+// ── Login screen ───────────────────────────────────────────────────
+function showLoginScreen() {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;';
+    overlay.innerHTML = `
+      <form id="login-form" style="display:flex;flex-direction:column;gap:var(--s4);width:280px;">
+        <span style="font-size:20px;font-weight:600;color:var(--text);margin-bottom:var(--s2)">Seratus</span>
+        <input id="login-email" type="email" placeholder="Email" autocomplete="email"
+          style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:var(--s3) var(--s4);color:var(--text);font-size:var(--fs-sm);outline:none;">
+        <input id="login-pw" type="password" placeholder="Password" autocomplete="current-password"
+          style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:var(--s3) var(--s4);color:var(--text);font-size:var(--fs-sm);outline:none;">
+        <button type="submit"
+          style="background:var(--accent);color:#fff;border:none;border-radius:var(--r2);padding:var(--s3) var(--s4);font-size:var(--fs-sm);cursor:pointer;">
+          Sign in
+        </button>
+        <p id="login-err" style="color:var(--red);font-size:var(--fs-xs);margin:0;min-height:1em;"></p>
+      </form>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.querySelector('#login-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = overlay.querySelector('button[type=submit]');
+      const err = overlay.querySelector('#login-err');
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+      err.textContent = '';
+      try {
+        await signIn(
+          overlay.querySelector('#login-email').value,
+          overlay.querySelector('#login-pw').value
+        );
+        overlay.remove();
+        resolve();
+      } catch (e) {
+        err.textContent = e.message;
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+      }
+    });
+  });
+}
+
 // ── Boot ───────────────────────────────────────────────────────────
 applyTheme(_theme);
 
@@ -189,7 +233,19 @@ if (/Mobi|Android/i.test(navigator.userAgent)) {
   window.location.replace('mobile.html');
 }
 
-const _data = load();
+// 10-tap on brand name triggers owner login
+let _tapCount = 0, _tapTimer = null;
+brandWrap.querySelector('.brand-pill-name').addEventListener('click', () => {
+  _tapCount++;
+  clearTimeout(_tapTimer);
+  _tapTimer = setTimeout(() => { _tapCount = 0; }, 2000);
+  if (_tapCount >= 10) {
+    _tapCount = 0;
+    getSession().then(s => { if (!s) showLoginScreen(); });
+  }
+});
+
+const _data = await load();
 if (!_data.settings?.setupDone) {
   window.location.href = 'index.html';
 } else {
