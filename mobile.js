@@ -1,556 +1,467 @@
-// mobile.js — standalone mobile quick-entry app
-// Stores delta in localStorage under 'lifeOS_mobile'
-// Export as delta JSON, import on PC via Settings > Import mobile data
+// mobile.js — LifeOS mobile companion
+// Reads/writes lifeOS_data (same store as desktop)
 
-const MOBILE_KEY = 'lifeOS_mobile';
-const TZ = 'Asia/Tokyo';
+const DATA_KEY = 'lifeOS_data';
 
-const SPEND_CATS = [
-  { id: 'food',          name: 'Food',          sub: ['Breakfast', 'Lunch', 'Dinner', 'Others'] },
-  { id: 'bills',         name: 'Bills',         sub: ['Rent', 'Gas', 'Water', 'Electricity', 'Internet', 'Mobile'] },
-  { id: 'commute',       name: 'Commute',       sub: ['Work', 'Bus', 'Train', 'Airplane', 'Taxi', 'Ship'] },
-  { id: 'entertainment', name: 'Entertainment', sub: ['Game', 'Movie', 'Clothes', 'Gadget'] },
-  { id: 'beauty',        name: 'Beauty',        sub: ['Hair cut', 'Hair color', 'Nails', 'Eyebrow'] },
-  { id: 'paperwork',     name: 'Paperwork',     sub: ['Visa', 'Government', 'Ward office'] },
-  { id: 'medical',       name: 'Medical',       sub: ['Hospital', 'Clinic', 'Pharmacy'] },
-  { id: 'necessities',   name: 'Necessities',   sub: ['Shampoo', 'Soap', 'Detergent'] },
+const SYMPTOM_GROUPS = [
+  { label: 'General', items: [
+    { key: 'appetite_change', label: 'Appetite change' },
+    { key: 'mood_change',     label: 'Mood change' },
+    { key: 'sleep_change',    label: 'Sleep change' },
+    { key: 'fatigue',         label: 'Fatigue' },
+    { key: 'memory_lapse',    label: 'Memory lapse' },
+    { key: 'hot_flashes',     label: 'Hot flashes' },
+    { key: 'night_sweats',    label: 'Night sweats' },
+    { key: 'chills',          label: 'Chills' },
+  ]},
+  { label: 'Skin & Hair', items: [
+    { key: 'acne',      label: 'Acne' },
+    { key: 'dry_skin',  label: 'Dry skin' },
+    { key: 'hair_loss', label: 'Hair loss' },
+    { key: 'itchy',     label: 'Itchy' },
+  ]},
+  { label: 'Pain', items: [
+    { key: 'abdominal_cramp', label: 'Abdominal cramp' },
+    { key: 'breast_pain',     label: 'Breast pain' },
+    { key: 'headache',        label: 'Headache' },
+    { key: 'lower_back_pain', label: 'Lower back pain' },
+    { key: 'pelvic_pain',     label: 'Pelvic pain' },
+  ]},
+  { label: 'Digestive & Other', items: [
+    { key: 'bloating',             label: 'Bloating' },
+    { key: 'constipation',         label: 'Constipation' },
+    { key: 'diarrhea',             label: 'Diarrhea' },
+    { key: 'nausea',               label: 'Nausea' },
+    { key: 'cravings',             label: 'Cravings' },
+    { key: 'vaginal_dryness',      label: 'Vaginal dryness' },
+    { key: 'bladder_incontinence', label: 'Bladder incontinence' },
+  ]},
 ];
 
-const EVENT_CATS = [
-  { id: 'personal',  name: 'Personal',  color: '#d69aa5' },
-  { id: 'work',      name: 'Work',      color: '#b8c89a' },
-  { id: 'health',    name: 'Health',    color: '#c79a9a' },
-  { id: 'friends',   name: 'Friends',   color: '#7c9ccb' },
-  { id: 'family',    name: 'Family',    color: '#86afc5' },
-  { id: 'travel',    name: 'Travel',    color: '#d1b36a' },
-  { id: 'education', name: 'Education', color: '#8fafa2' },
-  { id: 'partner',   name: 'Partner',   color: '#b7a6b5' },
-];
+// ── State ───────────────────────────────────────────────────────────
+let _tab      = 'day';
+let _selDate  = _todayStr();
+let _calMonth = { y: +_selDate.slice(0, 4), m: +_selDate.slice(5, 7) };
+let _expandedNote = null;
 
-const SYMPTOMS = ['cramps', 'bloating', 'headache', 'mood swings', 'fatigue', 'back pain', 'nausea', 'tender'];
+// ── Data ────────────────────────────────────────────────────────────
+function _D() {
+  try { return JSON.parse(localStorage.getItem(DATA_KEY)) || {}; } catch { return {}; }
+}
 
-// ── State ──────────────────────────────────────────────────────────
-let _data = _load();
-let _viewDate = _todayStr();
-let _tab = 'spend';
-let _sheet = null; // null | 'spend' | 'event' | 'task'
+function _saveD(d) {
+  localStorage.setItem(DATA_KEY, JSON.stringify(d));
+  _render();
+}
 
-// ── Persistence ────────────────────────────────────────────────────
-function _load() {
+function _todayStr() {
   try {
-    return JSON.parse(localStorage.getItem(MOBILE_KEY)) || _empty();
+    const tz = JSON.parse(localStorage.getItem(DATA_KEY))?.settings?.timezone ?? 'Asia/Tokyo';
+    return new Date().toLocaleDateString('sv-SE', { timeZone: tz });
   } catch {
-    return _empty();
+    return new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
   }
 }
 
-function _empty() {
-  return {
-    type: 'delta',
-    version: 2,
-    createdAt: new Date().toISOString(),
-    calendar: { spendEntries: {}, events: [] },
-    period: { entries: [], spotting: [], symptoms: {} },
-    tasks: {},
-  };
-}
-
-function _save() {
-  localStorage.setItem(MOBILE_KEY, JSON.stringify(_data));
-}
-
-function _clearData() {
-  if (!confirm('Clear all unsaved mobile entries? Make sure you exported first.')) return;
-  _data = _empty();
-  _save();
-  render();
-}
-
-// ── Date helpers ───────────────────────────────────────────────────
-function _todayStr() {
-  return new Date().toLocaleDateString('sv-SE', { timeZone: TZ });
-}
-
-function _dateLabel(s) {
-  const [y, m, d] = s.split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-}
-
-function _shiftDate(s, n) {
-  const [y, m, d] = s.split('-').map(Number);
-  const dt = new Date(y, m - 1, d + n);
-  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+function _ds(y, m, d) {
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
 function _uid() {
   return 'mob_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
-// ── Export ─────────────────────────────────────────────────────────
-function _export() {
-  const out = { ..._data, exportedAt: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `lifeos-delta-${_todayStr()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+function _shiftDate(s, n) {
+  const [y, m, d] = s.split('-').map(Number);
+  const dt = new Date(y, m - 1, d + n);
+  return _ds(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
 }
 
-// ── Count helper ───────────────────────────────────────────────────
-function _entryCount() {
-  const spendDates = Object.keys(_data.calendar.spendEntries).length;
-  const events     = _data.calendar.events.length;
-  const period     = _data.period.entries.length + _data.period.spotting.length;
-  const tasks      = Object.values(_data.tasks).flat().length;
-  return spendDates + events + period + tasks;
+// ── Period logic ─────────────────────────────────────────────────────
+function _getFlow(date) {
+  const { entries = [], spotting = [] } = _D().period || {};
+  if (spotting.includes(date)) return 'spotting';
+  const e = entries.find(e => e.start <= date && date <= e.end);
+  return e?.flow ?? 'none';
 }
 
-// ── Render ─────────────────────────────────────────────────────────
-function render() {
-  const app = document.getElementById('mob-app');
-  app.innerHTML = '';
-  app.appendChild(_header());
-  app.appendChild(_datebar());
-  app.appendChild(_tabs());
-  app.appendChild(_content());
-  if (_sheet) app.appendChild(_buildSheet());
-}
+function _logFlow(date, flow) {
+  const d = _D();
+  const p = d.period || { entries: [], spotting: [], symptoms: {} };
+  p.spotting = (p.spotting || []).filter(s => s !== date);
 
-function _header() {
-  const el = document.createElement('div');
-  el.className = 'mob-header';
-
-  const count = _entryCount();
-  el.innerHTML = `
-    <span class="mob-title">LifeOS</span>
-    <div class="mob-header-actions">
-      ${count > 0 ? `<button class="mob-clear-btn" id="clearBtn">Clear</button>` : ''}
-      <button class="mob-export-btn" id="exportBtn">Export${count > 0 ? ` (${count})` : ''}</button>
-    </div>
-  `;
-  el.querySelector('#exportBtn').addEventListener('click', _export);
-  el.querySelector('#clearBtn')?.addEventListener('click', _clearData);
-  return el;
-}
-
-function _datebar() {
-  const el = document.createElement('div');
-  el.className = 'mob-datebar';
-  const isToday = _viewDate === _todayStr();
-  el.innerHTML = `
-    <button class="mob-nav-btn" id="prevDay">&#8249;</button>
-    <span class="mob-date-label">
-      ${_dateLabel(_viewDate)}
-      ${isToday ? '<span class="mob-today-badge">Today</span>' : ''}
-    </span>
-    <button class="mob-nav-btn" id="nextDay">&#8250;</button>
-  `;
-  el.querySelector('#prevDay').addEventListener('click', () => { _viewDate = _shiftDate(_viewDate, -1); render(); });
-  el.querySelector('#nextDay').addEventListener('click', () => { _viewDate = _shiftDate(_viewDate, 1);  render(); });
-  return el;
-}
-
-function _tabs() {
-  const el = document.createElement('div');
-  el.className = 'mob-tabs';
-  for (const { id, label } of [
-    { id: 'spend',  label: 'Spend'  },
-    { id: 'period', label: 'Period' },
-    { id: 'events', label: 'Events' },
-    { id: 'tasks',  label: 'Tasks'  },
-  ]) {
-    const btn = document.createElement('button');
-    btn.className = 'mob-tab' + (_tab === id ? ' active' : '');
-    btn.textContent = label;
-    btn.addEventListener('click', () => { _tab = id; render(); });
-    el.appendChild(btn);
+  if (flow === 'spotting') {
+    p.entries = _removeDate(p.entries || [], date);
+    p.spotting.push(date);
+    d.period = p; _saveD(d); return;
   }
-  return el;
-}
-
-function _content() {
-  const el = document.createElement('div');
-  el.className = 'mob-content';
-  if      (_tab === 'spend')  el.appendChild(_spendTab());
-  else if (_tab === 'period') el.appendChild(_periodTab());
-  else if (_tab === 'events') el.appendChild(_eventsTab());
-  else if (_tab === 'tasks')  el.appendChild(_tasksTab());
-  return el;
-}
-
-// ── Spend tab ──────────────────────────────────────────────────────
-function _spendTab() {
-  const el      = document.createElement('div');
-  const entries = _data.calendar.spendEntries[_viewDate] || [];
-  const total   = entries.reduce((s, e) => s + e.amount, 0);
-
-  const hdr = document.createElement('div');
-  hdr.className = 'mob-section-hdr';
-  hdr.innerHTML = `<span class="mob-section-total">${total > 0 ? '¥' + total.toLocaleString() : ''}</span>`;
-  const addBtn = document.createElement('button');
-  addBtn.className = 'mob-add-btn';
-  addBtn.textContent = '+ Add';
-  addBtn.addEventListener('click', () => { _sheet = 'spend'; render(); });
-  hdr.appendChild(addBtn);
-  el.appendChild(hdr);
-
-  if (!entries.length) {
-    const empty = document.createElement('div');
-    empty.className = 'mob-empty';
-    empty.textContent = 'No entries yet';
-    el.appendChild(empty);
-    return el;
+  if (flow === 'none') {
+    p.entries = _removeDate(p.entries || [], date);
+    d.period = p; _saveD(d); return;
   }
 
-  const list = document.createElement('div');
-  list.className = 'mob-list';
-  for (const entry of entries) {
-    const cat  = SPEND_CATS.find(c => c.id === entry.categoryId);
-    const item = document.createElement('div');
-    item.className = 'mob-entry';
-    item.innerHTML = `
-      <span class="mob-dot" style="background:var(--cat-${entry.categoryId})"></span>
-      <span class="mob-entry-cat">${cat?.name ?? entry.categoryId}</span>
-      ${entry.subcategory ? `<span class="mob-entry-sub">${entry.subcategory}</span>` : ''}
-      ${entry.note ? `<span class="mob-entry-note">${entry.note}</span>` : ''}
-      <span class="mob-entry-amt">¥${entry.amount.toLocaleString()}</span>
-      <button class="mob-del-btn" data-id="${entry.id}">×</button>
-    `;
-    item.querySelector('.mob-del-btn').addEventListener('click', e => {
-      const id = e.target.dataset.id;
-      _data.calendar.spendEntries[_viewDate] =
-        (_data.calendar.spendEntries[_viewDate] || []).filter(x => x.id !== id);
-      if (!_data.calendar.spendEntries[_viewDate].length)
-        delete _data.calendar.spendEntries[_viewDate];
-      _save(); render();
-    });
-    list.appendChild(item);
-  }
-  el.appendChild(list);
-  return el;
+  const entries = p.entries || [];
+  const within  = entries.find(e => e.start <= date && date <= e.end);
+  if (within) { within.flow = flow; d.period = p; _saveD(d); return; }
+
+  const prev = _shiftDate(date, -1);
+  const next = _shiftDate(date, 1);
+  const A = entries.find(e => e.end   === prev);
+  const B = entries.find(e => e.start === next);
+
+  if (A && B) { A.end = B.end; p.entries = entries.filter(e => e !== B); }
+  else if (A)  { A.end   = date; }
+  else if (B)  { B.start = date; B.flow = flow; }
+  else         { entries.push({ id: _uid(), start: date, end: date, flow }); }
+
+  d.period = p; _saveD(d);
 }
 
-// ── Period tab ─────────────────────────────────────────────────────
-function _periodTab() {
-  const el         = document.createElement('div');
-  const isSpotting = _data.period.spotting.includes(_viewDate);
-  const entry      = _data.period.entries.find(e => e.start <= _viewDate && _viewDate <= e.end);
-  const symptoms   = _data.period.symptoms[_viewDate] || {};
-  const flow       = isSpotting ? 'spotting' : (entry?.flow ?? 'none');
+function _removeDate(entries, date) {
+  const out = [];
+  for (const e of entries) {
+    if (date < e.start || date > e.end)    { out.push(e); continue; }
+    if (date === e.start && date === e.end) continue;
+    if (date === e.start) { out.push({ ...e, start: _shiftDate(date, 1) }); continue; }
+    if (date === e.end)   { out.push({ ...e, end:   _shiftDate(date, -1) }); continue; }
+    out.push({ ...e, end: _shiftDate(date, -1) });
+    out.push({ ...e, id: _uid(), start: _shiftDate(date, 1) });
+  }
+  return out;
+}
+
+function _toggleSymptom(date, key) {
+  const d    = _D();
+  const p    = d.period || {};
+  const syms = p.symptoms || {};
+  if (!syms[date]) syms[date] = {};
+  if (syms[date][key]) {
+    delete syms[date][key];
+    if (!Object.keys(syms[date]).length) delete syms[date];
+  } else {
+    syms[date][key] = true;
+  }
+  p.symptoms = syms;
+  d.period   = p;
+  _saveD(d);
+}
+
+function _cycleStatus() {
+  const { entries = [] } = _D().period || {};
+  const today = _todayStr();
+  const past  = entries.filter(e => e.start <= today).sort((a, b) => b.start.localeCompare(a.start));
+  if (!past.length) return null;
+
+  const last = past[0];
+  const [ly, lm, ld] = last.start.split('-').map(Number);
+  const [ty, tm, td] = today.split('-').map(Number);
+  const startDate = new Date(ly, lm - 1, ld);
+  const todayDate = new Date(ty, tm - 1, td);
+  const cycleDay  = Math.floor((todayDate - startDate) / 86400000) + 1;
+
+  let avgCycle = 28;
+  if (past.length >= 2) {
+    const gaps = [];
+    for (let i = 0; i < Math.min(past.length - 1, 5); i++) {
+      const [ay, am, ad] = past[i].start.split('-').map(Number);
+      const [by, bm, bd] = past[i + 1].start.split('-').map(Number);
+      gaps.push(Math.floor((new Date(ay, am - 1, ad) - new Date(by, bm - 1, bd)) / 86400000));
+    }
+    avgCycle = Math.round(gaps.reduce((s, g) => s + g, 0) / gaps.length);
+  }
+
+  const nextDate = new Date(startDate);
+  nextDate.setDate(nextDate.getDate() + avgCycle);
+  const nextStr = nextDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+  let phase;
+  if (cycleDay <= 5)       phase = 'Menstrual';
+  else if (cycleDay <= 13) phase = 'Follicular';
+  else if (cycleDay <= 16) phase = 'Ovulation';
+  else                     phase = 'Luteal';
+
+  return { cycleDay, phase, nextStr };
+}
+
+// ── DOM helpers ──────────────────────────────────────────────────────
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls)             e.className   = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function btn(cls, text, onClick) {
+  const b = el('button', cls, text);
+  b.addEventListener('click', onClick);
+  return b;
+}
+
+// ── Mini calendar ────────────────────────────────────────────────────
+function _buildMiniCal(showPeriod) {
+  const d = _D();
+  const { entries = [], spotting = [] } = d.period || {};
+  const events = d.calendar?.events        || [];
+  const spend  = d.calendar?.spendEntries  || {};
+  const today  = _todayStr();
+  const { y, m } = _calMonth;
+
+  const firstDow    = new Date(y, m - 1, 1).getDay();
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const wrap        = el('div', 'mc-wrap');
+
+  // Header
+  const hdr = el('div', 'mc-hdr');
+  hdr.appendChild(btn('mc-nav', '‹', () => {
+    let nm = m - 1, ny = y;
+    if (nm < 1) { nm = 12; ny--; }
+    _calMonth = { y: ny, m: nm }; _render();
+  }));
+  hdr.appendChild(el('span', 'mc-month-label',
+    new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  ));
+  hdr.appendChild(btn('mc-nav', '›', () => {
+    let nm = m + 1, ny = y;
+    if (nm > 12) { nm = 1; ny++; }
+    _calMonth = { y: ny, m: nm }; _render();
+  }));
+  wrap.appendChild(hdr);
+
+  // Day-of-week labels
+  const dowRow = el('div', 'mc-dow-row');
+  for (const d of ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'])
+    dowRow.appendChild(el('span', 'mc-dow', d));
+  wrap.appendChild(dowRow);
+
+  // Grid
+  const grid = el('div', 'mc-grid');
+  for (let i = 0; i < firstDow; i++)
+    grid.appendChild(el('div', 'mc-cell mc-empty'));
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const ds   = _ds(y, m, day);
+    const cell = el('div', 'mc-cell');
+
+    if (showPeriod) {
+      if (entries.some(e => e.start <= ds && ds <= e.end)) cell.classList.add('mc-period');
+      if (spotting.includes(ds))                           cell.classList.add('mc-spotting');
+    }
+    if (ds === today)    cell.classList.add('mc-today');
+    if (ds === _selDate) cell.classList.add('mc-sel');
+
+    cell.appendChild(el('span', 'mc-num', String(day)));
+
+    if (!showPeriod) {
+      const hasEvent = events.some(e => e.date === ds);
+      const hasSpend = !!(spend[ds]?.length);
+      if (hasEvent || hasSpend) {
+        const dots = el('div', 'mc-dots');
+        if (hasEvent) dots.appendChild(el('span', 'mc-dot mc-dot-ev'));
+        if (hasSpend) dots.appendChild(el('span', 'mc-dot mc-dot-sp'));
+        cell.appendChild(dots);
+      }
+    }
+
+    cell.addEventListener('click', () => { _selDate = ds; _render(); });
+    grid.appendChild(cell);
+  }
+
+  wrap.appendChild(grid);
+  return wrap;
+}
+
+// ── Day tab ──────────────────────────────────────────────────────────
+function _buildDayTab() {
+  const d    = _D();
+  const wrap = el('div', 'tab-content');
+  wrap.appendChild(_buildMiniCal(false));
+
+  const [sy, sm, sd] = _selDate.split('-').map(Number);
+  wrap.appendChild(el('div', 'day-date-label',
+    new Date(sy, sm - 1, sd).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  ));
+
+  // Events section
+  const events = (d.calendar?.events || []).filter(e => e.date === _selDate);
+  const evSec  = el('div', 'day-section');
+  evSec.appendChild(el('div', 'day-sec-title', 'Events'));
+  if (events.length) {
+    const list = el('div', 'day-list');
+    for (const ev of events) {
+      const item = el('div', 'day-item');
+      const dot  = el('span', 'day-dot');
+      dot.style.background = `var(--cat-ev-${ev.categoryId ?? ev.category ?? 'personal'})`;
+      item.appendChild(dot);
+      const info = el('div', 'day-item-info');
+      info.appendChild(el('span', 'day-item-title', ev.title));
+      if (ev.startTime) info.appendChild(el('span', 'day-item-meta', ev.startTime));
+      item.appendChild(info);
+      list.appendChild(item);
+    }
+    evSec.appendChild(list);
+  } else {
+    evSec.appendChild(el('div', 'day-empty', 'No events'));
+  }
+  wrap.appendChild(evSec);
+
+  // Spend section
+  const spendEntries = d.calendar?.spendEntries?.[_selDate] || [];
+  const total  = spendEntries.reduce((s, e) => s + (e.amount || 0), 0);
+  const spSec  = el('div', 'day-section');
+  const spHdr  = el('div', 'day-sec-hdr');
+  spHdr.appendChild(el('span', 'day-sec-title', 'Spend'));
+  if (total) spHdr.appendChild(el('span', 'day-sec-total', '¥' + total.toLocaleString()));
+  spSec.appendChild(spHdr);
+  if (spendEntries.length) {
+    const list = el('div', 'day-list');
+    for (const entry of spendEntries) {
+      const item = el('div', 'day-item');
+      const dot  = el('span', 'day-dot');
+      dot.style.background = `var(--cat-${entry.categoryId})`;
+      item.appendChild(dot);
+      const catLabel = entry.categoryId
+        ? entry.categoryId.charAt(0).toUpperCase() + entry.categoryId.slice(1)
+        : '';
+      const info = el('div', 'day-item-info');
+      info.appendChild(el('span', 'day-item-title', catLabel + (entry.subcategory ? ' · ' + entry.subcategory : '')));
+      if (entry.note) info.appendChild(el('span', 'day-item-meta', entry.note));
+      item.appendChild(info);
+      item.appendChild(el('span', 'day-item-amt', '¥' + (entry.amount || 0).toLocaleString()));
+      list.appendChild(item);
+    }
+    spSec.appendChild(list);
+  } else {
+    spSec.appendChild(el('div', 'day-empty', 'No spend'));
+  }
+  wrap.appendChild(spSec);
+
+  return wrap;
+}
+
+// ── Period tab ───────────────────────────────────────────────────────
+function _buildPeriodTab() {
+  const d    = _D();
+  const syms = d.period?.symptoms || {};
+  const wrap = el('div', 'tab-content');
+
+  // Cycle status
+  const status = _cycleStatus();
+  if (status) {
+    const bar = el('div', 'cycle-bar');
+    bar.appendChild(el('span', 'cycle-day', `Day ${status.cycleDay}`));
+    bar.appendChild(el('span', 'cycle-phase', status.phase));
+    bar.appendChild(el('span', 'cycle-next', `Next ~${status.nextStr}`));
+    wrap.appendChild(bar);
+  }
+
+  wrap.appendChild(_buildMiniCal(true));
+
+  // Selected date label
+  const [sy, sm, sd] = _selDate.split('-').map(Number);
+  wrap.appendChild(el('div', 'day-date-label',
+    new Date(sy, sm - 1, sd).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  ));
 
   // Flow
-  const flowSec = document.createElement('div');
-  flowSec.className = 'mob-period-section';
-  flowSec.innerHTML = '<div class="mob-period-label">Flow</div>';
-  const flowBtns = document.createElement('div');
-  flowBtns.className = 'mob-flow-btns';
+  const flowSec = el('div', 'period-section');
+  flowSec.appendChild(el('div', 'period-sec-label', 'Flow'));
+  const flowRow = el('div', 'flow-btns');
+  const curFlow = _getFlow(_selDate);
   for (const f of ['none', 'light', 'medium', 'heavy', 'spotting']) {
-    const btn = document.createElement('button');
-    btn.className = 'mob-flow-btn' + (f === 'spotting' ? ' spotting' : '') + (flow === f ? ' active' : '');
-    btn.textContent = f.charAt(0).toUpperCase() + f.slice(1);
-    btn.addEventListener('click', () => _setFlow(f));
-    flowBtns.appendChild(btn);
+    flowRow.appendChild(btn(
+      'flow-btn' + (f === curFlow ? ' active' : '') + (f === 'spotting' ? ' spotting' : ''),
+      f.charAt(0).toUpperCase() + f.slice(1),
+      () => _logFlow(_selDate, f)
+    ));
   }
-  flowSec.appendChild(flowBtns);
-  el.appendChild(flowSec);
+  flowSec.appendChild(flowRow);
+  wrap.appendChild(flowSec);
 
   // Symptoms
-  const sympSec = document.createElement('div');
-  sympSec.className = 'mob-period-section';
-  sympSec.innerHTML = '<div class="mob-period-label">Symptoms</div>';
-  const sympGrid = document.createElement('div');
-  sympGrid.className = 'mob-symp-grid';
-  for (const s of SYMPTOMS) {
-    const btn = document.createElement('button');
-    btn.className = 'mob-symp-btn' + (symptoms[s] ? ' active' : '');
-    btn.textContent = s;
-    btn.addEventListener('click', () => _toggleSymptom(s));
-    sympGrid.appendChild(btn);
+  const symSec = el('div', 'period-section');
+  symSec.appendChild(el('div', 'period-sec-label', 'Symptoms'));
+  const daySym = syms[_selDate] || {};
+  for (const group of SYMPTOM_GROUPS) {
+    symSec.appendChild(el('div', 'sym-group-label', group.label));
+    const chips = el('div', 'sym-chips');
+    for (const { key, label } of group.items) {
+      chips.appendChild(btn(
+        'sym-chip' + (daySym[key] ? ' active' : ''),
+        label,
+        () => _toggleSymptom(_selDate, key)
+      ));
+    }
+    symSec.appendChild(chips);
   }
-  sympSec.appendChild(sympGrid);
-  el.appendChild(sympSec);
+  wrap.appendChild(symSec);
 
-  return el;
+  return wrap;
 }
 
-function _setFlow(flow) {
-  _data.period.spotting = _data.period.spotting.filter(d => d !== _viewDate);
-  _data.period.entries  = _data.period.entries.filter(
-    e => !(e.start <= _viewDate && _viewDate <= e.end)
-  );
-  if (flow === 'spotting') {
-    _data.period.spotting.push(_viewDate);
-  } else if (flow !== 'none') {
-    _data.period.entries.push({ id: _uid(), start: _viewDate, end: _viewDate, flow });
-  }
-  _save(); render();
-}
+// ── Notes tab ────────────────────────────────────────────────────────
+function _buildNotesTab() {
+  const d     = _D();
+  const notes = (d.notes?.notes || [])
+    .slice()
+    .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+  const wrap  = el('div', 'tab-content');
 
-function _toggleSymptom(symptom) {
-  const s = _data.period.symptoms;
-  if (!s[_viewDate]) s[_viewDate] = {};
-  if (s[_viewDate][symptom]) {
-    delete s[_viewDate][symptom];
-    if (!Object.keys(s[_viewDate]).length) delete s[_viewDate];
-  } else {
-    s[_viewDate][symptom] = true;
-  }
-  _save(); render();
-}
-
-// ── Events tab ─────────────────────────────────────────────────────
-function _eventsTab() {
-  const el     = document.createElement('div');
-  const events = _data.calendar.events.filter(e => e.date === _viewDate);
-
-  const hdr = document.createElement('div');
-  hdr.className = 'mob-section-hdr';
-  hdr.innerHTML = '<span></span>';
-  const addBtn = document.createElement('button');
-  addBtn.className = 'mob-add-btn';
-  addBtn.textContent = '+ Add';
-  addBtn.addEventListener('click', () => { _sheet = 'event'; render(); });
-  hdr.appendChild(addBtn);
-  el.appendChild(hdr);
-
-  if (!events.length) {
-    const empty = document.createElement('div');
-    empty.className = 'mob-empty';
-    empty.textContent = 'No events';
-    el.appendChild(empty);
-    return el;
+  if (!notes.length) {
+    wrap.appendChild(el('div', 'day-empty', 'No notes yet'));
+    return wrap;
   }
 
-  const list = document.createElement('div');
-  list.className = 'mob-list';
-  for (const ev of events) {
-    const cat  = EVENT_CATS.find(c => c.id === ev.category);
-    const item = document.createElement('div');
-    item.className = 'mob-entry';
-    item.innerHTML = `
-      <span class="mob-dot" style="background:var(--cat-ev-${ev.category}, var(--text-3))"></span>
-      <span class="mob-entry-cat">${ev.title}</span>
-      <span class="mob-entry-sub">${cat?.name ?? ev.category}</span>
-      <button class="mob-del-btn" data-id="${ev.id}">×</button>
-    `;
-    item.querySelector('.mob-del-btn').addEventListener('click', e => {
-      _data.calendar.events = _data.calendar.events.filter(x => x.id !== e.target.dataset.id);
-      _save(); render();
-    });
-    list.appendChild(item);
+  const list = el('div', 'notes-list');
+  for (const note of notes) {
+    const isOpen = _expandedNote === note.id;
+    const card   = el('div', 'note-card' + (isOpen ? ' expanded' : ''));
+    card.appendChild(el('div', 'note-title', note.title || 'Untitled'));
+    if (isOpen) {
+      card.appendChild(el('div', 'note-body', note.body || ''));
+    } else if (note.body) {
+      card.appendChild(el('div', 'note-preview',
+        note.body.slice(0, 140) + (note.body.length > 140 ? '…' : '')
+      ));
+    }
+    card.addEventListener('click', () => { _expandedNote = isOpen ? null : note.id; _render(); });
+    list.appendChild(card);
   }
-  el.appendChild(list);
-  return el;
+  wrap.appendChild(list);
+  return wrap;
 }
 
-// ── Tasks tab ──────────────────────────────────────────────────────
-function _tasksTab() {
-  const el    = document.createElement('div');
-  const tasks = _data.tasks[_viewDate] || [];
-
-  const hdr = document.createElement('div');
-  hdr.className = 'mob-section-hdr';
-  hdr.innerHTML = '<span></span>';
-  const addBtn = document.createElement('button');
-  addBtn.className = 'mob-add-btn';
-  addBtn.textContent = '+ Add';
-  addBtn.addEventListener('click', () => { _sheet = 'task'; render(); });
-  hdr.appendChild(addBtn);
-  el.appendChild(hdr);
-
-  if (!tasks.length) {
-    const empty = document.createElement('div');
-    empty.className = 'mob-empty';
-    empty.textContent = 'No tasks';
-    el.appendChild(empty);
-    return el;
+// ── Bottom nav ───────────────────────────────────────────────────────
+function _buildBottomNav() {
+  const nav = el('div', 'bottom-nav');
+  for (const { id, label, icon } of [
+    { id: 'day',    label: 'Day',    icon: 'calendar_today' },
+    { id: 'period', label: 'Period', icon: 'water_drop' },
+    { id: 'notes',  label: 'Notes',  icon: 'note' },
+  ]) {
+    const b = el('button', 'nav-btn' + (_tab === id ? ' active' : ''));
+    b.innerHTML = `<span class="material-symbols-outlined">${icon}</span><span class="nav-label">${label}</span>`;
+    b.addEventListener('click', () => { _tab = id; _render(); });
+    nav.appendChild(b);
   }
-
-  const list = document.createElement('div');
-  list.className = 'mob-list';
-  for (const task of tasks) {
-    const item = document.createElement('div');
-    item.className = 'mob-entry task' + (task.done ? ' done' : '');
-    item.innerHTML = `
-      <button class="mob-check-btn${task.done ? ' checked' : ''}" data-id="${task.id}">
-        ${task.done ? '✓' : ''}
-      </button>
-      <span class="mob-task-text">${task.text}</span>
-      <button class="mob-del-btn" data-id="${task.id}">×</button>
-    `;
-    item.querySelector('.mob-check-btn').addEventListener('click', e => {
-      const t = (_data.tasks[_viewDate] || []).find(x => x.id === e.currentTarget.dataset.id);
-      if (t) { t.done = !t.done; _save(); render(); }
-    });
-    item.querySelector('.mob-del-btn').addEventListener('click', e => {
-      _data.tasks[_viewDate] = (_data.tasks[_viewDate] || []).filter(x => x.id !== e.target.dataset.id);
-      _save(); render();
-    });
-    list.appendChild(item);
-  }
-  el.appendChild(list);
-  return el;
+  return nav;
 }
 
-// ── Bottom sheet ───────────────────────────────────────────────────
-function _buildSheet() {
-  const overlay = document.createElement('div');
-  overlay.className = 'mob-overlay';
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay) { _sheet = null; render(); }
-  });
-  const sheet = document.createElement('div');
-  sheet.className = 'mob-sheet';
-  if      (_sheet === 'spend') sheet.appendChild(_spendSheet());
-  else if (_sheet === 'event') sheet.appendChild(_eventSheet());
-  else if (_sheet === 'task')  sheet.appendChild(_taskSheet());
-  overlay.appendChild(sheet);
-  return overlay;
+// ── Render ───────────────────────────────────────────────────────────
+function _render() {
+  const app = document.getElementById('mob-app');
+  app.innerHTML = '';
+
+  const hdr = el('div', 'mob-header');
+  hdr.appendChild(el('span', 'mob-title', 'LifeOS'));
+  app.appendChild(hdr);
+
+  const main = el('div', 'mob-main');
+  if (_tab === 'day')    main.appendChild(_buildDayTab());
+  if (_tab === 'period') main.appendChild(_buildPeriodTab());
+  if (_tab === 'notes')  main.appendChild(_buildNotesTab());
+  app.appendChild(main);
+
+  app.appendChild(_buildBottomNav());
 }
 
-function _sheetHeader(title) {
-  const hdr = document.createElement('div');
-  hdr.className = 'mob-sheet-hdr';
-  hdr.innerHTML = `<span class="mob-sheet-title">${title}</span>`;
-  const close = document.createElement('button');
-  close.className = 'mob-sheet-close';
-  close.textContent = '×';
-  close.addEventListener('click', () => { _sheet = null; render(); });
-  hdr.appendChild(close);
-  return hdr;
-}
-
-function _spendSheet() {
-  const el = document.createElement('div');
-  el.appendChild(_sheetHeader('Add spend'));
-
-  const catGrid = document.createElement('div');
-  catGrid.className = 'mob-cat-grid';
-
-  const fields = document.createElement('div');
-  fields.className = 'mob-sheet-fields';
-  fields.style.display = 'none';
-
-  const subSel   = Object.assign(document.createElement('select'),   { className: 'mob-input' });
-  const amtInput = Object.assign(document.createElement('input'),    { className: 'mob-input', type: 'number', placeholder: 'Amount (¥)', inputMode: 'numeric' });
-  const noteInput = Object.assign(document.createElement('input'),   { className: 'mob-input', type: 'text',   placeholder: 'Note (optional)' });
-  const saveBtn  = Object.assign(document.createElement('button'),   { className: 'mob-save-btn', textContent: 'Save' });
-
-  fields.appendChild(subSel);
-  fields.appendChild(amtInput);
-  fields.appendChild(noteInput);
-  fields.appendChild(saveBtn);
-
-  let selectedCat = null;
-
-  for (const cat of SPEND_CATS) {
-    const btn = document.createElement('button');
-    btn.className = 'mob-cat-btn';
-    btn.innerHTML = `<span class="mob-dot" style="background:var(--cat-${cat.id})"></span>${cat.name}`;
-    btn.addEventListener('click', () => {
-      selectedCat = cat;
-      catGrid.querySelectorAll('.mob-cat-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      subSel.innerHTML = '<option value="">No subcategory</option>' +
-        cat.sub.map(s => `<option value="${s}">${s}</option>`).join('');
-      fields.style.display = '';
-      setTimeout(() => amtInput.focus(), 50);
-    });
-    catGrid.appendChild(btn);
-  }
-
-  saveBtn.addEventListener('click', () => {
-    if (!selectedCat) return;
-    const amt = parseInt(amtInput.value, 10);
-    if (!amt) return;
-    const entry = {
-      id:          _uid(),
-      categoryId:  selectedCat.id,
-      subcategory: subSel.value || null,
-      note:        noteInput.value.trim() || null,
-      amount:      amt,
-      currency:    'JPY',
-    };
-    if (!_data.calendar.spendEntries[_viewDate])
-      _data.calendar.spendEntries[_viewDate] = [];
-    _data.calendar.spendEntries[_viewDate].push(entry);
-    _save(); _sheet = null; render();
-  });
-
-  amtInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveBtn.click(); });
-
-  el.appendChild(catGrid);
-  el.appendChild(fields);
-  return el;
-}
-
-function _eventSheet() {
-  const el = document.createElement('div');
-  el.appendChild(_sheetHeader('Add event'));
-
-  const fields = document.createElement('div');
-  fields.className = 'mob-sheet-fields';
-
-  const titleInput = Object.assign(document.createElement('input'), {
-    className: 'mob-input', type: 'text', placeholder: 'Title',
-  });
-  const catSel = Object.assign(document.createElement('select'), { className: 'mob-input' });
-  catSel.innerHTML = EVENT_CATS.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-
-  const saveBtn = Object.assign(document.createElement('button'), {
-    className: 'mob-save-btn', textContent: 'Save',
-  });
-
-  saveBtn.addEventListener('click', () => {
-    const title = titleInput.value.trim();
-    if (!title) return;
-    const cat = EVENT_CATS.find(c => c.id === catSel.value);
-    _data.calendar.events.push({
-      id: _uid(), title, category: catSel.value, color: cat?.color ?? null, date: _viewDate,
-    });
-    _save(); _sheet = null; render();
-  });
-  titleInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveBtn.click(); });
-
-  fields.appendChild(titleInput);
-  fields.appendChild(catSel);
-  fields.appendChild(saveBtn);
-  el.appendChild(fields);
-  setTimeout(() => titleInput.focus(), 50);
-  return el;
-}
-
-function _taskSheet() {
-  const el = document.createElement('div');
-  el.appendChild(_sheetHeader('Add task'));
-
-  const fields = document.createElement('div');
-  fields.className = 'mob-sheet-fields';
-
-  const textInput = Object.assign(document.createElement('input'), {
-    className: 'mob-input', type: 'text', placeholder: 'Task',
-  });
-  const saveBtn = Object.assign(document.createElement('button'), {
-    className: 'mob-save-btn', textContent: 'Save',
-  });
-
-  saveBtn.addEventListener('click', () => {
-    const text = textInput.value.trim();
-    if (!text) return;
-    if (!_data.tasks[_viewDate]) _data.tasks[_viewDate] = [];
-    _data.tasks[_viewDate].push({ id: _uid(), text, done: false });
-    _save(); _sheet = null; render();
-  });
-  textInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveBtn.click(); });
-
-  fields.appendChild(textInput);
-  fields.appendChild(saveBtn);
-  el.appendChild(fields);
-  setTimeout(() => textInput.focus(), 50);
-  return el;
-}
-
-// ── Init ───────────────────────────────────────────────────────────
-render();
+_render();
