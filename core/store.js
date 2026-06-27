@@ -35,7 +35,7 @@ function defaultData() {
     currency: { holdings: [], reference: 'IDR', rates: null, ratesAt: null },
     nisa:     { contributions: [] },
     savings:  { accounts: [], bonds: [], deposits: [] },
-    notes:    { items: [], countdowns: [] },
+    notes:    { items: [], countdowns: [] }, // drawings stored separately in lifeOS_drawings (localStorage-only)
     tasks:    {},
   };
 }

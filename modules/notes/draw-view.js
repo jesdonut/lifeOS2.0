@@ -1,8 +1,9 @@
-// draw-view.js — Drawing canvas tab
+// draw-view.js — Drawing canvas tab (localStorage-only, clears daily)
 
-const CANVAS_W = 1600;
-const CANVAS_H = 1000;
+const CANVAS_W  = 1600;
+const CANVAS_H  = 1000;
 const MAX_HISTORY = 40;
+const DRAW_KEY  = 'lifeOS_drawings'; // separate from Supabase-backed store
 
 const PALETTE = [
   '#1e1916', '#6b3a2e', '#b84a30', '#e07840',
@@ -19,23 +20,35 @@ let _isDrawing = false;
 let _lastX = 0, _lastY = 0;
 let _currentId = null;
 let _fit = true;
-let _data, _onSave;
+let _tz  = 'Asia/Tokyo';
 let _leftEl = null;
 let _toolbarEl = null;
 let _removeKeys = null;
 
-// ── Data ───────────────────────────────────────────────────────────
+// ── Local storage (drawings never go to Supabase) ──────────────────
 
-function duid()    { return 'dr_' + Math.random().toString(36).slice(2, 9); }
-function allDrawings() { return _data.notes?.drawings ?? []; }
-function notesBase()   { return _data.notes ?? {}; }
+function todayStr() {
+  return new Date().toLocaleDateString('sv-SE', { timeZone: _tz });
+}
+
+function loadStore() {
+  try { return JSON.parse(localStorage.getItem(DRAW_KEY)) ?? {}; } catch { return {}; }
+}
+
+function writeStore(drawings) {
+  localStorage.setItem(DRAW_KEY, JSON.stringify({ date: todayStr(), drawings }));
+}
+
+function allDrawings() {
+  return loadStore().drawings ?? [];
+}
 
 function saveDrawing(id, dataUrl) {
   const list = allDrawings().map(d => d.id === id
     ? { ...d, dataUrl, updatedAt: new Date().toISOString() }
     : d
   );
-  _onSave({ notes: { ...notesBase(), drawings: list } });
+  writeStore(list);
 }
 
 // ── History ────────────────────────────────────────────────────────
@@ -201,6 +214,15 @@ function mkBtn(icon, title, onClick, extra = '') {
   return b;
 }
 
+function exportPng() {
+  const url = _canvas.toDataURL('image/png');
+  const a   = document.createElement('a');
+  a.href    = url;
+  const d   = allDrawings().find(x => x.id === _currentId);
+  a.download = (d?.title?.trim() || 'drawing') + '.png';
+  a.click();
+}
+
 function buildToolbar() {
   const bar = document.createElement('div');
   bar.className = 'dr-toolbar';
@@ -265,19 +287,20 @@ function buildToolbar() {
 
   bar.appendChild(sep());
 
-  // Undo / Redo / Clear
+  // Undo / Redo / Export / Clear
   const actions = document.createElement('div');
   actions.className = 'dr-group';
-
-  const undoBtn  = mkBtn('undo',   'Undo (⌘Z)',    undo);
-  const redoBtn  = mkBtn('redo',   'Redo (⌘⇧Z)',   redo);
-  const clearBtn = mkBtn('delete', 'Clear canvas', clearCanvas, 'dr-btn-danger');
-  actions.append(undoBtn, redoBtn, clearBtn);
+  actions.append(
+    mkBtn('undo',     'Undo (⌘Z)',     undo),
+    mkBtn('redo',     'Redo (⌘⇧Z)',    redo),
+    mkBtn('download', 'Export as PNG', exportPng),
+    mkBtn('delete',   'Clear canvas',  clearCanvas, 'dr-btn-danger'),
+  );
   bar.appendChild(actions);
 
   bar.appendChild(sep());
 
-  // Fit / actual size toggle
+  // Fit toggle
   const fitBtn = mkBtn('fit_screen', 'Fit to screen', toggleFit);
   fitBtn.dataset.tool = 'fit';
   if (_fit) fitBtn.classList.add('dr-active');
@@ -315,7 +338,7 @@ function initCanvas() {
   _canvas.className = 'dr-canvas';
   _canvas.width  = CANVAS_W;
   _canvas.height = CANVAS_H;
-  _canvas.style.touchAction = 'none'; // prevent touch scroll hijack on tablet
+  _canvas.style.touchAction = 'none';
   _ctx = _canvas.getContext('2d');
 
   _canvas.addEventListener('pointerdown', onPointerDown);
@@ -383,7 +406,7 @@ function refreshList() {
       function commit() {
         const val = input.value.trim() || 'Untitled';
         const updated = allDrawings().map(x => x.id === d.id ? { ...x, title: val } : x);
-        _onSave({ notes: { ...notesBase(), drawings: updated } });
+        writeStore(updated);
         refreshList();
       }
       input.addEventListener('blur', commit);
@@ -400,13 +423,12 @@ function refreshList() {
     delBtn.addEventListener('click', e => {
       e.stopPropagation();
       const updated = allDrawings().filter(x => x.id !== d.id);
-      _onSave({ notes: { ...notesBase(), drawings: updated } });
+      writeStore(updated);
       if (_currentId === d.id) {
         _currentId = null;
         _history = []; _histIdx = -1;
         if (_ctx) { _ctx.clearRect(0, 0, CANVAS_W, CANVAS_H); pushHistory(); }
-        const remaining = updated;
-        if (remaining.length) loadDrawing(remaining[remaining.length - 1].id);
+        if (updated.length) loadDrawing(updated[updated.length - 1].id);
       }
       refreshList();
     });
@@ -443,12 +465,10 @@ function loadDrawing(id) {
 
 function newDrawing() {
   if (_currentId) autoSave();
-  const id  = duid();
+  const id  = 'dr_' + Math.random().toString(36).slice(2, 9);
   const now = new Date().toISOString();
   const entry = { id, title: 'Untitled', dataUrl: '', createdAt: now, updatedAt: now };
-  const list  = [...allDrawings(), entry];
-  _data = { ..._data, notes: { ...notesBase(), drawings: list } };
-  _onSave({ notes: _data.notes });
+  writeStore([...allDrawings(), entry]);
   _currentId = id;
   _history = []; _histIdx = -1;
   _ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
@@ -456,19 +476,27 @@ function newDrawing() {
   refreshList();
 }
 
+// ── Daily reset ────────────────────────────────────────────────────
+
+function maybeResetForNewDay() {
+  const s = loadStore();
+  if (s.date && s.date !== todayStr()) {
+    writeStore([]);
+  }
+}
+
 // ── Public API ─────────────────────────────────────────────────────
 
 export function buildDrawPane(container, data, onSave) {
-  _data   = data;
-  _onSave = onSave;
+  _tz = data?.settings?.timezone ?? 'Asia/Tokyo';
+
+  maybeResetForNewDay();
 
   const root = document.createElement('div');
   root.className = 'nt-root';
 
-  // Left
   root.appendChild(buildLeft());
 
-  // Right
   const right = document.createElement('div');
   right.className = 'dr-right';
   right.appendChild(buildToolbar());
@@ -482,7 +510,6 @@ export function buildDrawPane(container, data, onSave) {
   root.appendChild(right);
   container.appendChild(root);
 
-  // Load most recent or create new
   const list = allDrawings();
   if (list.length) {
     loadDrawing(list[list.length - 1].id);
@@ -490,7 +517,6 @@ export function buildDrawPane(container, data, onSave) {
     newDrawing();
   }
 
-  // Keyboard shortcuts
   function onKey(e) {
     const mod = e.ctrlKey || e.metaKey;
     if (mod && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
@@ -501,8 +527,7 @@ export function buildDrawPane(container, data, onSave) {
 }
 
 export function updateDrawData(newData) {
-  _data = newData;
-  refreshList();
+  _tz = newData?.settings?.timezone ?? _tz;
 }
 
 export function destroyDrawPane() {
