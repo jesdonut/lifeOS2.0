@@ -232,7 +232,6 @@ if (/Mobi|Android/i.test(navigator.userAgent)) {
   window.location.replace('mobile.html');
 }
 
-// 10-tap on brand name triggers owner login
 let _tapCount = 0, _tapTimer = null;
 brandWrap.querySelector('.brand-pill-name').addEventListener('click', () => {
   _tapCount++;
