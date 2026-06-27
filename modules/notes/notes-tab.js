@@ -82,15 +82,17 @@ function _render() {
   if (_tab === 'draw') destroyDrawPane();
   _container.innerHTML = '';
 
-  // Tab bar
+  // Tab bar — uses shared cal-view-toggle / cal-view-btn to match Calendar and Finance
   const tabBar = el('div', 'nt-tab-bar');
+  const toggle = el('div', 'cal-view-toggle');
   ['notes', 'draw'].forEach(t => {
     const b = document.createElement('button');
-    b.className = 'nt-tab-btn' + (_tab === t ? ' active' : '');
+    b.className = 'cal-view-btn' + (_tab === t ? ' active' : '');
     b.textContent = t.charAt(0).toUpperCase() + t.slice(1);
     b.addEventListener('click', () => { _tab = t; _render(); });
-    tabBar.appendChild(b);
+    toggle.appendChild(b);
   });
+  tabBar.appendChild(toggle);
   _container.appendChild(tabBar);
 
   // Content
