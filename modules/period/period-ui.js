@@ -199,12 +199,16 @@ function _buildTop() {
 
   const today = _todayStr();
 
+  // Left zone always takes flex:1 so tabs are anchored to the same right position in all views
+  const left = document.createElement('div');
+  left.className = 'pr-top-left';
+
   if (_view === 'cycles') {
     const lbl = document.createElement('span');
     lbl.className = 'cal-year-label';
     const cycleDay = _cycleDay(today);
     lbl.textContent = _fmtDate(today) + (cycleDay ? ` · Day ${cycleDay}` : '');
-    top.appendChild(lbl);
+    left.appendChild(lbl);
   } else {
     const prevBtn = document.createElement('button'); prevBtn.className = 'cal-year-btn'; prevBtn.textContent = '‹';
     const lbl     = document.createElement('span');   lbl.className = 'cal-year-label';
@@ -232,12 +236,13 @@ function _buildTop() {
       todBtn.disabled = onYear; todBtn.style.opacity = onYear ? '0.35' : '1';
       todBtn.addEventListener('click', () => { _navDate = today; _render(); });
     }
-    top.append(prevBtn, lbl, nextBtn, todBtn);
+    left.append(prevBtn, lbl, nextBtn, todBtn);
   }
+  top.appendChild(left);
 
-  // View toggle — always on the right, matching Calendar layout
+  // Tabs — always a fixed right block, never affected by left content width
   const tabs = document.createElement('div');
-  tabs.className = 'cal-view-toggle';
+  tabs.className = 'cal-view-toggle pr-view-tabs';
   [
     { v: 'day',    label: 'Day' },
     { v: 'year',   label: 'Year' },
