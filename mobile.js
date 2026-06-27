@@ -40,9 +40,19 @@ const SYMPTOM_GROUPS = [
   ]},
 ];
 
+// ── Theme ────────────────────────────────────────────────────────────
+const _THEME_KEY = 'lifeOS_landing_theme';
+let _mobTheme = localStorage.getItem(_THEME_KEY) || 'dark';
+function _applyTheme(t) {
+  _mobTheme = t;
+  document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : '');
+  localStorage.setItem(_THEME_KEY, t);
+}
+_applyTheme(_mobTheme);
+
 // ── State ───────────────────────────────────────────────────────────
 let _tab      = 'day';
-let _calView  = 'month'; // 'day' | 'week' | 'month'
+let _calView  = 'day'; // 'day' | 'week'
 let _selDate  = _todayStr();
 let _calMonth = { y: +_selDate.slice(0, 4), m: +_selDate.slice(5, 7) };
 let _expandedNote = null;
@@ -392,19 +402,16 @@ function _buildWeekView() {
 function _buildDayTab() {
   const wrap = el('div', 'tab-content');
 
-  // View toggle
+  // View toggle: Day | Week only
   const toggle = el('div', 'cal-view-toggle-mob');
-  for (const v of ['Day', 'Week', 'Month']) {
+  for (const v of ['Day', 'Week']) {
     const b = el('button', 'cal-vtog-btn' + (_calView === v.toLowerCase() ? ' active' : ''), v);
     b.addEventListener('click', () => { _calView = v.toLowerCase(); _render(); });
     toggle.appendChild(b);
   }
   wrap.appendChild(toggle);
 
-  if (_calView === 'month') {
-    wrap.appendChild(_buildMiniCal(false));
-    wrap.appendChild(_buildDayDetail(_selDate));
-  } else if (_calView === 'week') {
+  if (_calView === 'week') {
     wrap.appendChild(_buildWeekView());
   } else {
     wrap.appendChild(_buildMiniCal(false));
@@ -583,6 +590,10 @@ function _render() {
   const title = el('span', 'mob-title', 'Seratus');
   title.addEventListener('click', _onTitleTap);
   hdr.appendChild(title);
+  const themeBtn = el('button', 'mob-theme-btn');
+  themeBtn.innerHTML = `<span class="material-symbols-outlined">${_mobTheme === 'light' ? 'dark_mode' : 'light_mode'}</span>`;
+  themeBtn.addEventListener('click', () => { _applyTheme(_mobTheme === 'dark' ? 'light' : 'dark'); _render(); });
+  hdr.appendChild(themeBtn);
   app.appendChild(hdr);
 
   const main = el('div', 'mob-main');
