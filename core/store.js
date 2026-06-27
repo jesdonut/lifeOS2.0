@@ -43,22 +43,33 @@ function defaultData() {
 let _data = null;
 const _subs = new Set();
 
+// ── Paginate past server row limit ────────────────────────────────────────
+async function fetchAll(table, columns) {
+  const rows = [];
+  const size = 1000;
+  let from = 0;
+  while (true) {
+    const { data, error } = await sb.from(table).select(columns).range(from, from + size - 1);
+    if (error) throw error;
+    rows.push(...(data ?? []));
+    if ((data ?? []).length < size) break;
+    from += size;
+  }
+  return rows;
+}
+
 // ── Fetch all data from Supabase ───────────────────────────────────────────
 async function fetchFromSupabase() {
   const data = defaultData();
 
-  const [modRes, evtRes, spendRes] = await Promise.all([
-    sb.from('modules').select('*'),
-    sb.from('calendar_events').select('data').range(0, 9999),
-    sb.from('spend_entries').select('*').range(0, 9999),
+  const [modRows, evtRows, spendRows] = await Promise.all([
+    fetchAll('modules', '*'),
+    fetchAll('calendar_events', 'data'),
+    fetchAll('spend_entries', '*'),
   ]);
 
-  if (modRes.error)   throw modRes.error;
-  if (evtRes.error)   throw evtRes.error;
-  if (spendRes.error) throw spendRes.error;
-
   // Modules
-  for (const row of modRes.data ?? []) {
+  for (const row of modRows) {
     if (row.module === 'settings') {
       data.settings = { ...data.settings, ...row.data };
     } else {
@@ -67,20 +78,18 @@ async function fetchFromSupabase() {
   }
 
   // Calendar events
-  data.calendar.events = (evtRes.data ?? []).map(r => r.data);
+  data.calendar.events = evtRows.map(r => r.data);
 
   // Spend entries — rebuild the date-keyed dict
   const spendDict = {};
-  for (const row of spendRes.data ?? []) {
+  for (const row of spendRows) {
     if (!spendDict[row.date]) spendDict[row.date] = [];
     spendDict[row.date].push(row.data);
   }
   data.calendar.spendEntries = spendDict;
 
   // First-time migration: if Supabase is empty but localStorage has data, push it up
-  const isEmpty = (modRes.data ?? []).length === 0
-    && (evtRes.data ?? []).length === 0
-    && (spendRes.data ?? []).length === 0;
+  const isEmpty = modRows.length === 0 && evtRows.length === 0 && spendRows.length === 0;
 
   if (isEmpty) {
     try {
