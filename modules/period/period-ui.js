@@ -204,7 +204,6 @@ function _buildTop() {
     const cycleNum = _entries.length;
     const meta = document.createElement('div');
     meta.className = 'pr-meta';
-    meta.style.flex = '1';
     meta.innerHTML = `
       <span>${_fmtDate(today)}</span>
       ${cycleDay ? `<span class="pr-dot">·</span><span>Day <strong>${cycleDay}</strong> of cycle</span>` : ''}
@@ -558,36 +557,20 @@ function _monthSnippet(year, monthIdx, todayStr) {
 }
 
 // ── Cycles tab (Gantt) ─────────────────────────────────────────────
+function _cycleMedian(lengths) {
+  if (!lengths.length) return null;
+  const s = [...lengths].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 === 0 ? Math.round((s[m - 1] + s[m]) / 2) : s[m];
+}
+
 function _buildCycles(el) {
   const today  = _todayStr();
   const avgDur = avgPeriodDuration(_entries);
 
-  const statsRow = document.createElement('div');
-  statsRow.className = 'pr-cyc-stats';
-
-  const regValue = !_stats ? '—'
-    : _stats.notEnoughData ? 'Not enough data'
-    : _stats.irregular     ? 'Variable' : 'Regular';
-  const regColor = !_stats || _stats.notEnoughData ? null
-    : _stats.irregular ? 'var(--amber)' : 'var(--green)';
-  const lenValue = _stats && !_stats.notEnoughData ? _stats.lengthPattern : '—';
-
-  [
-    { label: 'Cycles tracked', value: _entries.length.toString() },
-    { label: 'Avg cycle',      value: _stats ? `${_stats.avg}d` : '—' },
-    { label: 'Avg period',     value: avgDur ? `${avgDur}d` : '—' },
-    { label: 'Regularity',     value: regValue, color: regColor },
-    { label: 'Length pattern', value: lenValue },
-  ].forEach(({ label, value, color }) => {
-    const card = document.createElement('div'); card.className = 'pr-cyc-stat';
-    card.innerHTML = `<div class="pr-cyc-stat-val"${color ? ` style="color:${color}"` : ''}>${value}</div><div class="pr-cyc-stat-lbl">${label}</div>`;
-    statsRow.appendChild(card);
-  });
-  el.appendChild(statsRow);
-
   if (!_entries.length) {
     const empty = document.createElement('p'); empty.className = 'pr-cyc-empty';
-    empty.textContent = 'No cycles tracked yet. Go to Overview and tap a day to start.';
+    empty.textContent = 'No cycles tracked yet. Go to Day view and tap a day to start.';
     el.appendChild(empty);
     return;
   }
@@ -596,76 +579,83 @@ function _buildCycles(el) {
   for (let i = 0; i < _entries.length - 1; i++)
     completedLengths.push(diffD(D(_entries[i].start), D(_entries[i + 1].start)));
 
-  const maxActual = completedLengths.length ? Math.max(...completedLengths) : 0;
-  const maxDays   = Math.ceil(Math.max(42, maxActual + 5) / 7) * 7;
-  const pct       = n => `${(n / maxDays * 100).toFixed(2)}%`;
-  const refLines  = [21, 28, 35, 42].filter(d => d < maxDays);
+  const avg     = _stats?.avg ?? null;
+  const median  = _cycleMedian(completedLengths);
+  const longest = completedLengths.length ? Math.max(...completedLengths) : null;
+  const shortest = completedLengths.length ? Math.min(...completedLengths) : null;
 
-  const axisWrap = document.createElement('div'); axisWrap.className = 'pr-cyc-axis-wrap';
-  const axis    = document.createElement('div'); axis.className = 'pr-cyc-row pr-cyc-axis';
-  const axisLbl = document.createElement('div'); axisLbl.className = 'pr-cyc-lbl-col';
-  const axisBar = document.createElement('div'); axisBar.className = 'pr-cyc-bar-zone';
-  refLines.forEach(d => {
-    const lbl = document.createElement('div'); lbl.className = 'pr-cyc-ref-label'; lbl.style.left = pct(d); lbl.textContent = `${d}d`;
-    axisBar.appendChild(lbl);
+  const statsRow = document.createElement('div');
+  statsRow.className = 'pr-cyc-stats';
+  [
+    { label: 'Average',  value: avg     ? `${avg}d`     : '—' },
+    { label: 'Median',   value: median  ? `${median}d`  : '—' },
+    { label: 'Longest',  value: longest ? `${longest}d` : '—' },
+    { label: 'Shortest', value: shortest ? `${shortest}d` : '—' },
+    { label: 'Avg period', value: avgDur ? `${avgDur}d` : '—' },
+  ].forEach(({ label, value }) => {
+    const card = document.createElement('div'); card.className = 'pr-cyc-stat';
+    card.innerHTML = `<div class="pr-cyc-stat-val">${value}</div><div class="pr-cyc-stat-lbl">${label}</div>`;
+    statsRow.appendChild(card);
   });
-  const axisNum = document.createElement('div'); axisNum.className = 'pr-cyc-num-col';
-  axis.append(axisLbl, axisBar, axisNum);
-  axisWrap.appendChild(axis);
-  el.appendChild(axisWrap);
+  el.appendChild(statsRow);
 
-  const chart = document.createElement('div'); chart.className = 'pr-cyc-chart';
+  // Last 10 cycles, most recent first
+  const recent = [..._entries].reverse().slice(0, 10);
+  const list = document.createElement('div');
+  list.className = 'pr-cyc-list';
 
-  completedLengths.forEach((length, i) =>
-    chart.appendChild(_cycleRow(i + 1, _entries[i].start, length, null, 'completed', maxDays, refLines))
-  );
+  recent.forEach((entry, i) => {
+    const globalIdx = _entries.length - 1 - i;
+    const nextEntry = _entries[globalIdx + 1];
+    const cycleLen  = nextEntry ? diffD(D(entry.start), D(nextEntry.start)) : null;
+    const periodLen = entry.end ? diffD(D(entry.start), D(entry.end)) + 1 : null;
+    const isCurrent = i === 0 && !nextEntry;
 
-  const last    = _entries[_entries.length - 1];
-  const elapsed = Math.max(1, diffD(D(last.start), D(today)) + 1);
-  chart.appendChild(_cycleRow(_entries.length, last.start, _stats?.avg ?? 28, elapsed, 'current', maxDays, refLines));
+    const startDate = new Date(entry.start + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const endDate   = entry.end ? new Date(entry.end + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
 
-  if (_stats) {
-    futurePredictions(_entries, _stats, 5).forEach((p, i) =>
-      chart.appendChild(_cycleRow(_entries.length + i + 1, fd(p.center), _stats.avg, null, 'predicted', maxDays, refLines))
-    );
-  }
+    const item = document.createElement('div');
+    item.className = 'pr-cyc-item';
 
-  el.appendChild(chart);
-}
+    const header = document.createElement('div');
+    header.className = 'pr-cyc-item-hdr';
+    header.innerHTML = `
+      <span class="pr-cyc-item-num">Cycle ${globalIdx + 1}${isCurrent ? ' <span class="pr-cyc-cur-badge">current</span>' : ''}</span>
+      <span class="pr-cyc-item-date">${startDate}${endDate ? ` – ${endDate}` : ''}</span>
+      <span class="pr-cyc-item-len">${cycleLen ? `${cycleLen}d` : isCurrent ? '…' : '—'}</span>
+      <span class="pr-cyc-item-chevron">›</span>
+    `;
 
-function _cycleRow(n, startStr, length, elapsed, status, maxDays, refLines) {
-  const pct = d => `${(d / maxDays * 100).toFixed(2)}%`;
+    const body = document.createElement('div');
+    body.className = 'pr-cyc-item-body';
+    body.hidden = true;
 
-  const row  = document.createElement('div'); row.className = 'pr-cyc-row';
-  const lbl  = document.createElement('div'); lbl.className = 'pr-cyc-lbl-col';
-  const name = document.createElement('div'); name.className = 'pr-cyc-name'; name.textContent = `Cycle ${n}`;
-  const date = document.createElement('div'); date.className = 'pr-cyc-date';
-  date.textContent = new Date(startStr + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  lbl.append(name, date);
+    const rows = [];
+    if (periodLen) rows.push(`Period: ${periodLen} day${periodLen !== 1 ? 's' : ''}`);
+    if (entry.flow) {
+      const flowStr = Object.entries(entry.flow).map(([d, f]) => `${f}`).slice(0, 3).join(', ');
+      if (flowStr) rows.push(`Flow: ${flowStr}`);
+    }
+    const sympDays = Object.keys(entry.symptoms ?? {});
+    if (sympDays.length) {
+      const allSymps = [...new Set(sympDays.flatMap(d => entry.symptoms[d]))];
+      rows.push(`Symptoms: ${allSymps.slice(0, 5).map(k => SYM_LABEL[k] ?? k).join(', ')}`);
+    }
+    if (!rows.length) rows.push('No details logged.');
+    body.innerHTML = rows.map(r => `<div class="pr-cyc-detail">${r}</div>`).join('');
 
-  const zone = document.createElement('div'); zone.className = 'pr-cyc-bar-zone';
-  refLines.forEach(d => {
-    const line = document.createElement('div'); line.className = 'pr-cyc-refline'; line.style.left = pct(d);
-    zone.appendChild(line);
+    header.addEventListener('click', () => {
+      const open = !body.hidden;
+      body.hidden = open;
+      item.classList.toggle('expanded', !open);
+      header.querySelector('.pr-cyc-item-chevron').textContent = open ? '›' : '⌄';
+    });
+
+    item.append(header, body);
+    list.appendChild(item);
   });
 
-  const bar = document.createElement('div');
-  bar.className = `pr-cyc-bar pr-cyc-bar--${status}`;
-  bar.style.width = pct(Math.min(length, maxDays));
-  zone.appendChild(bar);
-
-  if (status === 'current' && elapsed != null) {
-    const marker = document.createElement('div'); marker.className = 'pr-cyc-today-marker';
-    marker.style.left = pct(Math.min(elapsed, maxDays));
-    zone.appendChild(marker);
-  }
-
-  const num = document.createElement('div'); num.className = 'pr-cyc-num-col';
-  num.textContent = status === 'completed' ? `${length}d` : `~${length}d`;
-  if (status !== 'completed') num.classList.add('dim');
-
-  row.append(lbl, zone, num);
-  return row;
+  el.appendChild(list);
 }
 
 // ── Day log modal ──────────────────────────────────────────────────
