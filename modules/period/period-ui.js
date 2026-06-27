@@ -197,24 +197,6 @@ function _buildTop() {
   const top = document.createElement('div');
   top.className = 'pr-top';
 
-  // View toggle — always leftmost
-  const tabs = document.createElement('div');
-  tabs.className = 'cal-view-toggle';
-  tabs.style.marginLeft = '0';
-  [
-    { v: 'day',    label: 'Day' },
-    { v: 'year',   label: 'Year' },
-    { v: 'cycles', label: 'Cycles' },
-  ].forEach(({ v, label }) => {
-    const btn = document.createElement('button');
-    btn.className = 'cal-view-btn' + (_view === v ? ' active' : '');
-    btn.textContent = label;
-    btn.addEventListener('click', () => { if (_view !== v) { _view = v; _render(); } });
-    tabs.appendChild(btn);
-  });
-  top.appendChild(tabs);
-
-  // Navigation controls — after tabs, left-aligned
   const today = _todayStr();
 
   if (_view === 'cycles') {
@@ -222,6 +204,7 @@ function _buildTop() {
     const cycleNum = _entries.length;
     const meta = document.createElement('div');
     meta.className = 'pr-meta';
+    meta.style.flex = '1';
     meta.innerHTML = `
       <span>${_fmtDate(today)}</span>
       ${cycleDay ? `<span class="pr-dot">·</span><span>Day <strong>${cycleDay}</strong> of cycle</span>` : ''}
@@ -257,6 +240,22 @@ function _buildTop() {
     }
     top.append(prevBtn, lbl, nextBtn, todBtn);
   }
+
+  // View toggle — always on the right, matching Calendar layout
+  const tabs = document.createElement('div');
+  tabs.className = 'cal-view-toggle';
+  [
+    { v: 'day',    label: 'Day' },
+    { v: 'year',   label: 'Year' },
+    { v: 'cycles', label: 'Cycles' },
+  ].forEach(({ v, label }) => {
+    const btn = document.createElement('button');
+    btn.className = 'cal-view-btn' + (_view === v ? ' active' : '');
+    btn.textContent = label;
+    btn.addEventListener('click', () => { if (_view !== v) { _view = v; _render(); } });
+    tabs.appendChild(btn);
+  });
+  top.appendChild(tabs);
 
   return top;
 }
