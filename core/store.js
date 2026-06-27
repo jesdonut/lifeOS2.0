@@ -49,8 +49,8 @@ async function fetchFromSupabase() {
 
   const [modRes, evtRes, spendRes] = await Promise.all([
     sb.from('modules').select('*'),
-    sb.from('calendar_events').select('data'),
-    sb.from('spend_entries').select('*'),
+    sb.from('calendar_events').select('data').range(0, 9999),
+    sb.from('spend_entries').select('*').range(0, 9999),
   ]);
 
   if (modRes.error)   throw modRes.error;
