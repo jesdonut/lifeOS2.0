@@ -572,47 +572,166 @@
 }
 
 /* ── Cycles tab ── */
-.pr-cyc-stats {
-  display: flex;
-  gap: var(--s2);
-  padding: var(--s5) var(--s5) var(--s3);
-  flex-wrap: wrap;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--bg);
-  margin: 0 calc(-1 * var(--s5));
-  padding-left: var(--s5);
-  padding-right: var(--s5);
-}
-
-.pr-cyc-stat {
-  flex: 1;
-  min-width: 80px;
-  background: color-mix(in srgb, var(--flow-light) 10%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--flow-light) 20%, var(--border-dim));
-  border-radius: var(--radius-sm);
-  padding: var(--s3) var(--s4);
-}
-
-.pr-cyc-stat-val {
-  font-size: var(--fs-lg);
-  font-weight: 600;
-  color: var(--text);
-  line-height: 1.1;
-}
-
-.pr-cyc-stat-lbl {
-  font-size: var(--fs-xs);
-  color: var(--text-3);
-  margin-top: 4px;
-}
-
 .pr-cyc-empty {
   padding: var(--s5);
   color: var(--text-3);
   font-size: var(--fs-sm);
 }
+
+/* Overview row: donut + stats side by side */
+.pr-cyc-overview {
+  display: flex;
+  gap: var(--s5);
+  padding: var(--s5);
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+/* Donut chart */
+.pr-cyc-donut-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s3);
+  flex-shrink: 0;
+}
+
+.pr-donut {
+  width: 120px;
+  height: 120px;
+}
+
+.pr-donut-label {
+  font-size: 13px;
+  font-weight: 600;
+  fill: var(--text);
+}
+
+.pr-donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 120px;
+}
+
+.pr-donut-leg-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-size: var(--fs-xs);
+}
+
+.pr-donut-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pr-donut-leg-lbl { flex: 1; color: var(--text-2); }
+.pr-donut-leg-cnt { color: var(--text-3); font-variant-numeric: tabular-nums; }
+
+/* Stats panel */
+.pr-cyc-stats-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.pr-cyc-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--s1) 0;
+  border-bottom: 1px solid var(--border-dim);
+  font-size: var(--fs-sm);
+}
+.pr-cyc-stat-row:last-child { border-bottom: none; }
+
+.pr-cyc-stat-lbl { color: var(--text-3); }
+.pr-cyc-stat-val { font-weight: 600; color: var(--text); }
+
+/* Bar chart */
+.pr-cyc-barchart {
+  position: relative;
+  padding: var(--s4) var(--s5) var(--s3) calc(var(--s5) + 28px);
+  border-bottom: 1px solid var(--border-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pr-cyc-refline {
+  position: absolute;
+  top: var(--s3);
+  bottom: var(--s2);
+  width: 1px;
+  background: var(--border-dim);
+  pointer-events: none;
+}
+
+.pr-cyc-ref-lbl {
+  position: absolute;
+  top: 0;
+  left: 3px;
+  font-size: 9px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.pr-cyc-bar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  position: relative;
+  z-index: 1;
+}
+
+.pr-cyc-bar-lbl {
+  font-size: 10px;
+  color: var(--text-3);
+  width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+  margin-left: calc(-1 * (var(--s5) + 28px) + var(--s5));
+}
+
+.pr-cyc-bar-track {
+  flex: 1;
+  height: 10px;
+  background: var(--surface-2);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.pr-cyc-bar-fill {
+  height: 100%;
+  background: var(--flow-medium);
+  border-radius: 5px;
+  min-width: 3px;
+}
+
+.pr-cyc-bar-num {
+  font-size: 10px;
+  color: var(--text-3);
+  width: 28px;
+  flex-shrink: 0;
+}
+
+/* See all button */
+.pr-cyc-see-all {
+  align-self: center;
+  margin-top: var(--s2);
+  font-size: var(--fs-xs);
+  color: var(--accent);
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 20px;
+  padding: 4px 14px;
+  cursor: pointer;
+}
+.pr-cyc-see-all:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
 
 /* ── Cycle list ── */
 .pr-cyc-list {

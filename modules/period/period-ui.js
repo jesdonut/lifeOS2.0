@@ -200,16 +200,11 @@ function _buildTop() {
   const today = _todayStr();
 
   if (_view === 'cycles') {
+    const lbl = document.createElement('span');
+    lbl.className = 'cal-year-label';
     const cycleDay = _cycleDay(today);
-    const cycleNum = _entries.length;
-    const meta = document.createElement('div');
-    meta.className = 'pr-meta';
-    meta.innerHTML = `
-      <span>${_fmtDate(today)}</span>
-      ${cycleDay ? `<span class="pr-dot">·</span><span>Day <strong>${cycleDay}</strong> of cycle</span>` : ''}
-      ${cycleNum ? `<span class="pr-dot">·</span><span><strong>${cycleNum}</strong> ${cycleNum === 1 ? 'cycle' : 'cycles'} tracked</span>` : ''}
-    `;
-    top.appendChild(meta);
+    lbl.textContent = _fmtDate(today) + (cycleDay ? ` · Day ${cycleDay}` : '');
+    top.appendChild(lbl);
   } else {
     const prevBtn = document.createElement('button'); prevBtn.className = 'cal-year-btn'; prevBtn.textContent = '‹';
     const lbl     = document.createElement('span');   lbl.className = 'cal-year-label';
@@ -564,6 +559,50 @@ function _cycleMedian(lengths) {
   return s.length % 2 === 0 ? Math.round((s[m - 1] + s[m]) / 2) : s[m];
 }
 
+// ── SVG donut chart ────────────────────────────────────────────────
+function _donutChart(segments, cx, cy, r, thickness, centerLabel) {
+  const total = segments.reduce((s, seg) => s + seg.value, 0);
+  if (!total) return null;
+
+  const ns  = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${cx * 2} ${cy * 2}`);
+  svg.setAttribute('class', 'pr-donut');
+
+  let angle = -Math.PI / 2; // start at top
+  const innerR = r - thickness;
+
+  segments.forEach(({ value, color }) => {
+    if (!value) return;
+    const sweep = (value / total) * 2 * Math.PI;
+    const endAngle = angle + sweep;
+    const largeArc = sweep > Math.PI ? 1 : 0;
+
+    const ox1 = cx + r * Math.cos(angle),  oy1 = cy + r * Math.sin(angle);
+    const ox2 = cx + r * Math.cos(endAngle), oy2 = cy + r * Math.sin(endAngle);
+    const ix1 = cx + innerR * Math.cos(endAngle), iy1 = cy + innerR * Math.sin(endAngle);
+    const ix2 = cx + innerR * Math.cos(angle), iy2 = cy + innerR * Math.sin(angle);
+
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', `M ${ox1} ${oy1} A ${r} ${r} 0 ${largeArc} 1 ${ox2} ${oy2} L ${ix1} ${iy1} A ${innerR} ${innerR} 0 ${largeArc} 0 ${ix2} ${iy2} Z`);
+    path.setAttribute('fill', color);
+    svg.appendChild(path);
+
+    angle = endAngle;
+  });
+
+  if (centerLabel) {
+    const text = document.createElementNS(ns, 'text');
+    text.setAttribute('x', cx); text.setAttribute('y', cy);
+    text.setAttribute('text-anchor', 'middle'); text.setAttribute('dominant-baseline', 'middle');
+    text.setAttribute('class', 'pr-donut-label');
+    text.textContent = centerLabel;
+    svg.appendChild(text);
+  }
+
+  return svg;
+}
+
 function _buildCycles(el) {
   const today  = _todayStr();
   const avgDur = avgPeriodDuration(_entries);
@@ -579,32 +618,119 @@ function _buildCycles(el) {
   for (let i = 0; i < _entries.length - 1; i++)
     completedLengths.push(diffD(D(_entries[i].start), D(_entries[i + 1].start)));
 
-  const avg     = _stats?.avg ?? null;
-  const median  = _cycleMedian(completedLengths);
-  const longest = completedLengths.length ? Math.max(...completedLengths) : null;
+  const avg      = _stats?.avg ?? null;
+  const median   = _cycleMedian(completedLengths);
+  const longest  = completedLengths.length ? Math.max(...completedLengths) : null;
   const shortest = completedLengths.length ? Math.min(...completedLengths) : null;
 
-  const statsRow = document.createElement('div');
-  statsRow.className = 'pr-cyc-stats';
+  // Count flow days across all entries
+  const flowCounts = { spotting: 0, light: 0, medium: 0, heavy: 0 };
+  for (const entry of _entries) {
+    for (const level of Object.values(entry.flow ?? {})) {
+      if (flowCounts[level] !== undefined) flowCounts[level]++;
+    }
+  }
+  const totalFlowDays = Object.values(flowCounts).reduce((s, v) => s + v, 0);
+
+  // ── Overview area (donut + stats side by side) ────────────────────
+  const overview = document.createElement('div');
+  overview.className = 'pr-cyc-overview';
+
+  // Donut: flow distribution
+  const donutWrap = document.createElement('div');
+  donutWrap.className = 'pr-cyc-donut-wrap';
+
+  const donut = _donutChart([
+    { value: flowCounts.heavy,    color: 'var(--flow-heavy)' },
+    { value: flowCounts.medium,   color: 'var(--flow-medium)' },
+    { value: flowCounts.light,    color: 'var(--flow-light)' },
+    { value: flowCounts.spotting, color: 'var(--purple)' },
+  ], 60, 60, 52, 20, avgDur ? `${avgDur}d` : '');
+
+  if (donut) {
+    donutWrap.appendChild(donut);
+    // Legend
+    const legend = document.createElement('div');
+    legend.className = 'pr-donut-legend';
+    [
+      { label: 'Heavy',    color: 'var(--flow-heavy)',   count: flowCounts.heavy },
+      { label: 'Medium',   color: 'var(--flow-medium)',  count: flowCounts.medium },
+      { label: 'Light',    color: 'var(--flow-light)',   count: flowCounts.light },
+      { label: 'Spotting', color: 'var(--purple)',       count: flowCounts.spotting },
+    ].filter(s => s.count > 0).forEach(({ label, color, count }) => {
+      const row = document.createElement('div'); row.className = 'pr-donut-leg-row';
+      row.innerHTML = `<span class="pr-donut-dot" style="background:${color}"></span><span class="pr-donut-leg-lbl">${label}</span><span class="pr-donut-leg-cnt">${count}d</span>`;
+      legend.appendChild(row);
+    });
+    donutWrap.appendChild(legend);
+  } else {
+    donutWrap.appendChild(Object.assign(document.createElement('p'), { className: 'pr-cyc-empty', textContent: 'No flow logged yet.' }));
+  }
+  overview.appendChild(donutWrap);
+
+  // Stats panel
+  const statsPanel = document.createElement('div');
+  statsPanel.className = 'pr-cyc-stats-panel';
   [
-    { label: 'Average',  value: avg     ? `${avg}d`     : '—' },
-    { label: 'Median',   value: median  ? `${median}d`  : '—' },
-    { label: 'Longest',  value: longest ? `${longest}d` : '—' },
-    { label: 'Shortest', value: shortest ? `${shortest}d` : '—' },
-    { label: 'Avg period', value: avgDur ? `${avgDur}d` : '—' },
+    { label: 'Avg cycle',  value: avg      ? `${avg}d`      : '—' },
+    { label: 'Median',     value: median   ? `${median}d`   : '—' },
+    { label: 'Longest',    value: longest  ? `${longest}d`  : '—' },
+    { label: 'Shortest',   value: shortest ? `${shortest}d` : '—' },
+    { label: 'Avg period', value: avgDur   ? `${avgDur}d`   : '—' },
+    { label: 'Total logged', value: `${_entries.length}` },
   ].forEach(({ label, value }) => {
-    const card = document.createElement('div'); card.className = 'pr-cyc-stat';
-    card.innerHTML = `<div class="pr-cyc-stat-val">${value}</div><div class="pr-cyc-stat-lbl">${label}</div>`;
-    statsRow.appendChild(card);
+    const row = document.createElement('div'); row.className = 'pr-cyc-stat-row';
+    row.innerHTML = `<span class="pr-cyc-stat-lbl">${label}</span><span class="pr-cyc-stat-val">${value}</span>`;
+    statsPanel.appendChild(row);
   });
-  el.appendChild(statsRow);
+  overview.appendChild(statsPanel);
+  el.appendChild(overview);
 
-  // Last 10 cycles, most recent first
-  const recent = [..._entries].reverse().slice(0, 10);
-  const list = document.createElement('div');
-  list.className = 'pr-cyc-list';
+  // ── Cycle length bar chart ────────────────────────────────────────
+  if (completedLengths.length) {
+    const maxLen = Math.max(longest, 42);
+    const chartWrap = document.createElement('div');
+    chartWrap.className = 'pr-cyc-barchart';
 
-  recent.forEach((entry, i) => {
+    const refDays = [21, 28, 35].filter(d => d <= maxLen);
+    refDays.forEach(d => {
+      const line = document.createElement('div');
+      line.className = 'pr-cyc-refline';
+      line.style.left = `${(d / maxLen * 100).toFixed(1)}%`;
+      const lbl = document.createElement('span'); lbl.className = 'pr-cyc-ref-lbl'; lbl.textContent = `${d}d`;
+      line.appendChild(lbl);
+      chartWrap.appendChild(line);
+    });
+
+    const showAll = el.dataset.showAllBars === '1';
+    const barsToShow = showAll ? completedLengths : completedLengths.slice(-8);
+    const startIdx   = showAll ? 0 : Math.max(0, completedLengths.length - 8);
+
+    barsToShow.forEach((len, i) => {
+      const idx = startIdx + i;
+      const bar = document.createElement('div'); bar.className = 'pr-cyc-bar-row';
+      const lbl = document.createElement('span'); lbl.className = 'pr-cyc-bar-lbl'; lbl.textContent = `#${idx + 1}`;
+      const track = document.createElement('div'); track.className = 'pr-cyc-bar-track';
+      const fill  = document.createElement('div'); fill.className = 'pr-cyc-bar-fill';
+      fill.style.width = `${(len / maxLen * 100).toFixed(1)}%`;
+      const num = document.createElement('span'); num.className = 'pr-cyc-bar-num'; num.textContent = `${len}d`;
+      track.appendChild(fill);
+      bar.append(lbl, track, num);
+      chartWrap.appendChild(bar);
+    });
+
+    el.appendChild(chartWrap);
+  }
+
+  // ── Cycle list ────────────────────────────────────────────────────
+  const listWrap = document.createElement('div');
+  listWrap.className = 'pr-cyc-list';
+
+  const showAllList = el.dataset.showAllList === '1';
+  const allReversed = [..._entries].reverse();
+  const visible     = showAllList ? allReversed : allReversed.slice(0, 5);
+
+  visible.forEach((entry, i) => {
     const globalIdx = _entries.length - 1 - i;
     const nextEntry = _entries[globalIdx + 1];
     const cycleLen  = nextEntry ? diffD(D(entry.start), D(nextEntry.start)) : null;
@@ -614,11 +740,8 @@ function _buildCycles(el) {
     const startDate = new Date(entry.start + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     const endDate   = entry.end ? new Date(entry.end + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
 
-    const item = document.createElement('div');
-    item.className = 'pr-cyc-item';
-
-    const header = document.createElement('div');
-    header.className = 'pr-cyc-item-hdr';
+    const item = document.createElement('div'); item.className = 'pr-cyc-item';
+    const header = document.createElement('div'); header.className = 'pr-cyc-item-hdr';
     header.innerHTML = `
       <span class="pr-cyc-item-num">Cycle ${globalIdx + 1}${isCurrent ? ' <span class="pr-cyc-cur-badge">current</span>' : ''}</span>
       <span class="pr-cyc-item-date">${startDate}${endDate ? ` – ${endDate}` : ''}</span>
@@ -626,21 +749,17 @@ function _buildCycles(el) {
       <span class="pr-cyc-item-chevron">›</span>
     `;
 
-    const body = document.createElement('div');
-    body.className = 'pr-cyc-item-body';
-    body.hidden = true;
-
+    const body = document.createElement('div'); body.className = 'pr-cyc-item-body'; body.hidden = true;
     const rows = [];
     if (periodLen) rows.push(`Period: ${periodLen} day${periodLen !== 1 ? 's' : ''}`);
-    if (entry.flow) {
-      const flowStr = Object.entries(entry.flow).map(([d, f]) => `${f}`).slice(0, 3).join(', ');
-      if (flowStr) rows.push(`Flow: ${flowStr}`);
+    const flowLevels = Object.values(entry.flow ?? {});
+    if (flowLevels.length) {
+      const counts = {};
+      flowLevels.forEach(f => { counts[f] = (counts[f] ?? 0) + 1; });
+      rows.push('Flow: ' + ['heavy','medium','light','spotting'].filter(k => counts[k]).map(k => `${counts[k]}d ${k}`).join(', '));
     }
-    const sympDays = Object.keys(entry.symptoms ?? {});
-    if (sympDays.length) {
-      const allSymps = [...new Set(sympDays.flatMap(d => entry.symptoms[d]))];
-      rows.push(`Symptoms: ${allSymps.slice(0, 5).map(k => SYM_LABEL[k] ?? k).join(', ')}`);
-    }
+    const allSymps = [...new Set(Object.values(entry.symptoms ?? {}).flat())];
+    if (allSymps.length) rows.push(`Symptoms: ${allSymps.slice(0, 5).map(k => SYM_LABEL[k] ?? k).join(', ')}`);
     if (!rows.length) rows.push('No details logged.');
     body.innerHTML = rows.map(r => `<div class="pr-cyc-detail">${r}</div>`).join('');
 
@@ -650,12 +769,24 @@ function _buildCycles(el) {
       item.classList.toggle('expanded', !open);
       header.querySelector('.pr-cyc-item-chevron').textContent = open ? '›' : '⌄';
     });
-
     item.append(header, body);
-    list.appendChild(item);
+    listWrap.appendChild(item);
   });
 
-  el.appendChild(list);
+  // "See all" / "Show less" toggle
+  if (_entries.length > 5) {
+    const toggle = document.createElement('button');
+    toggle.className = 'pr-cyc-see-all';
+    toggle.textContent = showAllList ? 'Show less' : `See all ${_entries.length} cycles`;
+    toggle.addEventListener('click', () => {
+      el.dataset.showAllList = showAllList ? '0' : '1';
+      el.innerHTML = '';
+      _buildCycles(el);
+    });
+    listWrap.appendChild(toggle);
+  }
+
+  el.appendChild(listWrap);
 }
 
 // ── Day log modal ──────────────────────────────────────────────────
