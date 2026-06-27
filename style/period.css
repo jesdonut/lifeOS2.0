@@ -56,6 +56,8 @@
   flex-shrink: 0;
 }
 
+.pr-top .cal-view-toggle { margin-left: auto; }
+
 .pr-brand {
   display: flex;
   align-items: center;
