@@ -216,8 +216,9 @@ function _buildMiniCal(showPeriod) {
   const today  = _todayStr();
   const { y, m } = _calMonth;
 
-  const firstDow    = new Date(y, m - 1, 1).getDay();
-  const daysInMonth = new Date(y, m, 0).getDate();
+  const firstDowSun  = new Date(y, m - 1, 1).getDay(); // 0=Sun
+  const firstDow     = (firstDowSun + 6) % 7;          // shift so Mon=0
+  const daysInMonth  = new Date(y, m, 0).getDate();
   const wrap        = el('div', 'mc-wrap');
 
   // Header
@@ -239,7 +240,7 @@ function _buildMiniCal(showPeriod) {
 
   // Day-of-week labels
   const dowRow = el('div', 'mc-dow-row');
-  for (const d of ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'])
+  for (const d of ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'])
     dowRow.appendChild(el('span', 'mc-dow', d));
   wrap.appendChild(dowRow);
 
