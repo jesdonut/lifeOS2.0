@@ -280,6 +280,156 @@ function _buildMiniCal(showPeriod) {
   return wrap;
 }
 
+// ── Add event sheet ───────────────────────────────────────────────────
+function _showAddEvent(dateStr) {
+  const d    = _D();
+  const cats = [
+    { id: 'personal',  label: 'Personal'  },
+    { id: 'work',      label: 'Work'      },
+    { id: 'health',    label: 'Health'    },
+    { id: 'family',    label: 'Family'    },
+    { id: 'friends',   label: 'Friends'   },
+    { id: 'travel',    label: 'Travel'    },
+    { id: 'education', label: 'Education' },
+    { id: 'project',   label: 'Project'   },
+    { id: 'partner',   label: 'Partner'   },
+  ];
+
+  const overlay = el('div', 'mob-sheet-overlay');
+  const sheet   = el('div', 'mob-sheet');
+
+  sheet.innerHTML = `
+    <div class="mob-sheet-hdr">
+      <span class="mob-sheet-title">Add event</span>
+      <button class="mob-sheet-close">✕</button>
+    </div>
+    <div class="mob-sheet-body">
+      <input id="ms-ev-title" type="text" placeholder="Title" autocomplete="off">
+      <div class="mob-field-row">
+        <input id="ms-ev-time" type="time" placeholder="Time (optional)">
+      </div>
+      <div class="mob-cat-grid" id="ms-ev-cats"></div>
+      <button class="mob-sheet-save" id="ms-ev-save">Add</button>
+    </div>
+  `;
+  overlay.appendChild(sheet);
+  document.body.appendChild(overlay);
+
+  let selCat = 'personal';
+  const catGrid = sheet.querySelector('#ms-ev-cats');
+  cats.forEach(c => {
+    const btn = el('button', 'mob-cat-btn' + (c.id === selCat ? ' active' : ''), c.label);
+    btn.style.setProperty('--cat-color', `var(--cat-${c.id})`);
+    btn.addEventListener('click', () => {
+      selCat = c.id;
+      catGrid.querySelectorAll('.mob-cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+    catGrid.appendChild(btn);
+  });
+
+  const close = () => overlay.remove();
+  sheet.querySelector('.mob-sheet-close').addEventListener('click', close);
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+  sheet.querySelector('#ms-ev-save').addEventListener('click', () => {
+    const title = sheet.querySelector('#ms-ev-title').value.trim();
+    if (!title) { sheet.querySelector('#ms-ev-title').focus(); return; }
+    const time  = sheet.querySelector('#ms-ev-time').value;
+    const event = { id: _uid(), date: dateStr, title, category: selCat, categoryId: selCat };
+    if (time) event.startTime = time;
+    const cal = { ...(d.calendar || {}), events: [...(d.calendar?.events || []), event] };
+    d.calendar = cal;
+    _mobileData = d;
+    save({ calendar: cal });
+    close();
+    _render();
+  });
+
+  setTimeout(() => sheet.querySelector('#ms-ev-title').focus(), 100);
+}
+
+// ── Add spend sheet ───────────────────────────────────────────────────
+function _showAddSpend(dateStr) {
+  const d    = _D();
+  const cats = (d.settings?.spendCategories || []);
+
+  const overlay = el('div', 'mob-sheet-overlay');
+  const sheet   = el('div', 'mob-sheet');
+
+  let selCat = cats[0]?.id || 'food';
+  let selSub = '';
+
+  sheet.innerHTML = `
+    <div class="mob-sheet-hdr">
+      <span class="mob-sheet-title">Add spend</span>
+      <button class="mob-sheet-close">✕</button>
+    </div>
+    <div class="mob-sheet-body">
+      <input id="ms-sp-amt" type="number" inputmode="numeric" placeholder="Amount (¥)">
+      <div class="mob-cat-grid" id="ms-sp-cats"></div>
+      <div class="mob-sub-wrap" id="ms-sp-subs"></div>
+      <input id="ms-sp-note" type="text" placeholder="Note (optional)" autocomplete="off">
+      <button class="mob-sheet-save" id="ms-sp-save">Add</button>
+    </div>
+  `;
+  overlay.appendChild(sheet);
+  document.body.appendChild(overlay);
+
+  function renderSubs() {
+    const wrap = sheet.querySelector('#ms-sp-subs');
+    const cat  = cats.find(c => c.id === selCat);
+    const subs = cat?.sub || [];
+    wrap.innerHTML = '';
+    if (!subs.length) { selSub = ''; return; }
+    selSub = selSub && subs.includes(selSub) ? selSub : subs[0];
+    subs.forEach(s => {
+      const btn = el('button', 'mob-sub-btn' + (s === selSub ? ' active' : ''), s);
+      btn.addEventListener('click', () => {
+        selSub = s;
+        wrap.querySelectorAll('.mob-sub-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
+  const catGrid = sheet.querySelector('#ms-sp-cats');
+  cats.forEach(c => {
+    const btn = el('button', 'mob-cat-btn' + (c.id === selCat ? ' active' : ''), c.name);
+    btn.style.setProperty('--cat-color', c.color || `var(--cat-${c.id})`);
+    btn.addEventListener('click', () => {
+      selCat = c.id;
+      catGrid.querySelectorAll('.mob-cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderSubs();
+    });
+    catGrid.appendChild(btn);
+  });
+  renderSubs();
+
+  const close = () => overlay.remove();
+  sheet.querySelector('.mob-sheet-close').addEventListener('click', close);
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+  sheet.querySelector('#ms-sp-save').addEventListener('click', () => {
+    const amt = parseFloat(sheet.querySelector('#ms-sp-amt').value);
+    if (!amt || isNaN(amt)) { sheet.querySelector('#ms-sp-amt').focus(); return; }
+    const note  = sheet.querySelector('#ms-sp-note').value.trim();
+    const entry = { id: _uid(), categoryId: selCat, subcategory: selSub || '', amount: amt, currency: 'JPY', note };
+    const prev  = d.calendar?.spendEntries?.[dateStr] || [];
+    const spendEntries = { ...(d.calendar?.spendEntries || {}), [dateStr]: [...prev, entry] };
+    const cal = { ...(d.calendar || {}), spendEntries };
+    d.calendar = cal;
+    _mobileData = d;
+    save({ calendar: cal });
+    close();
+    _render();
+  });
+
+  setTimeout(() => sheet.querySelector('#ms-sp-amt').focus(), 100);
+}
+
 // ── Day detail (events + spend for one date) ─────────────────────────
 function _buildDayDetail(dateStr) {
   const d    = _D();
@@ -291,15 +441,21 @@ function _buildDayDetail(dateStr) {
   );
   frag.appendChild(lbl);
 
+  // Events
   const events = (d.calendar?.events || []).filter(e => e.date === dateStr);
   const evSec  = el('div', 'day-section');
-  evSec.appendChild(el('div', 'day-sec-title', 'Events'));
+  const evHdr  = el('div', 'day-sec-hdr');
+  evHdr.appendChild(el('span', 'day-sec-title', 'Events'));
+  const evAdd = el('button', 'day-sec-add', '+');
+  evAdd.addEventListener('click', () => _showAddEvent(dateStr));
+  evHdr.appendChild(evAdd);
+  evSec.appendChild(evHdr);
   if (events.length) {
     const list = el('div', 'day-list');
     for (const ev of events) {
       const item = el('div', 'day-item');
       const dot  = el('span', 'day-dot');
-      dot.style.background = `var(--cat-ev-${ev.categoryId ?? ev.category ?? 'personal'})`;
+      dot.style.background = `var(--cat-${ev.categoryId ?? ev.category ?? 'personal'})`;
       item.appendChild(dot);
       const info = el('div', 'day-item-info');
       info.appendChild(el('span', 'day-item-title', ev.title));
@@ -313,25 +469,31 @@ function _buildDayDetail(dateStr) {
   }
   frag.appendChild(evSec);
 
+  // Spend
   const spendEntries = d.calendar?.spendEntries?.[dateStr] || [];
   const total  = spendEntries.reduce((s, e) => s + (e.amount || 0), 0);
   const spSec  = el('div', 'day-section');
   const spHdr  = el('div', 'day-sec-hdr');
   spHdr.appendChild(el('span', 'day-sec-title', 'Spend'));
-  if (total) spHdr.appendChild(el('span', 'day-sec-total', '¥' + total.toLocaleString()));
+  const spRight = el('div', 'day-sec-right');
+  if (total) spRight.appendChild(el('span', 'day-sec-total', '¥' + total.toLocaleString()));
+  const spAdd = el('button', 'day-sec-add', '+');
+  spAdd.addEventListener('click', () => _showAddSpend(dateStr));
+  spRight.appendChild(spAdd);
+  spHdr.appendChild(spRight);
   spSec.appendChild(spHdr);
   if (spendEntries.length) {
     const list = el('div', 'day-list');
+    const spendCats = d.settings?.spendCategories || [];
     for (const entry of spendEntries) {
+      const cat  = spendCats.find(c => c.id === entry.categoryId);
       const item = el('div', 'day-item');
       const dot  = el('span', 'day-dot');
-      dot.style.background = `var(--cat-${entry.categoryId})`;
+      dot.style.background = cat?.color || `var(--cat-${entry.categoryId})`;
       item.appendChild(dot);
-      const catLabel = entry.categoryId
-        ? entry.categoryId.charAt(0).toUpperCase() + entry.categoryId.slice(1)
-        : '';
       const info = el('div', 'day-item-info');
-      info.appendChild(el('span', 'day-item-title', catLabel + (entry.subcategory ? ' · ' + entry.subcategory : '')));
+      const label = (cat?.name || entry.categoryId) + (entry.subcategory ? ' · ' + entry.subcategory : '');
+      info.appendChild(el('span', 'day-item-title', label));
       if (entry.note) info.appendChild(el('span', 'day-item-meta', entry.note));
       item.appendChild(info);
       item.appendChild(el('span', 'day-item-amt', '¥' + (entry.amount || 0).toLocaleString()));
