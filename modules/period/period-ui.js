@@ -182,7 +182,7 @@ function _render() {
   root.className = 'pr-root';
   root.appendChild(_buildTop());
   const content = document.createElement('div');
-  content.className = 'pr-content';
+  content.className = _view === 'cycles' ? 'pr-content pr-content--cycles' : 'pr-content';
   if      (_view === 'day')    _buildDayView(content);
   else if (_view === 'week')   _buildWeekView(content);
   else if (_view === 'month')  _buildMonthView(content);
@@ -623,40 +623,40 @@ function _buildCycles(el) {
   const longest  = completedLengths.length ? Math.max(...completedLengths) : null;
   const shortest = completedLengths.length ? Math.min(...completedLengths) : null;
 
-  // Count flow days across all entries
   const flowCounts = { spotting: 0, light: 0, medium: 0, heavy: 0 };
-  for (const entry of _entries) {
-    for (const level of Object.values(entry.flow ?? {})) {
+  for (const entry of _entries)
+    for (const level of Object.values(entry.flow ?? {}))
       if (flowCounts[level] !== undefined) flowCounts[level]++;
-    }
-  }
-  const totalFlowDays = Object.values(flowCounts).reduce((s, v) => s + v, 0);
 
-  // ── Overview area (donut + stats side by side) ────────────────────
-  const overview = document.createElement('div');
-  overview.className = 'pr-cyc-overview';
+  const showAllList = el.dataset.showAllList === '1';
 
-  // Donut: flow distribution
+  // ── Two-column layout ─────────────────────────────────────────────
+  const layout = document.createElement('div');
+  layout.className = 'pr-cyc-layout';
+
+  // ── LEFT column ───────────────────────────────────────────────────
+  const left = document.createElement('div');
+  left.className = 'pr-cyc-left';
+
+  // Donut
   const donutWrap = document.createElement('div');
   donutWrap.className = 'pr-cyc-donut-wrap';
-
   const donut = _donutChart([
-    { value: flowCounts.heavy,    color: 'var(--flow-heavy)' },
+    { value: flowCounts.heavy,    color: 'var(--flow-heavy)'  },
     { value: flowCounts.medium,   color: 'var(--flow-medium)' },
-    { value: flowCounts.light,    color: 'var(--flow-light)' },
-    { value: flowCounts.spotting, color: 'var(--purple)' },
+    { value: flowCounts.light,    color: 'var(--flow-light)'  },
+    { value: flowCounts.spotting, color: 'var(--purple)'      },
   ], 60, 60, 52, 20, avgDur ? `${avgDur}d` : '');
 
   if (donut) {
     donutWrap.appendChild(donut);
-    // Legend
     const legend = document.createElement('div');
     legend.className = 'pr-donut-legend';
     [
-      { label: 'Heavy',    color: 'var(--flow-heavy)',   count: flowCounts.heavy },
-      { label: 'Medium',   color: 'var(--flow-medium)',  count: flowCounts.medium },
-      { label: 'Light',    color: 'var(--flow-light)',   count: flowCounts.light },
-      { label: 'Spotting', color: 'var(--purple)',       count: flowCounts.spotting },
+      { label: 'Heavy',    color: 'var(--flow-heavy)',  count: flowCounts.heavy    },
+      { label: 'Medium',   color: 'var(--flow-medium)', count: flowCounts.medium   },
+      { label: 'Light',    color: 'var(--flow-light)',  count: flowCounts.light    },
+      { label: 'Spotting', color: 'var(--purple)',      count: flowCounts.spotting },
     ].filter(s => s.count > 0).forEach(({ label, color, count }) => {
       const row = document.createElement('div'); row.className = 'pr-donut-leg-row';
       row.innerHTML = `<span class="pr-donut-dot" style="background:${color}"></span><span class="pr-donut-leg-lbl">${label}</span><span class="pr-donut-leg-cnt">${count}d</span>`;
@@ -666,69 +666,95 @@ function _buildCycles(el) {
   } else {
     donutWrap.appendChild(Object.assign(document.createElement('p'), { className: 'pr-cyc-empty', textContent: 'No flow logged yet.' }));
   }
-  overview.appendChild(donutWrap);
+  left.appendChild(donutWrap);
 
-  // Stats panel
-  const statsPanel = document.createElement('div');
-  statsPanel.className = 'pr-cyc-stats-panel';
+  // Stats 2×3 grid
+  const statsGrid = document.createElement('div');
+  statsGrid.className = 'pr-cyc-stats-grid';
   [
-    { label: 'Avg cycle',  value: avg      ? `${avg}d`      : '—' },
-    { label: 'Median',     value: median   ? `${median}d`   : '—' },
-    { label: 'Longest',    value: longest  ? `${longest}d`  : '—' },
-    { label: 'Shortest',   value: shortest ? `${shortest}d` : '—' },
-    { label: 'Avg period', value: avgDur   ? `${avgDur}d`   : '—' },
-    { label: 'Total logged', value: `${_entries.length}` },
+    { label: 'Avg cycle',     value: avg      ? `${avg}d`      : '—' },
+    { label: 'Median',        value: median   ? `${median}d`   : '—' },
+    { label: 'Longest',       value: longest  ? `${longest}d`  : '—' },
+    { label: 'Shortest',      value: shortest ? `${shortest}d` : '—' },
+    { label: 'Avg period',    value: avgDur   ? `${avgDur}d`   : '—' },
+    { label: 'Total logged',  value: `${_entries.length}`           },
   ].forEach(({ label, value }) => {
-    const row = document.createElement('div'); row.className = 'pr-cyc-stat-row';
-    row.innerHTML = `<span class="pr-cyc-stat-lbl">${label}</span><span class="pr-cyc-stat-val">${value}</span>`;
-    statsPanel.appendChild(row);
+    const cell = document.createElement('div'); cell.className = 'pr-cyc-stat-cell';
+    cell.innerHTML = `<div class="pr-cyc-cell-lbl">${label}</div><div class="pr-cyc-cell-val">${value}</div>`;
+    statsGrid.appendChild(cell);
   });
-  overview.appendChild(statsPanel);
-  el.appendChild(overview);
+  left.appendChild(statsGrid);
 
-  // ── Cycle length bar chart ────────────────────────────────────────
-  if (completedLengths.length) {
-    const maxLen = Math.max(longest, 42);
-    const chartWrap = document.createElement('div');
-    chartWrap.className = 'pr-cyc-barchart';
-
-    const refDays = [21, 28, 35].filter(d => d <= maxLen);
-    refDays.forEach(d => {
-      const line = document.createElement('div');
-      line.className = 'pr-cyc-refline';
-      line.style.left = `${(d / maxLen * 100).toFixed(1)}%`;
-      const lbl = document.createElement('span'); lbl.className = 'pr-cyc-ref-lbl'; lbl.textContent = `${d}d`;
-      line.appendChild(lbl);
-      chartWrap.appendChild(line);
-    });
-
-    const showAll = el.dataset.showAllBars === '1';
-    const barsToShow = showAll ? completedLengths : completedLengths.slice(-8);
-    const startIdx   = showAll ? 0 : Math.max(0, completedLengths.length - 8);
-
-    barsToShow.forEach((len, i) => {
-      const idx = startIdx + i;
-      const bar = document.createElement('div'); bar.className = 'pr-cyc-bar-row';
-      const lbl = document.createElement('span'); lbl.className = 'pr-cyc-bar-lbl'; lbl.textContent = `#${idx + 1}`;
-      const track = document.createElement('div'); track.className = 'pr-cyc-bar-track';
-      const fill  = document.createElement('div'); fill.className = 'pr-cyc-bar-fill';
-      fill.style.width = `${(len / maxLen * 100).toFixed(1)}%`;
-      const num = document.createElement('span'); num.className = 'pr-cyc-bar-num'; num.textContent = `${len}d`;
-      track.appendChild(fill);
-      bar.append(lbl, track, num);
-      chartWrap.appendChild(bar);
-    });
-
-    el.appendChild(chartWrap);
+  // Current cycle card
+  const cur = _entries[_entries.length - 1];
+  if (cur) {
+    const elapsed  = diffD(D(cur.start), D(today)) + 1;
+    const curFlow  = {};
+    Object.values(cur.flow ?? {}).forEach(f => { curFlow[f] = (curFlow[f] ?? 0) + 1; });
+    const flowStr  = ['heavy','medium','light','spotting'].filter(k => curFlow[k]).map(k => `${curFlow[k]}d ${k}`).join(' · ');
+    const startFmt = new Date(cur.start + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const endFmt   = cur.end ? new Date(cur.end + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'now';
+    const card     = document.createElement('div'); card.className = 'pr-cyc-cur-card';
+    card.innerHTML = `
+      <div class="pr-cyc-cur-title">Cycle ${_entries.length} <span class="pr-cyc-cur-badge">current</span></div>
+      <div class="pr-cyc-cur-dates">${startFmt} – ${endFmt} · ${elapsed}d</div>
+      ${flowStr ? `<div class="pr-cyc-cur-flow">${flowStr}</div>` : ''}
+    `;
+    left.appendChild(card);
   }
 
-  // ── Cycle list ────────────────────────────────────────────────────
-  const listWrap = document.createElement('div');
-  listWrap.className = 'pr-cyc-list';
+  layout.appendChild(left);
 
-  const showAllList = el.dataset.showAllList === '1';
+  // ── RIGHT column ──────────────────────────────────────────────────
+  const right = document.createElement('div');
+  right.className = 'pr-cyc-right';
+
+  // Bar chart — last 8 completed, longest as 100%
+  if (completedLengths.length) {
+    const maxLen  = longest;
+    const refDays = [21, 28, 35].filter(d => d < maxLen);
+    const pct     = d => `${(d / maxLen * 100).toFixed(2)}%`;
+
+    const chart = document.createElement('div');
+    chart.className = 'pr-cyc-barchart';
+
+    // Axis header
+    const axisRow = document.createElement('div'); axisRow.className = 'pr-cyc-bar-axis';
+    const axisZone = document.createElement('div'); axisZone.className = 'pr-cyc-bar-zone';
+    refDays.forEach(d => {
+      const t = document.createElement('span'); t.className = 'pr-cyc-axis-tick';
+      t.style.left = pct(d); t.textContent = `${d}d`;
+      axisZone.appendChild(t);
+    });
+    axisRow.appendChild(document.createElement('div')); // spacer for lbl col
+    axisRow.appendChild(axisZone);
+    axisRow.appendChild(document.createElement('div')); // spacer for num col
+    chart.appendChild(axisRow);
+
+    const last8    = completedLengths.slice(-8);
+    const startIdx = Math.max(0, completedLengths.length - 8);
+    last8.forEach((len, i) => {
+      const row   = document.createElement('div'); row.className = 'pr-cyc-bar-row';
+      const lbl   = document.createElement('div'); lbl.className = 'pr-cyc-bar-lbl'; lbl.textContent = `#${startIdx + i + 1}`;
+      const zone  = document.createElement('div'); zone.className = 'pr-cyc-bar-zone';
+      refDays.forEach(d => {
+        const line = document.createElement('div'); line.className = 'pr-cyc-bar-refline'; line.style.left = pct(d);
+        zone.appendChild(line);
+      });
+      const fill = document.createElement('div'); fill.className = 'pr-cyc-bar-fill'; fill.style.width = pct(len);
+      zone.appendChild(fill);
+      const num = document.createElement('div'); num.className = 'pr-cyc-bar-num'; num.textContent = `${len}d`;
+      row.append(lbl, zone, num);
+      chart.appendChild(row);
+    });
+    right.appendChild(chart);
+  }
+
+  // Cycle list — compact rows, last 5 default
   const allReversed = [..._entries].reverse();
   const visible     = showAllList ? allReversed : allReversed.slice(0, 5);
+  const list        = document.createElement('div');
+  list.className    = 'pr-cyc-list';
 
   visible.forEach((entry, i) => {
     const globalIdx = _entries.length - 1 - i;
@@ -740,26 +766,29 @@ function _buildCycles(el) {
     const startDate = new Date(entry.start + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     const endDate   = entry.end ? new Date(entry.end + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
 
-    const item = document.createElement('div'); item.className = 'pr-cyc-item';
-    const header = document.createElement('div'); header.className = 'pr-cyc-item-hdr';
-    header.innerHTML = `
-      <span class="pr-cyc-item-num">Cycle ${globalIdx + 1}${isCurrent ? ' <span class="pr-cyc-cur-badge">current</span>' : ''}</span>
-      <span class="pr-cyc-item-date">${startDate}${endDate ? ` – ${endDate}` : ''}</span>
-      <span class="pr-cyc-item-len">${cycleLen ? `${cycleLen}d` : isCurrent ? '…' : '—'}</span>
-      <span class="pr-cyc-item-chevron">›</span>
-    `;
+    const item    = document.createElement('div'); item.className = 'pr-cyc-item';
+    const header  = document.createElement('div'); header.className = 'pr-cyc-item-hdr';
+    const numSpan = document.createElement('span'); numSpan.className = 'pr-cyc-item-num';
+    numSpan.innerHTML = `Cycle ${globalIdx + 1}${isCurrent ? ' <span class="pr-cyc-cur-badge">current</span>' : ''}`;
+    const dateSpan = document.createElement('span'); dateSpan.className = 'pr-cyc-item-date';
+    dateSpan.textContent = startDate + (endDate ? ` – ${endDate}` : '');
+    const perSpan  = document.createElement('span'); perSpan.className = 'pr-cyc-item-period';
+    perSpan.textContent = periodLen ? `${periodLen}d period` : '';
+    const lenSpan  = document.createElement('span'); lenSpan.className = 'pr-cyc-item-len';
+    lenSpan.textContent = cycleLen ? `${cycleLen}d` : isCurrent ? '…' : '—';
+    const chev = document.createElement('span'); chev.className = 'pr-cyc-item-chevron'; chev.textContent = '›';
+    header.append(numSpan, dateSpan, perSpan, lenSpan, chev);
 
     const body = document.createElement('div'); body.className = 'pr-cyc-item-body'; body.hidden = true;
     const rows = [];
-    if (periodLen) rows.push(`Period: ${periodLen} day${periodLen !== 1 ? 's' : ''}`);
     const flowLevels = Object.values(entry.flow ?? {});
     if (flowLevels.length) {
       const counts = {};
       flowLevels.forEach(f => { counts[f] = (counts[f] ?? 0) + 1; });
-      rows.push('Flow: ' + ['heavy','medium','light','spotting'].filter(k => counts[k]).map(k => `${counts[k]}d ${k}`).join(', '));
+      rows.push('Flow: ' + ['heavy','medium','light','spotting'].filter(k => counts[k]).map(k => `${counts[k]}d ${k}`).join(' · '));
     }
     const allSymps = [...new Set(Object.values(entry.symptoms ?? {}).flat())];
-    if (allSymps.length) rows.push(`Symptoms: ${allSymps.slice(0, 5).map(k => SYM_LABEL[k] ?? k).join(', ')}`);
+    if (allSymps.length) rows.push(`Symptoms: ${allSymps.slice(0, 6).map(k => SYM_LABEL[k] ?? k).join(', ')}`);
     if (!rows.length) rows.push('No details logged.');
     body.innerHTML = rows.map(r => `<div class="pr-cyc-detail">${r}</div>`).join('');
 
@@ -767,26 +796,26 @@ function _buildCycles(el) {
       const open = !body.hidden;
       body.hidden = open;
       item.classList.toggle('expanded', !open);
-      header.querySelector('.pr-cyc-item-chevron').textContent = open ? '›' : '⌄';
+      chev.textContent = open ? '›' : '⌄';
     });
     item.append(header, body);
-    listWrap.appendChild(item);
+    list.appendChild(item);
   });
 
-  // "See all" / "Show less" toggle
   if (_entries.length > 5) {
     const toggle = document.createElement('button');
     toggle.className = 'pr-cyc-see-all';
     toggle.textContent = showAllList ? 'Show less' : `See all ${_entries.length} cycles`;
     toggle.addEventListener('click', () => {
       el.dataset.showAllList = showAllList ? '0' : '1';
-      el.innerHTML = '';
-      _buildCycles(el);
+      el.innerHTML = ''; _buildCycles(el);
     });
-    listWrap.appendChild(toggle);
+    list.appendChild(toggle);
   }
 
-  el.appendChild(listWrap);
+  right.appendChild(list);
+  layout.appendChild(right);
+  el.appendChild(layout);
 }
 
 // ── Day log modal ──────────────────────────────────────────────────
