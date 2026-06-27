@@ -1,6 +1,7 @@
 /* mobile.css — LifeOS mobile companion */
 
 :root {
+  /* Spend categories (mobile-only, not in base.css) */
   --cat-food:          #e8824a;
   --cat-bills:         #5b8fce;
   --cat-commute:       #4aae8f;
@@ -9,16 +10,6 @@
   --cat-paperwork:     #c9a84c;
   --cat-medical:       #e06060;
   --cat-necessities:   #7aab7a;
-
-  --cat-ev-personal:   #d69aa5;
-  --cat-ev-work:       #b8c89a;
-  --cat-ev-health:     #c79a9a;
-  --cat-ev-friends:    #7c9ccb;
-  --cat-ev-family:     #86afc5;
-  --cat-ev-travel:     #d1b36a;
-  --cat-ev-education:  #8fafa2;
-  --cat-ev-partner:    #b7a6b5;
-  --cat-ev-project:    #c49a73;
 }
 
 * {
@@ -35,6 +26,7 @@ html, body {
   font-size: var(--fs-base);
   height: 100%;
   overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
 }
 
 #mob-app {
@@ -49,34 +41,35 @@ html, body {
 .mob-header {
   display: flex;
   align-items: center;
-  padding: 14px var(--s4);
-  padding-top: max(14px, env(safe-area-inset-top));
+  gap: var(--s2);
+  padding: 0 var(--s4);
+  padding-top: env(safe-area-inset-top);
+  height: calc(var(--tab-h) + env(safe-area-inset-top));
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-dim);
   flex-shrink: 0;
 }
 
+/* Title reuses brand-pill-name from base.css (Fraunces, accent dot) */
 .mob-title {
-  font-size: var(--fs-base);
-  font-weight: 700;
-  letter-spacing: 0.02em;
   flex: 1;
+  font-size: 20px;
 }
 
 .mob-theme-btn {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
-  color: var(--text-2);
-  background: none;
-  border: none;
-  cursor: pointer;
+  color: var(--text-3);
   transition: color var(--dur-fast), background var(--dur-fast);
 }
-.mob-theme-btn:hover { color: var(--text); background: var(--surface-2); }
-.mob-theme-btn .material-symbols-outlined { font-size: 20px; }
+.mob-theme-btn:hover { color: var(--text-2); background: var(--surface-2); }
+.mob-theme-btn .material-symbols-outlined { font-size: 18px; }
 
 /* ── Main scrollable area ────────────────────────────────────────── */
 .mob-main {
@@ -109,12 +102,12 @@ html, body {
 }
 
 .mc-nav {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: var(--fs-lg);
   color: var(--text-3);
   border-radius: var(--radius-sm);
   transition: color var(--dur-fast), background var(--dur-fast);
@@ -129,7 +122,7 @@ html, body {
 
 .mc-dow {
   text-align: center;
-  font-size: 10px;
+  font-size: var(--fs-xs);
   color: var(--text-3);
   padding: 2px 0;
 }
@@ -165,37 +158,18 @@ html, body {
   font-weight: 700;
 }
 
-.mc-cell.mc-sel {
-  background: var(--surface-2);
-}
-.mc-cell.mc-sel .mc-num {
-  color: var(--text);
-  font-weight: 600;
-}
+.mc-cell.mc-sel { background: var(--surface-2); }
+.mc-cell.mc-sel .mc-num { color: var(--text); font-weight: 600; }
 
 /* Period overlays */
-.mc-cell.mc-period {
-  background: color-mix(in srgb, var(--red, #e06060) 18%, transparent);
-}
+.mc-cell.mc-period { background: color-mix(in srgb, var(--flow-medium) 18%, transparent); }
 .mc-cell.mc-period .mc-num { color: var(--text); }
-
-.mc-cell.mc-spotting {
-  background: color-mix(in srgb, var(--red, #e06060) 8%, transparent);
-}
+.mc-cell.mc-spotting { background: color-mix(in srgb, var(--flow-medium) 8%, transparent); }
 .mc-cell.mc-spotting .mc-num { color: var(--text-3); }
 
 /* Event/spend dots */
-.mc-dots {
-  display: flex;
-  gap: 2px;
-  margin-top: 1px;
-}
-
-.mc-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-}
+.mc-dots { display: flex; gap: 2px; margin-top: 1px; }
+.mc-dot { width: 4px; height: 4px; border-radius: 50%; }
 .mc-dot-ev { background: var(--accent); }
 .mc-dot-sp { background: var(--text-3); }
 
@@ -207,9 +181,7 @@ html, body {
   padding: var(--s3) var(--s4) 0;
 }
 
-.day-section {
-  padding: var(--s3) var(--s4) 0;
-}
+.day-section { padding: var(--s3) var(--s4) 0; }
 
 .day-sec-hdr {
   display: flex;
@@ -241,11 +213,7 @@ html, body {
 }
 
 /* ── Day list ────────────────────────────────────────────────────── */
-.day-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
+.day-list { display: flex; flex-direction: column; gap: 1px; }
 
 .day-item {
   display: flex;
@@ -257,12 +225,7 @@ html, body {
 }
 .day-item:hover { background: var(--surface-2); }
 
-.day-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
+.day-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
 .day-item-info {
   flex: 1;
@@ -280,33 +243,20 @@ html, body {
   text-overflow: ellipsis;
 }
 
-.day-item-meta {
-  font-size: var(--fs-xs);
-  color: var(--text-3);
-}
+.day-item-meta { font-size: var(--fs-xs); color: var(--text-3); }
+.day-item-amt { font-size: var(--fs-sm); font-weight: 600; color: var(--text); flex-shrink: 0; }
 
-.day-item-amt {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--text);
-  flex-shrink: 0;
-}
-
-/* ── Cycle bar ───────────────────────────────────────────────────── */
+/* ── Cycle status bar ────────────────────────────────────────────── */
 .cycle-bar {
   display: flex;
   align-items: center;
   gap: var(--s3);
   padding: var(--s3) var(--s4);
-  background: var(--surface-1);
+  background: var(--surface);
   border-bottom: 1px solid var(--border-dim);
 }
 
-.cycle-day {
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: var(--text);
-}
+.cycle-day { font-size: var(--fs-sm); font-weight: 700; color: var(--text); }
 
 .cycle-phase {
   font-size: var(--fs-xs);
@@ -317,16 +267,10 @@ html, body {
   border-radius: 100px;
 }
 
-.cycle-next {
-  font-size: var(--fs-xs);
-  color: var(--text-3);
-  margin-left: auto;
-}
+.cycle-next { font-size: var(--fs-xs); color: var(--text-3); margin-left: auto; }
 
 /* ── Period section ──────────────────────────────────────────────── */
-.period-section {
-  padding: var(--s3) var(--s4) 0;
-}
+.period-section { padding: var(--s3) var(--s4) 0; }
 
 .period-sec-label {
   font-size: var(--fs-xs);
@@ -338,11 +282,7 @@ html, body {
 }
 
 /* Flow buttons */
-.flow-btns {
-  display: flex;
-  gap: var(--s2);
-  flex-wrap: wrap;
-}
+.flow-btns { display: flex; gap: var(--s2); flex-wrap: wrap; }
 
 .flow-btn {
   padding: 8px 14px;
@@ -350,7 +290,7 @@ html, body {
   border: 1px solid var(--border);
   font-size: var(--fs-sm);
   color: var(--text-2);
-  background: var(--surface-1);
+  background: var(--surface);
   transition: all var(--dur-fast);
 }
 .flow-btn.active {
@@ -360,22 +300,13 @@ html, body {
   font-weight: 600;
 }
 .flow-btn.spotting.active {
-  background: var(--red, #e06060);
-  border-color: var(--red, #e06060);
+  background: var(--red);
+  border-color: var(--red);
 }
 
 /* Symptom groups */
-.sym-group-label {
-  font-size: var(--fs-xs);
-  color: var(--text-3);
-  margin: var(--s3) 0 var(--s2);
-}
-
-.sym-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s2);
-}
+.sym-group-label { font-size: var(--fs-xs); color: var(--text-3); margin: var(--s3) 0 var(--s2); }
+.sym-chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
 
 .sym-chip {
   padding: 6px 12px;
@@ -401,7 +332,7 @@ html, body {
 }
 
 .note-card {
-  background: var(--surface-1);
+  background: var(--surface);
   border: 1px solid var(--border-dim);
   border-radius: var(--radius);
   padding: var(--s3) var(--s4);
@@ -411,12 +342,7 @@ html, body {
 .note-card:hover { border-color: var(--border); }
 .note-card.expanded { border-color: var(--accent-2); }
 
-.note-title {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 4px;
-}
+.note-title { font-size: var(--fs-sm); font-weight: 600; color: var(--text); margin-bottom: 4px; }
 
 .note-preview {
   font-size: var(--fs-xs);
@@ -441,7 +367,9 @@ html, body {
   display: flex;
   border-top: 1px solid var(--border-dim);
   padding-bottom: env(safe-area-inset-bottom);
-  background: var(--bg);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   flex-shrink: 0;
 }
 
@@ -459,34 +387,27 @@ html, body {
 .nav-btn.active { color: var(--accent); }
 .nav-btn .material-symbols-outlined { font-size: 22px; }
 
-.nav-label {
-  font-size: 10px;
-  font-weight: 500;
-}
+.nav-label { font-size: 10px; font-weight: 500; }
 
-/* ── Calendar view toggle ── */
+/* ── Calendar view toggle — matches base.css .cal-view-toggle style ── */
 .cal-view-toggle-mob {
   display: flex;
-  gap: var(--s2);
+  align-items: center;
+  gap: 2px;
   padding: var(--s3) var(--s4) 0;
 }
 
 .cal-vtog-btn {
-  flex: 1;
-  padding: 6px 0;
-  border-radius: var(--r2, 8px);
-  border: 1px solid var(--border-dim);
+  padding: 4px var(--s3);
+  border-radius: 4px;
+  border: none;
   background: transparent;
-  color: var(--text-2);
-  font-size: 13px;
-  cursor: pointer;
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+  transition: color var(--dur-fast), background var(--dur-fast);
 }
-.cal-vtog-btn.active {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
-  color: var(--accent);
-  font-weight: 500;
-}
+.cal-vtog-btn:hover { color: var(--text-2); }
+.cal-vtog-btn.active { background: var(--surface-3); color: var(--text); }
 
 /* ── Week view ── */
 .cal-week-wrap {
@@ -498,40 +419,23 @@ html, body {
 
 .cal-week-row {
   padding: var(--s3) var(--s3);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
+  transition: background var(--dur-fast);
 }
-.cal-week-row:hover   { background: var(--surface-2); }
-.cal-week-row.today   { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.cal-week-row:hover    { background: var(--surface-2); }
+.cal-week-row.today    { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
 .cal-week-row.selected { background: color-mix(in srgb, var(--accent) 8%, transparent); }
 
-.cal-week-day-hdr {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+.cal-week-day-hdr { display: flex; align-items: center; justify-content: space-between; }
+.cal-week-day-label { font-size: var(--fs-sm); font-weight: 500; color: var(--text); }
+.cal-week-spend { font-size: var(--fs-xs); color: var(--text-3); }
 
-.cal-week-day-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.cal-week-spend {
-  font-size: 11px;
-  color: var(--text-3);
-}
-
-.cal-week-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 4px;
-}
+.cal-week-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 
 .cal-week-chip {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   padding: 2px 6px;
   border-radius: 4px;
   white-space: nowrap;
@@ -540,8 +444,4 @@ html, body {
   max-width: 160px;
 }
 
-.cal-week-more {
-  font-size: 11px;
-  color: var(--text-3);
-  padding: 2px 4px;
-}
+.cal-week-more { font-size: var(--fs-xs); color: var(--text-3); padding: 2px 4px; }

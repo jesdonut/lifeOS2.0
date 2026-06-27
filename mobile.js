@@ -587,7 +587,8 @@ function _render() {
   app.innerHTML = '';
 
   const hdr = el('div', 'mob-header');
-  const title = el('span', 'mob-title', 'Seratus');
+  const title = el('span', 'brand-pill-name mob-title');
+  title.textContent = 'Seratus';
   title.addEventListener('click', _onTitleTap);
   hdr.appendChild(title);
   const themeBtn = el('button', 'mob-theme-btn');
