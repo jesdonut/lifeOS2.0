@@ -446,3 +446,85 @@ html, body {
   font-size: 10px;
   font-weight: 500;
 }
+
+/* ── Calendar view toggle ── */
+.cal-view-toggle-mob {
+  display: flex;
+  gap: var(--s2);
+  padding: var(--s3) var(--s4) 0;
+}
+
+.cal-vtog-btn {
+  flex: 1;
+  padding: 6px 0;
+  border-radius: var(--r2, 8px);
+  border: 1px solid var(--border-dim);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13px;
+  cursor: pointer;
+}
+.cal-vtog-btn.active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ── Week view ── */
+.cal-week-wrap {
+  padding: var(--s3) var(--s4);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cal-week-row {
+  padding: var(--s3) var(--s3);
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.cal-week-row:hover   { background: var(--surface-2); }
+.cal-week-row.today   { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.cal-week-row.selected { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+
+.cal-week-day-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cal-week-day-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.cal-week-spend {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.cal-week-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.cal-week-chip {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.cal-week-more {
+  font-size: 11px;
+  color: var(--text-3);
+  padding: 2px 4px;
+}

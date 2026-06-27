@@ -42,6 +42,7 @@ const SYMPTOM_GROUPS = [
 
 // ── State ───────────────────────────────────────────────────────────
 let _tab      = 'day';
+let _calView  = 'month'; // 'day' | 'week' | 'month'
 let _selDate  = _todayStr();
 let _calMonth = { y: +_selDate.slice(0, 4), m: +_selDate.slice(5, 7) };
 let _expandedNote = null;
@@ -269,19 +270,18 @@ function _buildMiniCal(showPeriod) {
   return wrap;
 }
 
-// ── Day tab ──────────────────────────────────────────────────────────
-function _buildDayTab() {
+// ── Day detail (events + spend for one date) ─────────────────────────
+function _buildDayDetail(dateStr) {
   const d    = _D();
-  const wrap = el('div', 'tab-content');
-  wrap.appendChild(_buildMiniCal(false));
+  const frag = document.createDocumentFragment();
 
-  const [sy, sm, sd] = _selDate.split('-').map(Number);
-  wrap.appendChild(el('div', 'day-date-label',
+  const [sy, sm, sd] = dateStr.split('-').map(Number);
+  const lbl = el('div', 'day-date-label',
     new Date(sy, sm - 1, sd).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-  ));
+  );
+  frag.appendChild(lbl);
 
-  // Events section
-  const events = (d.calendar?.events || []).filter(e => e.date === _selDate);
+  const events = (d.calendar?.events || []).filter(e => e.date === dateStr);
   const evSec  = el('div', 'day-section');
   evSec.appendChild(el('div', 'day-sec-title', 'Events'));
   if (events.length) {
@@ -301,10 +301,9 @@ function _buildDayTab() {
   } else {
     evSec.appendChild(el('div', 'day-empty', 'No events'));
   }
-  wrap.appendChild(evSec);
+  frag.appendChild(evSec);
 
-  // Spend section
-  const spendEntries = d.calendar?.spendEntries?.[_selDate] || [];
+  const spendEntries = d.calendar?.spendEntries?.[dateStr] || [];
   const total  = spendEntries.reduce((s, e) => s + (e.amount || 0), 0);
   const spSec  = el('div', 'day-section');
   const spHdr  = el('div', 'day-sec-hdr');
@@ -332,7 +331,85 @@ function _buildDayTab() {
   } else {
     spSec.appendChild(el('div', 'day-empty', 'No spend'));
   }
-  wrap.appendChild(spSec);
+  frag.appendChild(spSec);
+
+  return frag;
+}
+
+// ── Week view ────────────────────────────────────────────────────────
+function _buildWeekView() {
+  const d     = _D();
+  const today = _todayStr();
+  const events = d.calendar?.events || [];
+  const spend  = d.calendar?.spendEntries || {};
+
+  const wrap = el('div', 'cal-week-wrap');
+
+  // Find Monday of the selected week
+  const [sy, sm, sd] = _selDate.split('-').map(Number);
+  const sel = new Date(sy, sm - 1, sd);
+  const dow = sel.getDay(); // 0=Sun
+  const startOfWeek = new Date(sel);
+  startOfWeek.setDate(sd - ((dow + 6) % 7)); // Monday
+
+  for (let i = 0; i < 7; i++) {
+    const day = new Date(startOfWeek);
+    day.setDate(startOfWeek.getDate() + i);
+    const ds = day.toLocaleDateString('sv-SE');
+    const dayLabel = day.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+
+    const row  = el('div', 'cal-week-row' + (ds === today ? ' today' : '') + (ds === _selDate ? ' selected' : ''));
+    const hdr  = el('div', 'cal-week-day-hdr');
+    hdr.appendChild(el('span', 'cal-week-day-label', dayLabel));
+
+    const dayEvts   = events.filter(e => e.date === ds);
+    const daySpend  = spend[ds] || [];
+    const spTotal   = daySpend.reduce((s, e) => s + (e.amount || 0), 0);
+    if (spTotal) hdr.appendChild(el('span', 'cal-week-spend', '¥' + spTotal.toLocaleString()));
+    row.appendChild(hdr);
+
+    if (dayEvts.length) {
+      const chips = el('div', 'cal-week-chips');
+      dayEvts.slice(0, 4).forEach(ev => {
+        const chip = el('div', 'cal-week-chip');
+        chip.style.background = `color-mix(in srgb, var(--cat-${ev.category ?? 'personal'}) 18%, transparent)`;
+        chip.style.color = `var(--cat-${ev.category ?? 'personal'})`;
+        chip.textContent = ev.title;
+        chips.appendChild(chip);
+      });
+      if (dayEvts.length > 4) chips.appendChild(el('span', 'cal-week-more', `+${dayEvts.length - 4} more`));
+      row.appendChild(chips);
+    }
+
+    row.addEventListener('click', () => { _selDate = ds; _calView = 'day'; _render(); });
+    wrap.appendChild(row);
+  }
+
+  return wrap;
+}
+
+// ── Calendar tab ─────────────────────────────────────────────────────
+function _buildDayTab() {
+  const wrap = el('div', 'tab-content');
+
+  // View toggle
+  const toggle = el('div', 'cal-view-toggle-mob');
+  for (const v of ['Day', 'Week', 'Month']) {
+    const b = el('button', 'cal-vtog-btn' + (_calView === v.toLowerCase() ? ' active' : ''), v);
+    b.addEventListener('click', () => { _calView = v.toLowerCase(); _render(); });
+    toggle.appendChild(b);
+  }
+  wrap.appendChild(toggle);
+
+  if (_calView === 'month') {
+    wrap.appendChild(_buildMiniCal(false));
+    wrap.appendChild(_buildDayDetail(_selDate));
+  } else if (_calView === 'week') {
+    wrap.appendChild(_buildWeekView());
+  } else {
+    wrap.appendChild(_buildMiniCal(false));
+    wrap.appendChild(_buildDayDetail(_selDate));
+  }
 
   return wrap;
 }
@@ -400,7 +477,8 @@ function _buildPeriodTab() {
 // ── Notes tab ────────────────────────────────────────────────────────
 function _buildNotesTab() {
   const d     = _D();
-  const notes = (d.notes?.notes || [])
+  const notes = (d.notes?.items || [])
+    .filter(n => !n.archived)
     .slice()
     .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
   const wrap  = el('div', 'tab-content');
@@ -414,12 +492,12 @@ function _buildNotesTab() {
   for (const note of notes) {
     const isOpen = _expandedNote === note.id;
     const card   = el('div', 'note-card' + (isOpen ? ' expanded' : ''));
-    card.appendChild(el('div', 'note-title', note.title || 'Untitled'));
+    card.appendChild(el('div', 'note-title', note.title || note.text?.split('\n')[0] || 'Untitled'));
     if (isOpen) {
-      card.appendChild(el('div', 'note-body', note.body || ''));
-    } else if (note.body) {
+      card.appendChild(el('div', 'note-body', note.text || ''));
+    } else if (note.text) {
       card.appendChild(el('div', 'note-preview',
-        note.body.slice(0, 140) + (note.body.length > 140 ? '…' : '')
+        note.text.slice(0, 140) + (note.text.length > 140 ? '…' : '')
       ));
     }
     card.addEventListener('click', () => { _expandedNote = isOpen ? null : note.id; _render(); });
@@ -502,7 +580,7 @@ function _render() {
   app.innerHTML = '';
 
   const hdr = el('div', 'mob-header');
-  const title = el('span', 'mob-title', 'LifeOS');
+  const title = el('span', 'mob-title', 'Seratus');
   title.addEventListener('click', _onTitleTap);
   hdr.appendChild(title);
   app.appendChild(hdr);
