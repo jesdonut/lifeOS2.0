@@ -405,7 +405,7 @@ function buildMonths(scroll) {
         if (bg) { chip.style.background = bg; chip.style.color = catColor(catId); }
         chip.dataset.id = evt.id;
         chip.textContent = evtChipLabel(evt);
-        chip.addEventListener('click', e => { e.stopPropagation(); openModal(key, evt.id); });
+        chip.addEventListener('click', e => { e.stopPropagation(); openEventView(key, evt.id); });
         evtList.appendChild(chip);
       });
       if (evts.length > maxShow) {
@@ -533,7 +533,7 @@ function buildWeek(scroll) {
         chip.textContent = evtChipLabel(evt);
       }
 
-      chip.addEventListener('click', e => { e.stopPropagation(); openModal(key, evt.id); });
+      chip.addEventListener('click', e => { e.stopPropagation(); openEventView(key, evt.id); });
       evtList.appendChild(chip);
     });
 
@@ -735,11 +735,141 @@ function buildYear(scroll) {
 
 // ── Modal ──────────────────────────────────────────────────────────
 
-function openModal(date, editId = null) {
+// ── Event view card (read mode) ────────────────────────────────────
+function openEventView(date, evtId) {
+  closeModal();
+  const evt = sortByTime(events().filter(e => e.date === date)).find(e => e.id === evtId)
+           ?? events().find(e => e.id === evtId); // parked events have no date
+  if (!evt) { openModal(date); return; }
+
+  const viewDate = evt.date ?? date;
+
+  _modal = document.createElement('div');
+  _modal.className = 'cal-modal';
+  _modal.addEventListener('click', e => { if (e.target === _modal) closeModal(); });
+
+  const card = document.createElement('div');
+  card.className = 'cal-modal-card cal-ev-view-card';
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.className = 'cal-modal-hdr';
+  const backBtn = document.createElement('button');
+  backBtn.className = 'cal-modal-back-btn';
+  backBtn.innerHTML = '<span class="material-symbols-outlined">arrow_back</span>';
+  backBtn.addEventListener('click', () => openModal(date));
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'cal-modal-close';
+  closeBtn.textContent = '✕';
+  closeBtn.addEventListener('click', closeModal);
+  hdr.append(backBtn, closeBtn);
+  card.appendChild(hdr);
+
+  // Body
+  const body = document.createElement('div');
+  body.className = 'cal-ev-view-body';
+
+  // Title
+  const titleEl = document.createElement('div');
+  titleEl.className = 'cal-ev-view-title';
+  titleEl.textContent = evt.title;
+  body.appendChild(titleEl);
+
+  // Meta: time + category
+  const metaEl = document.createElement('div');
+  metaEl.className = 'cal-ev-view-meta';
+  if (evt.time) {
+    const timeEl = document.createElement('span');
+    timeEl.className = 'cal-ev-view-time';
+    timeEl.textContent = evt.endTime ? `${evt.time}–${evt.endTime}` : evt.time;
+    metaEl.appendChild(timeEl);
+  }
+  const catEl = document.createElement('span');
+  catEl.className = 'cal-ev-view-cat';
+  catEl.textContent = evt.category ?? 'personal';
+  catEl.style.color = catColor(evt.category ?? 'personal');
+  metaEl.appendChild(catEl);
+  body.appendChild(metaEl);
+
+  // Location
+  if (evt.location) {
+    const locLink = document.createElement('a');
+    locLink.className = 'cal-ev-view-location';
+    locLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(evt.location)}`;
+    locLink.target = '_blank';
+    locLink.rel = 'noopener noreferrer';
+    locLink.innerHTML = `<span class="material-symbols-outlined">location_on</span><span>${evt.location}</span>`;
+    body.appendChild(locLink);
+  }
+
+  // Link button
+  if (evt.link) {
+    const linkBtn = document.createElement('a');
+    linkBtn.className = 'cal-ev-view-link-btn';
+    linkBtn.href = evt.link;
+    linkBtn.target = '_blank';
+    linkBtn.rel = 'noopener noreferrer';
+    try {
+      linkBtn.textContent = new URL(evt.link).hostname.replace(/^www\./, '');
+    } catch {
+      linkBtn.textContent = 'Open link';
+    }
+    linkBtn.innerHTML = `<span class="material-symbols-outlined">open_in_new</span>` + linkBtn.textContent;
+    body.appendChild(linkBtn);
+  }
+
+  // Notes (editable inline)
+  const notesWrap = document.createElement('div');
+  notesWrap.className = 'cal-ev-view-notes-wrap';
+  const notesLbl = document.createElement('div');
+  notesLbl.className = 'cal-ev-view-notes-lbl';
+  notesLbl.textContent = 'Notes';
+  const notesTA = document.createElement('textarea');
+  notesTA.className = 'cal-ev-view-notes';
+  notesTA.placeholder = 'Add notes…';
+  notesTA.value = evt.notes ?? '';
+  notesTA.rows = 4;
+  notesTA.addEventListener('click', e => e.stopPropagation());
+  notesTA.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); notesTA.blur(); } });
+  const saveNotesBtn = document.createElement('button');
+  saveNotesBtn.className = 'cal-ev-view-notes-save';
+  saveNotesBtn.textContent = 'Save notes';
+  saveNotesBtn.style.display = 'none';
+  notesTA.addEventListener('input', () => { saveNotesBtn.style.display = 'block'; });
+  saveNotesBtn.addEventListener('click', () => {
+    saveEvent({ ...evt, notes: notesTA.value.trim() || null });
+    openEventView(viewDate, evtId);
+  });
+  notesWrap.append(notesLbl, notesTA, saveNotesBtn);
+  body.appendChild(notesWrap);
+
+  card.appendChild(body);
+
+  // Footer actions
+  const footer = document.createElement('div');
+  footer.className = 'cal-ev-view-footer';
+  const editBtn = document.createElement('button');
+  editBtn.className = 'cal-ev-view-edit-btn';
+  editBtn.innerHTML = '<span class="material-symbols-outlined">edit</span>Edit';
+  editBtn.addEventListener('click', () => openEditForm(viewDate, evtId));
+  const delBtn = document.createElement('button');
+  delBtn.className = 'cal-ev-view-del-btn';
+  delBtn.innerHTML = '<span class="material-symbols-outlined">delete</span>Delete';
+  delBtn.addEventListener('click', () => { removeEvent(evtId); openModal(date); });
+  footer.append(editBtn, delBtn);
+  card.appendChild(footer);
+
+  _modal.appendChild(card);
+  _container.appendChild(_modal);
+}
+
+// ── Day modal (add new event) ───────────────────────────────────────
+function openModal(date, _editId = null) {
+  // backward compat: if called with an event id, show view instead
+  if (_editId) { openEventView(date, _editId); return; }
   closeModal();
 
   const dayEvts = sortByTime(events().filter(e => e.date === date));
-  const editing = editId ? dayEvts.find(e => e.id === editId) : null;
 
   const [y, mo, d] = date.split('-').map(Number);
   const dayLabel = new Date(y, mo - 1, d).toLocaleDateString('en', {
@@ -765,13 +895,14 @@ function openModal(date, editId = null) {
   hdr.append(dateSpan, closeBtn);
   card.appendChild(hdr);
 
-  // Event list
+  // Event list (click row → view, ✕ → delete)
   if (dayEvts.length > 0) {
     const list = document.createElement('div');
     list.className = 'cal-modal-list';
     dayEvts.forEach(evt => {
       const row = document.createElement('div');
       row.className = 'cal-modal-row';
+      row.style.cursor = 'pointer';
       const dot = document.createElement('span');
       dot.className = 'cal-modal-dot';
       dot.style.background = catColor(evt.category ?? 'personal');
@@ -787,188 +918,206 @@ function openModal(date, editId = null) {
       const cat = document.createElement('span');
       cat.className = 'cal-modal-cat';
       cat.textContent = evt.category ?? '';
-      const editBtn = document.createElement('button');
-      editBtn.className = 'cal-modal-edit-btn';
-      editBtn.textContent = 'edit';
-      editBtn.addEventListener('click', () => openModal(date, evt.id));
       const delBtn = document.createElement('button');
       delBtn.className = 'cal-modal-del-row';
       delBtn.textContent = '✕';
-      delBtn.addEventListener('click', () => { removeEvent(evt.id); openModal(date); });
-      const actions = [editBtn, delBtn];
-      if (evt.link) {
-        const linkBtn = document.createElement('a');
-        linkBtn.className = 'cal-modal-link-btn';
-        linkBtn.href = evt.link;
-        linkBtn.target = '_blank';
-        linkBtn.rel = 'noopener noreferrer';
-        linkBtn.innerHTML = '<span class="material-symbols-outlined">link</span>';
-        linkBtn.title = evt.link;
-        linkBtn.addEventListener('click', e => e.stopPropagation());
-        actions.unshift(linkBtn);
-      }
-      row.append(dot, titleWrap, cat, ...actions);
-      if (evt.notes) {
-        const noteEl = document.createElement('div');
-        noteEl.className = 'cal-modal-evt-notes';
-        noteEl.textContent = evt.notes;
-        list.appendChild(noteEl);
-      }
+      delBtn.addEventListener('click', e => { e.stopPropagation(); removeEvent(evt.id); openModal(date); });
+      row.append(dot, titleWrap, cat, delBtn);
+      row.addEventListener('click', () => openEventView(date, evt.id));
       list.appendChild(row);
     });
     card.appendChild(list);
   }
 
+  // Create form
   const formArea = document.createElement('div');
   card.appendChild(formArea);
   _modal.appendChild(card);
   _container.appendChild(_modal);
   _modal.addEventListener('click', e => { if (e.target === _modal) closeModal(); });
 
-  function renderFormArea() {
-    formArea.innerHTML = '';
-    renderEventForm();
+  _renderEventForm(formArea, date, null, () => openModal(date));
+}
+
+// ── Edit form modal ─────────────────────────────────────────────────
+function openEditForm(date, evtId) {
+  closeModal();
+  const editing = events().find(e => e.id === evtId);
+  if (!editing) { openModal(date); return; }
+
+  _modal = document.createElement('div');
+  _modal.className = 'cal-modal';
+  _modal.addEventListener('click', e => { if (e.target === _modal) closeModal(); });
+
+  const card = document.createElement('div');
+  card.className = 'cal-modal-card';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'cal-modal-hdr';
+  const backBtn = document.createElement('button');
+  backBtn.className = 'cal-modal-back-btn';
+  backBtn.innerHTML = '<span class="material-symbols-outlined">arrow_back</span>';
+  backBtn.addEventListener('click', () => openEventView(date, evtId));
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'cal-modal-close';
+  closeBtn.textContent = '✕';
+  closeBtn.addEventListener('click', closeModal);
+  hdr.append(backBtn, closeBtn);
+  card.appendChild(hdr);
+
+  const formArea = document.createElement('div');
+  card.appendChild(formArea);
+  _modal.appendChild(card);
+  _container.appendChild(_modal);
+
+  _renderEventForm(formArea, date, editing, (savedId) => openEventView(date, savedId ?? evtId));
+}
+
+// ── Shared event form renderer ──────────────────────────────────────
+function _renderEventForm(formArea, date, editing, onDone) {
+  const form = document.createElement('div');
+  form.className = 'cal-modal-form';
+
+  const input = document.createElement('input');
+  input.className = 'cal-modal-input';
+  input.type = 'text';
+  input.placeholder = editing ? 'Event title' : 'New event title';
+  input.value = editing?.title ?? '';
+  input.autocomplete = 'off';
+  form.appendChild(input);
+
+  let rescheduleDate = date;
+  if (editing) {
+    const dateRow = document.createElement('div');
+    dateRow.className = 'cal-modal-date-row';
+    const dateLbl = document.createElement('span');
+    dateLbl.className = 'cal-form-label';
+    dateLbl.textContent = 'Date';
+    const dateInp = document.createElement('input');
+    dateInp.type = 'date';
+    dateInp.className = 'cal-modal-date-input';
+    dateInp.value = editing.date ?? date;
+    dateInp.addEventListener('change', () => { rescheduleDate = dateInp.value || date; });
+    dateRow.append(dateLbl, dateInp);
+    form.appendChild(dateRow);
   }
 
-  function renderEventForm() {
-    const form = document.createElement('div');
-    form.className = 'cal-modal-form';
+  const timeRow = document.createElement('div');
+  timeRow.className = 'cal-modal-time-row';
+  const timeStart = document.createElement('input');
+  timeStart.type = 'time'; timeStart.className = 'cal-modal-time-input';
+  timeStart.value = editing?.time ?? '';
+  const timeSep = document.createElement('span');
+  timeSep.className = 'cal-modal-time-sep'; timeSep.textContent = '–';
+  const timeEnd = document.createElement('input');
+  timeEnd.type = 'time'; timeEnd.className = 'cal-modal-time-input';
+  timeEnd.value = editing?.endTime ?? '';
+  timeRow.append(timeStart, timeSep, timeEnd);
+  form.appendChild(timeRow);
 
-    const input = document.createElement('input');
-    input.className = 'cal-modal-input';
-    input.type = 'text';
-    input.placeholder = editing ? 'Event title' : 'New event title';
-    input.value = editing?.title ?? '';
-    input.autocomplete = 'off';
-    form.appendChild(input);
+  const linkInput = document.createElement('input');
+  linkInput.className = 'cal-modal-input cal-modal-link-input';
+  linkInput.type = 'url';
+  linkInput.placeholder = 'Meeting link (optional)';
+  linkInput.value = editing?.link ?? '';
+  linkInput.autocomplete = 'off';
+  form.appendChild(linkInput);
 
-    // Date picker — only shown when editing (reschedule)
-    let rescheduleDate = date;
-    if (editing) {
-      const dateRow = document.createElement('div');
-      dateRow.className = 'cal-modal-date-row';
-      const dateLbl = document.createElement('span');
-      dateLbl.className = 'cal-form-label';
-      dateLbl.textContent = 'Date';
-      const dateInp = document.createElement('input');
-      dateInp.type = 'date';
-      dateInp.className = 'cal-modal-date-input';
-      dateInp.value = date;
-      dateInp.addEventListener('change', () => { rescheduleDate = dateInp.value || date; });
-      dateRow.append(dateLbl, dateInp);
-      form.appendChild(dateRow);
+  const locationInput = document.createElement('input');
+  locationInput.className = 'cal-modal-input cal-modal-link-input';
+  locationInput.type = 'text';
+  locationInput.placeholder = 'Location (optional)';
+  locationInput.value = editing?.location ?? '';
+  locationInput.autocomplete = 'off';
+  form.appendChild(locationInput);
+
+  const notesInput = document.createElement('textarea');
+  notesInput.className = 'cal-modal-input cal-modal-notes-input';
+  notesInput.placeholder = 'Notes (optional)';
+  notesInput.value = editing?.notes ?? '';
+  notesInput.rows = 3;
+  notesInput.addEventListener('click', e => e.stopPropagation());
+  notesInput.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  form.appendChild(notesInput);
+
+  let selectedCat = editing?.category ?? 'personal';
+  const catGrid = document.createElement('div');
+  catGrid.className = 'cal-cat-grid';
+  cats().forEach(c => {
+    const bg   = catBg(c.id);
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = `cal-cat-chip${bg ? '' : ` evt-${c.id}`}${selectedCat === c.id ? ' selected' : ''}`;
+    chip.dataset.cat = c.id;
+    chip.textContent = c.name;
+    if (bg) {
+      chip.style.background = bg;
+      chip.style.color = catColor(c.id);
+      if (selectedCat === c.id) chip.style.borderColor = catColor(c.id);
     }
-
-    const timeRow = document.createElement('div');
-    timeRow.className = 'cal-modal-time-row';
-    const timeStart = document.createElement('input');
-    timeStart.type = 'time'; timeStart.className = 'cal-modal-time-input';
-    timeStart.value = editing?.time ?? '';
-    const timeSep = document.createElement('span');
-    timeSep.className = 'cal-modal-time-sep'; timeSep.textContent = '–';
-    const timeEnd = document.createElement('input');
-    timeEnd.type = 'time'; timeEnd.className = 'cal-modal-time-input';
-    timeEnd.value = editing?.endTime ?? '';
-    timeRow.append(timeStart, timeSep, timeEnd);
-    form.appendChild(timeRow);
-
-    const linkInput = document.createElement('input');
-    linkInput.className = 'cal-modal-input cal-modal-link-input';
-    linkInput.type = 'url';
-    linkInput.placeholder = 'Meeting link (optional)';
-    linkInput.value = editing?.link ?? '';
-    linkInput.autocomplete = 'off';
-    form.appendChild(linkInput);
-
-    const notesInput = document.createElement('textarea');
-    notesInput.className = 'cal-modal-input cal-modal-notes-input';
-    notesInput.placeholder = 'Notes (optional)';
-    notesInput.value = editing?.notes ?? '';
-    notesInput.rows = 3;
-    notesInput.addEventListener('click', e => e.stopPropagation());
-    notesInput.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-    form.appendChild(notesInput);
-
-    let selectedCat = editing?.category ?? 'personal';
-    const catGrid = document.createElement('div');
-    catGrid.className = 'cal-cat-grid';
-    cats().forEach(c => {
-      const bg   = catBg(c.id);
-      const chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = `cal-cat-chip${bg ? '' : ` evt-${c.id}`}${selectedCat === c.id ? ' selected' : ''}`;
-      chip.dataset.cat = c.id;
-      chip.textContent = c.name;
-      if (bg) {
-        chip.style.background = bg;
-        chip.style.color = catColor(c.id);
-        if (selectedCat === c.id) chip.style.borderColor = catColor(c.id);
-      }
-      chip.addEventListener('click', () => {
-        selectedCat = c.id;
-        catGrid.querySelectorAll('.cal-cat-chip').forEach(b => {
-          const isSelected = b.dataset.cat === c.id;
-          b.classList.toggle('selected', isSelected);
-          const bcat = cats().find(x => x.id === b.dataset.cat);
-          if (bcat?.isCustom && bcat.color) b.style.borderColor = isSelected ? bcat.color : '';
-        });
+    chip.addEventListener('click', () => {
+      selectedCat = c.id;
+      catGrid.querySelectorAll('.cal-cat-chip').forEach(b => {
+        const isSelected = b.dataset.cat === c.id;
+        b.classList.toggle('selected', isSelected);
+        const bcat = cats().find(x => x.id === b.dataset.cat);
+        if (bcat?.isCustom && bcat.color) b.style.borderColor = isSelected ? bcat.color : '';
       });
-      catGrid.appendChild(chip);
     });
-    form.appendChild(catGrid);
+    catGrid.appendChild(chip);
+  });
+  form.appendChild(catGrid);
 
-    const actions = document.createElement('div');
-    actions.className = 'cal-modal-actions';
+  const actions = document.createElement('div');
+  actions.className = 'cal-modal-actions';
 
-    if (editing) {
-      const parkBtn = document.createElement('button');
-      parkBtn.className = 'cal-park-btn';
-      parkBtn.textContent = 'Park for later';
-      parkBtn.addEventListener('click', () => {
-        saveEvent({ ...editing, date: null, time: timeStart.value || editing?.time || null, endTime: timeEnd.value || editing?.endTime || null, link: linkInput.value.trim() || editing?.link || null, notes: notesInput.value.trim() || editing?.notes || null });
-        closeModal();
-      });
-      const dupBtn = document.createElement('button');
-      dupBtn.className = 'cal-park-btn';
-      dupBtn.textContent = 'Duplicate';
-      dupBtn.addEventListener('click', () => {
-        saveEvent({ ...editing, id: uid(), createdAt: undefined });
-        openModal(date);
-      });
-
-      const delBtn = document.createElement('button');
-      delBtn.className = 'cal-del-btn';
-      delBtn.textContent = 'Delete';
-      delBtn.addEventListener('click', () => { removeEvent(editing.id); openModal(date); });
-      actions.append(parkBtn, dupBtn, delBtn);
-    }
-
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'cal-save-btn';
-    saveBtn.textContent = editing ? 'Save' : 'Add';
-    saveBtn.addEventListener('click', () => {
-      const title = input.value.trim();
-      if (!title) { input.focus(); return; }
-      saveEvent({
-        id: editing?.id ?? uid(), date: rescheduleDate, title, category: selectedCat,
-        time:    timeStart.value || null,
-        endTime: timeEnd.value   || null,
-        link:    linkInput.value.trim() || null,
-        notes:   notesInput.value.trim() || null,
-      });
+  if (editing) {
+    const parkBtn = document.createElement('button');
+    parkBtn.className = 'cal-park-btn';
+    parkBtn.textContent = 'Park for later';
+    parkBtn.addEventListener('click', () => {
+      saveEvent({ ...editing, date: null, time: timeStart.value || null, endTime: timeEnd.value || null, link: linkInput.value.trim() || null, location: locationInput.value.trim() || null, notes: notesInput.value.trim() || null });
+      closeModal();
+    });
+    const dupBtn = document.createElement('button');
+    dupBtn.className = 'cal-park-btn';
+    dupBtn.textContent = 'Duplicate';
+    dupBtn.addEventListener('click', () => {
+      saveEvent({ ...editing, id: uid(), createdAt: undefined });
       openModal(rescheduleDate);
     });
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter')  { e.preventDefault(); saveBtn.click(); }
-      if (e.key === 'Escape') closeModal();
-    });
-    actions.appendChild(saveBtn);
-    form.appendChild(actions);
-    formArea.appendChild(form);
-    requestAnimationFrame(() => input.focus());
+    const delBtn = document.createElement('button');
+    delBtn.className = 'cal-del-btn';
+    delBtn.textContent = 'Delete';
+    delBtn.addEventListener('click', () => { removeEvent(editing.id); openModal(date); });
+    actions.append(parkBtn, dupBtn, delBtn);
   }
 
-  renderFormArea();
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'cal-save-btn';
+  saveBtn.textContent = editing ? 'Save' : 'Add';
+  saveBtn.addEventListener('click', () => {
+    const title = input.value.trim();
+    if (!title) { input.focus(); return; }
+    const newId = editing?.id ?? uid();
+    saveEvent({
+      id: newId, date: rescheduleDate, title, category: selectedCat,
+      time:     timeStart.value || null,
+      endTime:  timeEnd.value   || null,
+      link:     linkInput.value.trim()     || null,
+      location: locationInput.value.trim() || null,
+      notes:    notesInput.value.trim()    || null,
+    });
+    onDone(newId);
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); saveBtn.click(); }
+    if (e.key === 'Escape') closeModal();
+  });
+  actions.appendChild(saveBtn);
+  form.appendChild(actions);
+  formArea.appendChild(form);
+  requestAnimationFrame(() => input.focus());
 }
 
 function closeModal() {

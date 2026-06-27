@@ -309,6 +309,7 @@ function _showAddEvent(dateStr) {
       <div class="mob-field-row">
         <input id="ms-ev-time" type="time" placeholder="Time (optional)">
       </div>
+      <input id="ms-ev-location" type="text" placeholder="Location (optional)" autocomplete="off">
       <div class="mob-cat-grid" id="ms-ev-cats"></div>
       <button class="mob-sheet-save" id="ms-ev-save">Add</button>
     </div>
@@ -336,9 +337,11 @@ function _showAddEvent(dateStr) {
   sheet.querySelector('#ms-ev-save').addEventListener('click', () => {
     const title = sheet.querySelector('#ms-ev-title').value.trim();
     if (!title) { sheet.querySelector('#ms-ev-title').focus(); return; }
-    const time  = sheet.querySelector('#ms-ev-time').value;
+    const time     = sheet.querySelector('#ms-ev-time').value;
+    const location = sheet.querySelector('#ms-ev-location').value.trim();
     const event = { id: _uid(), date: dateStr, title, category: selCat, categoryId: selCat };
-    if (time) event.startTime = time;
+    if (time)     event.startTime = time;
+    if (location) event.location  = location;
     const cal = { ...(d.calendar || {}), events: [...(d.calendar?.events || []), event] };
     d.calendar = cal;
     _mobileData = d;
@@ -461,6 +464,15 @@ function _buildDayDetail(dateStr) {
       const info = el('div', 'day-item-info');
       info.appendChild(el('span', 'day-item-title', ev.title));
       if (ev.startTime) info.appendChild(el('span', 'day-item-meta', ev.startTime));
+      if (ev.location) {
+        const loc = document.createElement('a');
+        loc.className = 'day-item-location';
+        loc.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.location)}`;
+        loc.target = '_blank';
+        loc.rel = 'noopener noreferrer';
+        loc.innerHTML = `<span class="material-symbols-outlined">location_on</span>${ev.location}`;
+        info.appendChild(loc);
+      }
       item.appendChild(info);
       list.appendChild(item);
     }
