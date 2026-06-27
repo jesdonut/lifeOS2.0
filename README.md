@@ -15,10 +15,16 @@ Week, month, and year views. 9 built-in event categories, customizable in settin
 Always one swipe away. Holds parked (unscheduled) events, countdowns, and free-form notes with markdown support. Collapsible.
 
 **Period tracker**
-Year calendar with color-coded flow, predictions, and fertile window. Day logger for flow, mood, symptoms, and BBT. Stats panel with cycle averages and EWMA-weighted predictions.
+Year calendar with color-coded flow, predictions, and fertile window. Day logger for flow, mood, and symptoms (full clinical list). Cycles tab with flow donut chart, stats grid (avg, median, longest, shortest), bar chart of recent cycles, and expandable cycle history.
 
 **Finance**
 Monthly income ledger with Japan-specific salary breakdown (salary, transport allowance, social insurance, taxes). Spend totals pulled from calendar by category. Sub-views for Savings, Currency, and Investment (bonds, deposits, NISA).
+
+**Drawings**
+Daily scratch canvas in the Notes tab. Clears automatically each day. Export to PNG.
+
+**Mobile companion**
+Dedicated mobile view at /mobile.html, matching the desktop visual language: Fraunces title, frosted glass header, same color tokens. Day and week calendar views, period logging, notes list, and dark/light theme toggle.
 
 **Language**
 EN/ID toggle on all public pages.
