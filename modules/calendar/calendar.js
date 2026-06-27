@@ -292,8 +292,11 @@ function renderGrid() {
 function initSortable(scroll) {
   scroll.querySelectorAll('.cal-evt-list').forEach(list => {
     Sortable.create(list, {
-      group:     'cal-events',
-      animation: 120,
+      group:              'cal-events',
+      animation:          120,
+      delay:              150,
+      delayOnTouchOnly:   true,
+      touchStartThreshold: 4,
       onEnd(evt) {
         if (evt.from === evt.to) return;
         setTimeout(() => moveEvent(evt.item.dataset.id, evt.to.dataset.date), 0);
@@ -309,8 +312,11 @@ function initSortable(scroll) {
   });
   scroll.querySelectorAll('.cal-spend-list').forEach(list => {
     Sortable.create(list, {
-      group:     { name: 'cal-spend', put: 'cal-spend' },
-      animation: 120,
+      group:              { name: 'cal-spend', put: 'cal-spend' },
+      animation:          120,
+      delay:              150,
+      delayOnTouchOnly:   true,
+      touchStartThreshold: 4,
       onEnd(evt) {
         if (evt.from === evt.to) return;
         setTimeout(() => moveSpendEntry(evt.item.dataset.id, evt.item.dataset.from, evt.to.dataset.date), 0);
@@ -836,6 +842,23 @@ function openModal(date, editId = null) {
     input.autocomplete = 'off';
     form.appendChild(input);
 
+    // Date picker — only shown when editing (reschedule)
+    let rescheduleDate = date;
+    if (editing) {
+      const dateRow = document.createElement('div');
+      dateRow.className = 'cal-modal-date-row';
+      const dateLbl = document.createElement('span');
+      dateLbl.className = 'cal-form-label';
+      dateLbl.textContent = 'Date';
+      const dateInp = document.createElement('input');
+      dateInp.type = 'date';
+      dateInp.className = 'cal-modal-date-input';
+      dateInp.value = date;
+      dateInp.addEventListener('change', () => { rescheduleDate = dateInp.value || date; });
+      dateRow.append(dateLbl, dateInp);
+      form.appendChild(dateRow);
+    }
+
     const timeRow = document.createElement('div');
     timeRow.className = 'cal-modal-time-row';
     const timeStart = document.createElement('input');
@@ -927,13 +950,13 @@ function openModal(date, editId = null) {
       const title = input.value.trim();
       if (!title) { input.focus(); return; }
       saveEvent({
-        id: editing?.id ?? uid(), date, title, category: selectedCat,
+        id: editing?.id ?? uid(), date: rescheduleDate, title, category: selectedCat,
         time:    timeStart.value || null,
         endTime: timeEnd.value   || null,
         link:    linkInput.value.trim() || null,
         notes:   notesInput.value.trim() || null,
       });
-      openModal(date);
+      openModal(rescheduleDate);
     });
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter')  { e.preventDefault(); saveBtn.click(); }
@@ -1623,8 +1646,24 @@ function openSpendModal(dateStr, entryId, preselectCatId) {
       amount,
       currency:    selectedCurrency,
     });
-    closeSpendModal();
-    render();
+    if (editing) {
+      closeSpendModal();
+      render();
+    } else {
+      // Keep modal open for next entry — reset amount and note only
+      amtInput.value = '';
+      noteInput.value = '';
+      selectedNote = '';
+      render(); // update the calendar behind the modal
+      const flash = document.createElement('span');
+      flash.className = 'cal-spend-added-flash';
+      flash.textContent = 'Added';
+      actions.appendChild(flash);
+      requestAnimationFrame(() => {
+        amtInput.focus();
+        setTimeout(() => flash.remove(), 1200);
+      });
+    }
   });
   amtInput.addEventListener('keydown', e => {
     if (e.key === 'Enter')  { e.preventDefault(); saveBtn.click(); }
