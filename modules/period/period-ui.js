@@ -119,7 +119,7 @@ const PHASE_DATA = {
 let _container   = null;
 let _data        = null;
 let _onSave      = null;
-let _view        = 'month';
+let _view        = 'day';
 let _navDate     = null;
 let _entries     = [];
 let _stats       = null;
@@ -197,7 +197,24 @@ function _buildTop() {
   const top = document.createElement('div');
   top.className = 'pr-top';
 
-  // Navigation controls (context-aware per view)
+  // View toggle — always leftmost
+  const tabs = document.createElement('div');
+  tabs.className = 'cal-view-toggle';
+  tabs.style.marginLeft = '0';
+  [
+    { v: 'day',    label: 'Day' },
+    { v: 'year',   label: 'Year' },
+    { v: 'cycles', label: 'Cycles' },
+  ].forEach(({ v, label }) => {
+    const btn = document.createElement('button');
+    btn.className = 'cal-view-btn' + (_view === v ? ' active' : '');
+    btn.textContent = label;
+    btn.addEventListener('click', () => { if (_view !== v) { _view = v; _render(); } });
+    tabs.appendChild(btn);
+  });
+  top.appendChild(tabs);
+
+  // Navigation controls — after tabs, left-aligned
   const today = _todayStr();
 
   if (_view === 'cycles') {
@@ -224,23 +241,6 @@ function _buildTop() {
       const onToday = _navDate === today;
       todBtn.disabled = onToday; todBtn.style.opacity = onToday ? '0.35' : '1';
       todBtn.addEventListener('click', () => { _navDate = today; _render(); });
-    } else if (_view === 'week') {
-      const { mon, sun } = _weekBounds(_navDate);
-      const fs = s => new Date(s + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      lbl.textContent = `${fs(mon)} – ${fs(sun)}`;
-      prevBtn.addEventListener('click', () => { _navDate = dStr(addD(D(_weekBounds(_navDate).mon), -7)); _render(); });
-      nextBtn.addEventListener('click', () => { _navDate = dStr(addD(D(_weekBounds(_navDate).mon),  7)); _render(); });
-      const onWeek = mon <= today && today <= sun;
-      todBtn.disabled = onWeek; todBtn.style.opacity = onWeek ? '0.35' : '1';
-      todBtn.addEventListener('click', () => { _navDate = today; _render(); });
-    } else if (_view === 'month') {
-      const [y, m] = _navDate.split('-').map(Number);
-      lbl.textContent = `${MONTHS[m - 1]} ${y}`;
-      prevBtn.addEventListener('click', () => { _navDate = _shiftMonth(_navDate, -1); _render(); });
-      nextBtn.addEventListener('click', () => { _navDate = _shiftMonth(_navDate,  1); _render(); });
-      const onMonth = _navDate.slice(0, 7) === today.slice(0, 7);
-      todBtn.disabled = onMonth; todBtn.style.opacity = onMonth ? '0.35' : '1';
-      todBtn.addEventListener('click', () => { _navDate = today; _render(); });
     } else { // year
       const y         = parseInt(_navDate.slice(0, 4));
       const curYear   = parseInt(today.slice(0, 4));
@@ -257,24 +257,6 @@ function _buildTop() {
     }
     top.append(prevBtn, lbl, nextBtn, todBtn);
   }
-
-  // View toggle
-  const tabs = document.createElement('div');
-  tabs.className = 'cal-view-toggle';
-  [
-    { v: 'day',    label: 'Day' },
-    { v: 'week',   label: 'Week' },
-    { v: 'month',  label: 'Month' },
-    { v: 'year',   label: 'Year' },
-    { v: 'cycles', label: 'Cycles' },
-  ].forEach(({ v, label }) => {
-    const btn = document.createElement('button');
-    btn.className = 'cal-view-btn' + (_view === v ? ' active' : '');
-    btn.textContent = label;
-    btn.addEventListener('click', () => { if (_view !== v) { _view = v; _render(); } });
-    tabs.appendChild(btn);
-  });
-  top.appendChild(tabs);
 
   return top;
 }
