@@ -371,8 +371,22 @@ function _buildCard(code, s) {
   const div = document.createElement('div'); div.className = 'fin-cur-card-divider';
   card.appendChild(div);
 
-  // ── Lots ──
-  lots.forEach(lot => card.appendChild(_buildLotRow(lot, code, s)));
+  // ── Lots — grouped by funding currency if more than one used ──
+  const fundGroups = new Map();
+  lots.forEach(l => {
+    const fc = _migrateLot(l).fundingCurrency ?? '__none__';
+    if (!fundGroups.has(fc)) fundGroups.set(fc, []);
+    fundGroups.get(fc).push(l);
+  });
+  const multiGroup = fundGroups.size > 1;
+  fundGroups.forEach((groupLots, fc) => {
+    if (multiGroup && fc !== '__none__') {
+      const hdr = document.createElement('div'); hdr.className = 'fin-cur-lot-group-hdr';
+      hdr.textContent = `Bought with ${fc}`;
+      card.appendChild(hdr);
+    }
+    groupLots.forEach(lot => card.appendChild(_buildLotRow(lot, code, s)));
+  });;
 
   // ── P&L row ──
   const pnl = _computePnl(lots, code, s);
@@ -394,46 +408,53 @@ function _buildCard(code, s) {
   return card;
 }
 
+// Migrate old buyRates:{t:rate} format to fundingCurrency+buyRate
+function _migrateLot(lot) {
+  if (lot.fundingCurrency) return lot;
+  const entries = Object.entries(lot.buyRates ?? {});
+  if (entries.length) {
+    const [fc, br] = entries[0];
+    return { id: lot.id, currency: lot.currency, amount: lot.amount, date: lot.date, fundingCurrency: fc, buyRate: br };
+  }
+  return { id: lot.id, currency: lot.currency, amount: lot.amount, date: lot.date };
+}
+
 function _computePnl(lots, code, s) {
-  // Use the first target that has a current rate AND at least one lot with a buy rate
-  const t = s.targets.find(t => t !== code && s.currentRates?.[code]?.[t] &&
-    lots.some(l => l.buyRates?.[t]));
-  if (!t) return null;
-  const curRate = s.currentRates[code][t];
-  let gain = 0;
+  let gain = 0; let hasAny = false; let gainCurrency = null;
   lots.forEach(l => {
-    const br = l.buyRates?.[t];
-    if (br) gain += (l.amount || 0) * (curRate - br);
+    const ml = _migrateLot(l);
+    if (!ml.fundingCurrency || !ml.buyRate) return;
+    const curRate = s.currentRates?.[code]?.[ml.fundingCurrency];
+    if (!curRate) return;
+    gain += (ml.amount || 0) * (curRate - ml.buyRate);
+    hasAny = true;
+    gainCurrency = ml.fundingCurrency;
   });
-  return { gain, target: t };
+  if (!hasAny) return null;
+  return { gain, target: gainCurrency };
 }
 
 // ── Lot row (compact) ──────────────────────────────────────────────
 function _buildLotRow(lot, code, s) {
+  const ml  = _migrateLot(lot);
   const row = document.createElement('div'); row.className = 'fin-cur-lot-row';
 
-  // Date (MM-YY)
   const dateEl = document.createElement('span'); dateEl.className = 'fin-cur-lot-date';
-  dateEl.textContent = _fmtLotDate(lot.date);
+  dateEl.textContent = _fmtLotDate(ml.date);
 
-  // Amount @ buy rate (pick first target with a buy rate)
-  const t = s.targets.find(t => t !== code && lot.buyRates?.[t]);
   const mainEl = document.createElement('span'); mainEl.className = 'fin-cur-lot-main';
-  if (t && lot.amount) {
-    const br  = lot.buyRates[t];
-    const sym = CUR_MAP[t]?.symbol ?? t;
-    mainEl.textContent = `${_fmtCompact(lot.amount, code)}@${_fmtCompact(br, t)}`;
+  if (ml.fundingCurrency && ml.buyRate) {
+    mainEl.textContent = `${_fmtCompact(ml.amount || 0, code)}@${_fmtCompact(ml.buyRate, ml.fundingCurrency)}`;
   } else {
-    mainEl.textContent = _fmtCompact(lot.amount || 0, code);
+    mainEl.textContent = _fmtCompact(ml.amount || 0, code);
   }
 
-  // Gain
   const gainEl = document.createElement('span'); gainEl.className = 'fin-cur-lot-gain-cell';
-  if (t) {
-    const curRate = s.currentRates?.[code]?.[t];
-    if (curRate && lot.amount && lot.buyRates?.[t]) {
-      const gain = lot.amount * (curRate - lot.buyRates[t]);
-      const g    = fmtGain(gain, t);
+  if (ml.fundingCurrency && ml.buyRate) {
+    const curRate = s.currentRates?.[code]?.[ml.fundingCurrency];
+    if (curRate && ml.amount) {
+      const gain = ml.amount * (curRate - ml.buyRate);
+      const g    = fmtGain(gain, ml.fundingCurrency);
       if (g) { gainEl.textContent = g.text; gainEl.classList.add(g.dir); }
     }
   }
@@ -453,11 +474,11 @@ function _openAddLotForm(card, addBtn, code, s) {
 
   const form = document.createElement('div'); form.className = 'fin-cur-lot-form';
 
-  // Date input (full date)
+  // Date input
   const dateInp = document.createElement('input');
   dateInp.type = 'date'; dateInp.className = 'fin-cur-form-inp fin-cur-form-date';
 
-  // Amount input
+  // Amount
   const amtWrap = document.createElement('div'); amtWrap.className = 'fin-cur-form-amt-wrap';
   const amtSym  = document.createElement('span'); amtSym.className = 'fin-cur-form-sym'; amtSym.textContent = cur.symbol;
   const amtInp  = document.createElement('input');
@@ -465,29 +486,32 @@ function _openAddLotForm(card, addBtn, code, s) {
   amtInp.className = 'fin-cur-form-inp';
   amtWrap.append(amtSym, amtInp);
 
-  // Buy rate inputs per target
+  // Single "bought with" currency + buy rate
   const rateWrap = document.createElement('div'); rateWrap.className = 'fin-cur-form-rates';
-  const rateInps = {};
-  s.targets.forEach(t => {
-    if (t === code) return;
-    const tc = CUR_MAP[t];
-    const wrap = document.createElement('div'); wrap.className = 'fin-cur-form-rate';
-    const sym  = document.createElement('span'); sym.className = 'fin-cur-form-sym'; sym.textContent = `@${tc?.symbol ?? t}`;
-    const inp  = document.createElement('input');
-    inp.type = 'number'; inp.step = 'any'; inp.min = '0'; inp.placeholder = 'buy rate';
-    inp.className = 'fin-cur-form-inp';
-    rateInps[t] = inp;
-    wrap.append(sym, inp); rateWrap.appendChild(wrap);
+  const fundSel  = document.createElement('select'); fundSel.className = 'fin-cur-form-fund-sel';
+  CURRENCIES.filter(c => c.code !== code).forEach(c => {
+    const opt = document.createElement('option'); opt.value = c.code;
+    opt.textContent = `${c.flag} ${c.code}`;
+    fundSel.appendChild(opt);
   });
+  // Default to first target that isn't this currency, or IDR
+  const defaultFund = s.targets.find(t => t !== code) ?? 'IDR';
+  if (CURRENCIES.find(c => c.code === defaultFund)) fundSel.value = defaultFund;
+
+  const rateInp = document.createElement('input');
+  rateInp.type = 'number'; rateInp.step = 'any'; rateInp.min = '0'; rateInp.placeholder = 'buy rate';
+  rateInp.className = 'fin-cur-form-inp';
+
+  const atLbl = document.createElement('span'); atLbl.className = 'fin-cur-form-sym'; atLbl.textContent = '@';
+  rateWrap.append(atLbl, fundSel, rateInp);
 
   const ok = document.createElement('button'); ok.className = 'fin-cur-form-ok'; ok.textContent = 'Add';
   ok.addEventListener('click', () => {
     const amt = parseFloat(amtInp.value) || 0;
     if (!amt) return;
-    const brs = {};
-    s.targets.forEach(t => { if (rateInps[t]) { const v = parseFloat(rateInps[t].value); if (v) brs[t] = v; } });
-    const dateStr = dateInp.value; // already YYYY-MM-DD from date input
-    const newLot  = { id: uid(), currency: code, amount: amt, date: dateStr, buyRates: brs };
+    const br  = parseFloat(rateInp.value) || null;
+    const newLot = { id: uid(), currency: code, amount: amt, date: dateInp.value,
+                     fundingCurrency: br ? fundSel.value : null, buyRate: br };
     persist({ lots: [...state().lots, newLot] });
     _render();
   });

@@ -599,6 +599,12 @@
 .fin-cur-lot-row:hover .fin-cur-lot-rm { opacity: 1; }
 .fin-cur-lot-rm:hover { color: var(--red); }
 
+.fin-cur-lot-group-hdr {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-3);
+  padding: var(--s2) var(--s3) 2px;
+}
+
 /* P&L row */
 .fin-cur-pnl {
   display: flex; align-items: center; justify-content: space-between;
@@ -643,9 +649,15 @@
 .fin-cur-form-date   { width: 130px; }
 .fin-cur-form-amt-wrap { display: flex; align-items: center; gap: 3px; }
 .fin-cur-form-amt-wrap .fin-cur-form-inp { width: 80px; }
-.fin-cur-form-rates  { display: flex; gap: var(--s2); flex-wrap: wrap; }
+.fin-cur-form-rates  { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
 .fin-cur-form-rate   { display: flex; align-items: center; gap: 3px; }
 .fin-cur-form-rate .fin-cur-form-inp { width: 80px; }
+.fin-cur-form-fund-sel {
+  font-size: var(--fs-xs); font-family: var(--font);
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  padding: 2px var(--s2); height: 26px;
+}
 .fin-cur-form-sym    { font-size: 10px; color: var(--text-3); flex-shrink: 0; }
 
 .fin-cur-form-ok {
