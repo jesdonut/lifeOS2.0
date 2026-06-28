@@ -60,10 +60,12 @@
   align-items: center;
   gap: var(--s2);
 }
-/* Fixed label width so day/year/cycles labels are all the same size → tabs aligned */
+/* Fixed label width + nowrap so day/year/cycles labels are all the same size and
+   stay on one line → the tabs never move. Sized to fit "Sun, Jun 28 · Day 28". */
 .pr-top .cal-year-label {
-  width: 128px;
-  min-width: 128px;
+  width: 150px;
+  min-width: 150px;
+  white-space: nowrap;
 }
 /* Tabs sit immediately after the nav, left-aligned — same as Calendar */
 .pr-view-tabs {

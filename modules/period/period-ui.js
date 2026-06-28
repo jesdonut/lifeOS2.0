@@ -211,7 +211,8 @@ function _buildTop() {
     const nextBtn = document.createElement('button'); nextBtn.className = 'cal-year-btn';  nextBtn.textContent = '›';     nextBtn.style.visibility = 'hidden';
     const todBtn  = document.createElement('button'); todBtn.className  = 'cal-today-btn'; todBtn.textContent  = 'today'; todBtn.style.visibility  = 'hidden';
     const cycleDay = _cycleDay(today);
-    lbl.textContent = _fmtDate(today) + (cycleDay ? ` · Day ${cycleDay}` : '');
+    const shortDate = new Date(today + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    lbl.textContent = shortDate + (cycleDay ? ` · Day ${cycleDay}` : '');
     left.append(prevBtn, lbl, nextBtn, todBtn);
   } else {
     const prevBtn = document.createElement('button'); prevBtn.className = 'cal-year-btn'; prevBtn.textContent = '‹';
