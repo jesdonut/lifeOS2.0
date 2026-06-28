@@ -66,7 +66,7 @@ function _render() {
   _container.appendChild(body);
 
   if (_game === 'arknights') {
-    mountArknights(body, _data?.gacha?.arknights ?? {}, patch => _save({ arknights: { ...(_data?.gacha?.arknights ?? {}), ...patch } }));
+    mountArknights(body, _data?.gacha?.arknights ?? {}, patch => _save({ arknights: { ...(_data?.gacha?.arknights ?? {}), ...patch } })).catch(() => {});
   } else {
     const ph = document.createElement('div');
     ph.className = 'gacha-placeholder';
