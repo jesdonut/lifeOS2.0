@@ -2,7 +2,7 @@
   "name": "Seratus",
   "short_name": "Seratus",
   "description": "Your personal life OS",
-  "start_url": "/mobile.html",
+  "start_url": "/mobile/mobile.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#131110",

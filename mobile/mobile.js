@@ -1,7 +1,7 @@
 // mobile.js — LifeOS mobile companion
 // Reads/writes via Supabase store (same data as desktop)
 
-import { load, get, save, getSession, signIn } from './core/store.js';
+import { load, get, save, getSession, signIn } from '../core/store.js';
 
 let _mobileData = null;
 

@@ -1,10 +1,10 @@
-const CACHE = 'seratus-v11';
+const CACHE = 'seratus-v12';
 
 const SHELL = [
   '/app.html',
   '/index.html',
   '/setup.html',
-  '/mobile.html',
+  '/mobile/mobile.html',
   '/lib/Sortable.min.js',
   '/style/base.css',
   '/style/layout.css',

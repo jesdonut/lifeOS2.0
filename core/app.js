@@ -234,7 +234,7 @@ function showLoginScreen() {
 applyTheme(_theme);
 
 if (/Mobi|Android/i.test(navigator.userAgent)) {
-  window.location.replace('mobile.html');
+  window.location.replace('mobile/mobile.html');
 }
 
 let _tapCount = 0, _tapTimer = null;

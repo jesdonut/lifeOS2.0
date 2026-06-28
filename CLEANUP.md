@@ -111,22 +111,25 @@ renders pink. Keep the layout identical; only the accent variables differ.
 - [x] Bumped sw.js cache `seratus-v10` → `v11` so clients fetch the moved files
 - [x] Smoke test: files exist at new paths, old gone, `node --check` passes on edited JS
 
-### Level 2 — Medium risk (separate the static site + mobile)
-- [ ] Decide target layout (see proposal below) — get Jessica's OK on folder names
-- [ ] Move marketing pages → `site/`: about, terms, privacy, license, download, coming-soon, changelog, calendar, finance, notes, period, import-data, period-standalone, setup
-- [ ] Update all internal links between those pages + `vercel.json` rewrites + any nav
-- [ ] Move mobile build → `mobile/` (mobile.html, mobile.js, mobile.css); update its refs + sw.js + vercel
-- [ ] Full smoke test: landing → app → mobile → each marketing page
+### Level 2 — Group the mobile build (DECISION: marketing pages stay at root)
+Jessica's call: marketing/static pages stay at root (normal, conventional, avoids URL churn).
+Only the loose mobile build gets foldered.
+- [x] ~~Move marketing pages to site/~~ — DECIDED AGAINST. They stay at root on purpose.
+- [x] Move mobile build → `mobile/` (mobile.html, mobile.js, mobile.css)
+- [x] Fix internal paths: mobile.html `../manifest.json ../icons ../style/base.css`; mobile.js `../core/store.js`
+- [x] Update inbound refs: index.html + app.js redirects → `mobile/mobile.html`, sw.js shell, manifest `start_url`
+- [x] Add `vercel.json` redirect `/mobile.html` → `/mobile/mobile.html` (protects installed PWA + bookmarks)
+- [x] Bump sw cache v11 → v12
+- [x] Smoke test: no stale refs, `node --check` on mobile.js/app.js/sw.js, manifest JSON valid
 
-**Proposed target layout (confirm before executing):**
+**Actual layout now:**
 ```
-/  app.html  mobile.html  index.html       ← entry points stay at root for Vercel
+/  app.html  index.html  + marketing pages (about, terms, …)   ← stay at root
    core/        app.js store.js settings.js gestures.js lang.js
      import/    import-v1.js import-delta.js
-   modules/     (unchanged; period.css moves in here)
-   mobile/      mobile.js mobile.css        ← if Vercel routing allows
+   modules/     (period.css now lives here too)
+   mobile/      mobile.html mobile.js mobile.css                ← grouped
    style/       base layout pages landing settings setup import
-   site/        about terms privacy license download … (static marketing)
    lib/ icons/ scripts/
 ```
 
@@ -160,6 +163,7 @@ Each split keeps the module contract (`init`/`destroy`/`onDataChange`). One file
 ---
 
 ## Log (newest first)
+- 2026-06-28 — Level 2: grouped mobile build into mobile/, fixed paths, vercel redirect for old PWA URL, sw v12. Marketing pages stay at root (decided).
 - 2026-06-28 — Level 1: moved period.css into modules/period/, grouped import files into core/import/, sw cache v11.
 - 2026-06-28 — Level 0: removed dead `modules/tasks/` (orphan; real tasks UI is in notes-tab.js). DS_Store already clean.
 - 2026-06-28 — Step 0: promoted `.cal-header` from calendar.css → base.css (now app-wide). Rename of cal-* deferred.
