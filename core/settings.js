@@ -506,6 +506,13 @@ function renderSpending(el) {
   let editingSub   = null; // 'add' | index number
   let newSubValue  = '';
 
+  // Accept "#abc", "abc", "#aabbcc", "aabbcc" → normalized "#aabbcc", else null
+  function normHex(v) {
+    let s = String(v).trim().replace(/^#/, '');
+    if (/^[0-9a-fA-F]{3}$/.test(s)) s = s.split('').map(c => c + c).join('');
+    return /^[0-9a-fA-F]{6}$/.test(s) ? '#' + s.toLowerCase() : null;
+  }
+
   sectionLabel(el, 'Spending categories');
 
   const listEl = document.createElement('div');
@@ -540,15 +547,31 @@ function renderSpending(el) {
         const colorPick = document.createElement('input');
         colorPick.type = 'color';
         colorPick.className = 'sp-color-input';
-        colorPick.value = cat.color;
-        colorPick.addEventListener('input', () => { swatch.style.background = colorPick.value; });
+        colorPick.value = normHex(cat.color) ?? '#888888';
+
+        const hexInp = document.createElement('input');
+        hexInp.className   = 'sp-hex-input';
+        hexInp.value       = cat.color;
+        hexInp.placeholder = '#rrggbb';
+        hexInp.autocomplete = 'off';
+        hexInp.spellcheck   = false;
+        hexInp.maxLength    = 7;
+
+        hexInp.addEventListener('input', () => {
+          const n = normHex(hexInp.value);
+          if (n) { colorPick.value = n; swatch.style.background = n; }
+        });
+        colorPick.addEventListener('input', () => {
+          swatch.style.background = colorPick.value;
+          hexInp.value = colorPick.value;
+        });
 
         const okBtn = document.createElement('button');
         okBtn.className = 'sp-cat-btn';
         okBtn.textContent = 'Save';
         okBtn.addEventListener('click', () => {
           const val = inp.value.trim();
-          if (val) { cats[ci].name = val; cats[ci].color = colorPick.value; }
+          if (val) { cats[ci].name = val; cats[ci].color = normHex(hexInp.value) ?? colorPick.value; }
           editingId = null;
           saveSpendCats(cats);
           renderCats();
@@ -562,7 +585,7 @@ function renderSpending(el) {
         cancelBtn.textContent = 'Cancel';
         cancelBtn.addEventListener('click', () => { editingId = null; renderCats(); });
 
-        row.append(swatch, colorPick, inp, okBtn, cancelBtn);
+        row.append(swatch, colorPick, hexInp, inp, okBtn, cancelBtn);
       } else {
         const name = document.createElement('span');
         name.className = 'sp-cat-name';
@@ -696,6 +719,20 @@ function renderSpending(el) {
     colorPicker.type = 'color';
     colorPicker.className = 'sp-color-input';
     colorPicker.value = '#9b5cd4';
+
+    const hexInput = document.createElement('input');
+    hexInput.className   = 'sp-hex-input';
+    hexInput.value       = '#9b5cd4';
+    hexInput.placeholder = '#rrggbb';
+    hexInput.autocomplete = 'off';
+    hexInput.spellcheck   = false;
+    hexInput.maxLength    = 7;
+    hexInput.addEventListener('input', () => {
+      const n = normHex(hexInput.value);
+      if (n) colorPicker.value = n;
+    });
+    colorPicker.addEventListener('input', () => { hexInput.value = colorPicker.value; });
+
     const newName = document.createElement('input');
     newName.className = 'sp-input';
     newName.style.flex = '1';
@@ -707,13 +744,13 @@ function renderSpending(el) {
     addBtn.addEventListener('click', () => {
       const name = newName.value.trim();
       if (!name) { newName.focus(); return; }
-      cats.push({ id: 'custom_' + Math.random().toString(36).slice(2, 7), name, color: colorPicker.value, sub: [], isCustom: true });
+      cats.push({ id: 'custom_' + Math.random().toString(36).slice(2, 7), name, color: normHex(hexInput.value) ?? colorPicker.value, sub: [], isCustom: true });
       saveSpendCats(cats);
       newName.value = '';
       renderCats();
     });
     newName.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addBtn.click(); } });
-    addRow.append(colorPicker, newName, addBtn);
+    addRow.append(colorPicker, hexInput, newName, addBtn);
     listEl.appendChild(addRow);
   }
 
