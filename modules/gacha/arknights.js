@@ -325,13 +325,21 @@ function _buildHistory() {
 
 // ── Operators ──────────────────────────────────────────────────────
 function _renderOperators(el) {
+  const grid = document.createElement('div'); grid.className = 'ak-ops-grid';
+
+  // Left: Add column
+  const addCol = document.createElement('div'); addCol.className = 'ak-ops-col';
+
+  const addHdr = document.createElement('div'); addHdr.className = 'ak-ops-col-hdr';
+  addHdr.textContent = 'Add';
+  addCol.appendChild(addHdr);
+
   const filterBar = document.createElement('div'); filterBar.className = 'ak-filter-bar';
 
   const qInp = document.createElement('input');
   qInp.type = 'text'; qInp.className = 'ak-filter-q'; qInp.placeholder = 'Search…';
   qInp.value = _opFilter.q;
-  qInp.addEventListener('input', () => { _opFilter.q = qInp.value; _renderOpList(list); });
-  requestAnimationFrame(() => qInp.focus());
+  qInp.addEventListener('input', () => { _opFilter.q = qInp.value; _renderOpList(addList); });
 
   const rarSel = document.createElement('select'); rarSel.className = 'ak-filter-sel';
   [{ v: 0, l: 'All rarities' }, ...RARITIES.map(r => ({ v: r, l: r + '★' }))].forEach(({ v, l }) => {
@@ -339,7 +347,7 @@ function _renderOperators(el) {
     if (Number(v) === _opFilter.rarity) opt.selected = true;
     rarSel.appendChild(opt);
   });
-  rarSel.addEventListener('change', () => { _opFilter.rarity = parseInt(rarSel.value); _renderOpList(list); });
+  rarSel.addEventListener('change', () => { _opFilter.rarity = parseInt(rarSel.value); _renderOpList(addList); });
 
   const profSel = document.createElement('select'); profSel.className = 'ak-filter-sel';
   [{ v: '', l: 'All classes' }, ...PROFESSIONS.map(p => ({ v: p, l: profLabel(p) }))].forEach(({ v, l }) => {
@@ -347,23 +355,40 @@ function _renderOperators(el) {
     if (v === _opFilter.prof) opt.selected = true;
     profSel.appendChild(opt);
   });
-  profSel.addEventListener('change', () => { _opFilter.prof = profSel.value; _renderOpList(list); });
+  profSel.addEventListener('change', () => { _opFilter.prof = profSel.value; _renderOpList(addList); });
 
   filterBar.append(qInp, rarSel, profSel);
-  el.appendChild(filterBar);
+  addCol.appendChild(filterBar);
 
-  const list = document.createElement('div'); list.className = 'ak-op-list';
-  el.appendChild(list);
-  _renderOpList(list);
+  const addList = document.createElement('div'); addList.className = 'ak-op-list';
+  addCol.appendChild(addList);
+
+  // Right: Owned column
+  const ownedCol = document.createElement('div'); ownedCol.className = 'ak-ops-col';
+
+  const ownedHdr = document.createElement('div'); ownedHdr.className = 'ak-ops-col-hdr';
+  ownedHdr.textContent = 'Owned';
+  ownedCol.appendChild(ownedHdr);
+
+  const ownedList = document.createElement('div'); ownedList.className = 'ak-op-list';
+  ownedCol.appendChild(ownedList);
+
+  grid.append(addCol, ownedCol);
+  el.appendChild(grid);
+
+  _renderOpList(addList);
+  _renderOwnedList(ownedList);
 }
 
 function _renderOpList(list) {
   list.innerHTML = '';
+  const col  = s().collection ?? {};
   const q    = _opFilter.q.toLowerCase();
   const rFil = _opFilter.rarity;
   const pFil = _opFilter.prof;
 
   const filtered = OP_LIST.filter(op => {
+    if (col[op.id]?.owned) return false;
     if (rFil && op.rarity !== rFil) return false;
     if (pFil && op.profession !== pFil) return false;
     if (q && !op.name.toLowerCase().includes(q)) return false;
@@ -371,41 +396,88 @@ function _renderOpList(list) {
   }).sort((a, b) => b.rarity - a.rarity || a.name.localeCompare(b.name));
 
   filtered.forEach(op => {
-    const owned = !!s().collection[op.id]?.owned;
-    const row   = document.createElement('div'); row.className = 'ak-op-row' + (owned ? ' ak-op-owned' : '');
+    const row = document.createElement('div'); row.className = 'ak-op-row';
 
-    // Rarity-colored avatar placeholder
     const avatarEl = document.createElement('div');
     avatarEl.className = 'ak-op-avatar-ph ' + RARITY_CLASS[op.rarity];
     avatarEl.textContent = op.name[0];
 
     const info   = document.createElement('div'); info.className = 'ak-op-info';
     const nameEl = document.createElement('span'); nameEl.className = 'ak-op-name'; nameEl.textContent = op.name;
-    const sub    = document.createElement('span'); sub.className   = 'ak-op-sub';
+    const sub    = document.createElement('span'); sub.className = 'ak-op-sub';
     sub.textContent = profLabel(op.profession) + (op.limited ? ' · Limited' : op.collab ? ' · Collab' : '');
     info.append(nameEl, sub);
 
     const rar = document.createElement('span'); rar.className = 'ak-rarity-tag ' + RARITY_CLASS[op.rarity]; rar.textContent = op.rarity + '★';
 
-    const ownBtn = document.createElement('button'); ownBtn.className = 'ak-own-btn' + (owned ? ' owned' : '');
-    ownBtn.textContent = owned ? 'Owned' : 'Add';
-    ownBtn.addEventListener('click', e => {
+    const addBtn = document.createElement('button'); addBtn.className = 'ak-own-btn';
+    addBtn.textContent = 'Add';
+    addBtn.addEventListener('click', e => {
       e.stopPropagation();
-      const col = { ...(s().collection ?? {}) };
-      if (owned) {
-        delete col[op.id];
-      } else {
-        col[op.id] = { owned: true, potential: 1, elite: 0, level: 1, favorite: false };
-      }
-      _save({ collection: col });
+      const newCol = { ...(s().collection ?? {}), [op.id]: { owned: true, potential: 1, elite: 0, level: 1, favorite: false } };
+      _save({ collection: newCol });
     });
 
-    row.append(avatarEl, info, rar, ownBtn);
+    row.append(avatarEl, info, rar, addBtn);
     list.appendChild(row);
   });
 
   if (!filtered.length) {
-    const e = document.createElement('div'); e.className = 'ak-history-empty'; e.textContent = 'No operators match';
+    const e = document.createElement('div'); e.className = 'ak-history-empty';
+    e.textContent = (!q && !rFil && !pFil) ? 'All operators owned' : 'No operators match';
+    list.appendChild(e);
+  }
+}
+
+function _renderOwnedList(list) {
+  list.innerHTML = '';
+  const col = s().collection ?? {};
+
+  const owned = Object.entries(col)
+    .filter(([, c]) => c.owned)
+    .map(([id, data]) => ({ op: OP_LIST.find(o => o.id === id), data }))
+    .filter(({ op }) => op)
+    .sort((a, b) => b.op.rarity - a.op.rarity || a.op.name.localeCompare(b.op.name));
+
+  owned.forEach(({ op, data }) => {
+    const row = document.createElement('div'); row.className = 'ak-op-row ak-op-owned';
+
+    const avatarEl = document.createElement('div');
+    avatarEl.className = 'ak-op-avatar-ph ' + RARITY_CLASS[op.rarity];
+    avatarEl.textContent = op.name[0];
+
+    const info   = document.createElement('div'); info.className = 'ak-op-info';
+    const nameEl = document.createElement('span'); nameEl.className = 'ak-op-name'; nameEl.textContent = op.name;
+    const sub    = document.createElement('span'); sub.className = 'ak-op-sub'; sub.textContent = profLabel(op.profession);
+    info.append(nameEl, sub);
+
+    const potBtns = document.createElement('div'); potBtns.className = 'ak-pot-btns';
+    for (let p = 1; p <= 6; p++) {
+      const btn = document.createElement('button');
+      btn.className = 'ak-pot-btn' + (data.potential === p ? ' active' : '');
+      btn.textContent = p;
+      btn.addEventListener('click', () => {
+        const newCol = { ...(s().collection ?? {}), [op.id]: { ...data, potential: p } };
+        _save({ collection: newCol });
+      });
+      potBtns.appendChild(btn);
+    }
+
+    const rmBtn = document.createElement('button'); rmBtn.className = 'ak-own-btn';
+    rmBtn.textContent = '×';
+    rmBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const newCol = { ...(s().collection ?? {}) };
+      delete newCol[op.id];
+      _save({ collection: newCol });
+    });
+
+    row.append(avatarEl, info, potBtns, rmBtn);
+    list.appendChild(row);
+  });
+
+  if (!owned.length) {
+    const e = document.createElement('div'); e.className = 'ak-history-empty'; e.textContent = 'No operators owned yet';
     list.appendChild(e);
   }
 }
