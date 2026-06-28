@@ -114,7 +114,7 @@ export const OP_LIST = [
   { id: 'mantra',             name: 'Mantra',                       rarity: 6, profession: 'CASTER' },
   { id: 'necrass',            name: 'Necrass',                      rarity: 6, profession: 'CASTER' },
   { id: 'hoolheyak',          name: "Ho'olheyak",                   rarity: 6, profession: 'CASTER' },
-  { id: 'theresa',            name: 'Theresa',                      rarity: 6, profession: 'CASTER', welfare: true, freeType: 'story' },
+
   { id: 'dusk',               name: 'Dusk',                         rarity: 6, profession: 'CASTER', limited: true },
   { id: 'lappland_decadenza', name: 'Lappland the Decadenza',       rarity: 6, profession: 'CASTER', limited: true },
   { id: 'pramanix_holy',      name: 'Pramanix the Holy',            rarity: 6, profession: 'CASTER', limited: true },
