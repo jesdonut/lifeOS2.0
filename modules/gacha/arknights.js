@@ -15,7 +15,7 @@ const BANNERS = [
 const RARITIES = [6, 5, 4, 3];
 const RARITY_CLASS = { 6: 'ak-r6', 5: 'ak-r5', 4: 'ak-r4', 3: 'ak-r3' };
 
-const PROFESSIONS = ['CASTER','DEFENDER','GUARD','MEDIC','PIONEER','SNIPER','SPECIAL','SUPPORT'];
+const PROFESSIONS = ['CASTER','DEFENDER','GUARD','MEDIC','VANGUARD','SNIPER','SPECIALIST','SUPPORTER'];
 
 // ── Module state ───────────────────────────────────────────────────
 let _el, _state, _save;
