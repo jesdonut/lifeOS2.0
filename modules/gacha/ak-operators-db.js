@@ -35,10 +35,10 @@ export const OP_LIST = [
   { id: 'penance',            name: 'Penance',                      rarity: 6, profession: 'DEFENDER' },
   { id: 'blemishine',         name: 'Blemishine',                   rarity: 6, profession: 'DEFENDER' },
   { id: 'shuu',               name: 'Shū',                          rarity: 6, profession: 'DEFENDER', limited: true },
-  { id: 'jessica_liberated',  name: 'Jessica the Liberated',        rarity: 6, profession: 'DEFENDER' },
+  { id: 'jessica_liberated',  name: 'Jessica the Liberated',        rarity: 5, profession: 'DEFENDER' },
   { id: 'yuu',                name: 'Yūu',                          rarity: 6, profession: 'DEFENDER', limited: true },
   { id: 'sancta_mixer',       name: 'Sancta Mixer',                 rarity: 6, profession: 'DEFENDER' },
-  { id: 'hoshiguma_slash',    name: 'Hoshiguma the Flame-Cutter',   rarity: 6, profession: 'DEFENDER' },
+  { id: 'hoshiguma_slash',    name: 'Hoshiguma the Breacher',        rarity: 6, profession: 'DEFENDER' },
 
   // ── 6★ Guards (前衛) ──────────────────────────────────────────────
   { id: 'silverash',          name: 'SilverAsh',                    rarity: 6, profession: 'GUARD' },
@@ -96,7 +96,7 @@ export const OP_LIST = [
   { id: 'lemuen',             name: 'Lemuen',                       rarity: 6, profession: 'SNIPER' },
   { id: 'pozyomka',           name: 'Pozyomka',                     rarity: 6, profession: 'SNIPER' },
   { id: 'rosa',               name: 'Rosa',                         rarity: 6, profession: 'SNIPER' },
-  { id: 'kroos_glint',        name: 'Kroos the Keen Glint',         rarity: 6, profession: 'SNIPER', welfare: true, freeType: 'event' },
+  { id: 'kroos_glint',        name: 'Kroos the Keen Glint',         rarity: 5, profession: 'SNIPER', welfare: true, freeType: 'event' },
   { id: 'ash',                name: 'Ash',                          rarity: 6, profession: 'SNIPER', collab: true },
 
   // ── 6★ Casters (術師) ─────────────────────────────────────────────
@@ -144,13 +144,13 @@ export const OP_LIST = [
   { id: 'gladiia',            name: 'Gladiia',                      rarity: 6, profession: 'SPECIALIST' },
   { id: 'shalem',             name: 'Shalem',                       rarity: 6, profession: 'SPECIALIST', welfare: true, freeType: 'is' },
   { id: 'crownslayer',        name: 'Crownslayer',                  rarity: 6, profession: 'SPECIALIST', welfare: true, freeType: 'event' },
-  { id: 'greyy_alter',        name: 'Greyy the Lightningbearer',    rarity: 6, profession: 'SPECIALIST', limited: true },
+  { id: 'greyy_alter',        name: 'Greyy the Lightningbearer',    rarity: 5, profession: 'SPECIALIST' },
   { id: 'specter_unchained',  name: 'Specter the Unchained',        rarity: 6, profession: 'SPECIALIST', limited: true },
   { id: 'thorns_lodestar',    name: 'Thorns the Lodestar',          rarity: 6, profession: 'SPECIALIST', limited: true },
   { id: 'texas_omertosa',     name: 'Texas the Omertosa',           rarity: 6, profession: 'SPECIALIST', limited: true },
   { id: 'kirara',             name: 'Kirin R Yato',                 rarity: 6, profession: 'SPECIALIST', collab: true },
   { id: 'swire_alter',        name: 'Swire the Elegant Wit',        rarity: 6, profession: 'SPECIALIST', limited: true },
-  { id: 'exusiai_alter',      name: 'Exusiai the New Testament',    rarity: 6, profession: 'SPECIALIST', limited: true },
+  { id: 'exusiai_alter',      name: 'Exusiai the New Covenant',     rarity: 6, profession: 'SPECIALIST', limited: true },
   { id: 'ela',                name: 'Ela',                          rarity: 6, profession: 'SPECIALIST', collab: true },
 
   // ── 6★ Supporters (補助) ──────────────────────────────────────────
@@ -164,7 +164,7 @@ export const OP_LIST = [
   { id: 'radiant',            name: 'Radiant',                      rarity: 6, profession: 'SUPPORTER' },
   { id: 'haruka',             name: 'Haruka',                       rarity: 6, profession: 'SUPPORTER' },
   { id: 'tragodia',           name: 'Tragodia',                     rarity: 6, profession: 'SUPPORTER', limited: true },
-  { id: 'astgenne',           name: 'Astgenne the Shining',         rarity: 6, profession: 'SUPPORTER', welfare: true, freeType: 'event' },
+  { id: 'astgenne',           name: 'Astgenne the Lightchaser',     rarity: 6, profession: 'SUPPORTER', welfare: true, freeType: 'event' },
   { id: 'nasti',              name: 'Nasti',                        rarity: 6, profession: 'SUPPORTER' },
   { id: 'virtuosa',           name: 'Virtuosa',                     rarity: 6, profession: 'SUPPORTER', limited: true },
   { id: 'skadi_alter',        name: 'Skadi the Corrupting Heart',   rarity: 6, profession: 'SUPPORTER', limited: true },
