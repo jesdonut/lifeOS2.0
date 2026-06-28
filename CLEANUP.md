@@ -210,7 +210,25 @@ Each split keeps the module contract (`init`/`destroy`/`onDataChange`). One file
 
 ---
 
+## UI/UX consistency audit (2026-06-28) — report only, nothing changed yet
+Priority order for fixing. Each is a "standardize via token/shared class" job like --view-pad was.
+1. **Type scale bypassed (133 raw px font-sizes).** Tokens exist (`--fs-xs..2xl`) but ignored.
+   - `10px` ×57 and `9px` ×11 = an off-scale micro-label size with no token.
+   - `14px` ×17, `16px` ×16 = off-scale (between tokens).
+   - `11/13/18/22px` ×27 = match tokens but hardcoded.
+   - Fix: add `--fs-2xs` (10px) if intentional, snap off-scale to nearest, convert raw→token.
+2. **Border-radius inconsistent.** Pills use `99px` ×13 AND `100px` ×24 (same shape). Small radii
+   `1–8px` scattered vs `--radius-sm` (6px). Fix: add `--radius-pill`, snap small radii to tokens.
+3. **Color tokens bypassed (39 hardcoded hex).**
+   - Text-on-accent: `#fff` vs `var(--bg)` inconsistent → add `--on-accent` token.
+   - `var(--red, #c04 / #e55 / #e06060)` = 3 mismatched fallbacks, none = real `--red` #e05c6a.
+   - `#4caf50` used where `--green` (#4caf7d) belongs.
+4. **~45 distinct `*btn*` classes** (calendar 12, finance 10, settings 9, notes 7, gacha 5, period 2).
+   No shared `.btn` base; each view reinvents buttons. Fix: extract a base button, extend per view.
+NOT a problem: UPPERCASE small labels are consistent (text-3 + weight 600) — deliberate, keep.
+
 ## Log (newest first)
+- 2026-06-28 — Header height unified via --view-head-h (gacha .ak-nav was 44 vs 48). Period Cycles tab anchored (flex:1). Timeline shows auto age. v17/v18. Not yet tested live.
 - 2026-06-28 — settings.js split (1222→883): extracted settings/util.js + settings/data.js. Pushed (v16), tested OK.
 - 2026-06-28 — Padding rule: --view-pad token applied to calendar/period/finance/gacha. Pushed (v14), tested OK.
 - 2026-06-28 — Migration made in-memory-only (never auto-overwrites Supabase). Pushed (v15), tested OK.

@@ -73,6 +73,10 @@
      Used by every module body so calendar/period/finance/gacha line up. Change here only. */
   --view-pad: var(--s4) var(--s5) var(--s6);
 
+  /* Standard height of a view's top header/tab bar. Every view's header uses this
+     so switching tabs never nudges content up/down. Change here only. */
+  --view-head-h: 48px;
+
   /* Type */
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
   --mono: 'SF Mono', 'Fira Code', monospace;
@@ -165,7 +169,7 @@ input:focus, textarea:focus, select:focus {
   align-items: center;
   gap: var(--s2);
   padding: 0 var(--s5);
-  height: 48px;
+  height: var(--view-head-h);
   border-bottom: 1px solid var(--border-dim);
   flex-shrink: 0;
 }
