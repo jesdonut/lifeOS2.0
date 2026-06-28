@@ -247,6 +247,22 @@ section {
   animation: bar-grow 500ms var(--ease-spring) both;
 }
 
+.preview-invest-graph {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 54px;
+  margin-top: var(--s3);
+}
+
+.invest-bar {
+  flex: 1;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  animation: bar-grow 500ms var(--ease-spring) both;
+}
+.invest-bar.hi { background: var(--accent); }
+
 .prog-bar {
   height: 100%;
   border-radius: 100px;
