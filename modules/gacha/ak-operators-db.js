@@ -58,7 +58,7 @@ export const OP_LIST = [
   { id: 'lessing',            name: 'Lessing',                      rarity: 6, profession: 'GUARD', welfare: true, freeType: 'is' },
   { id: 'degenbrecher',       name: 'Degenbrecher',                 rarity: 6, profession: 'GUARD' },
   { id: 'zuo_le',             name: 'Zuo Le',                       rarity: 6, profession: 'GUARD' },
-  { id: 'headley',            name: 'Headley',                      rarity: 6, profession: 'GUARD' },
+  { id: 'hoederer',           name: 'Hoederer',                     rarity: 6, profession: 'GUARD' },
   { id: 'entelecheia',        name: 'Entelechia',                   rarity: 6, profession: 'GUARD' },
   { id: 'pepe',               name: 'Pepe',                         rarity: 6, profession: 'GUARD' },
   { id: 'ulpianus',           name: 'Ulpianus',                     rarity: 6, profession: 'GUARD' },
