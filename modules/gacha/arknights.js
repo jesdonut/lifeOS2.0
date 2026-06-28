@@ -21,7 +21,7 @@ const PROFESSIONS = ['CASTER','DEFENDER','GUARD','MEDIC','VANGUARD','SNIPER','SP
 let _el, _state, _save;
 let _view      = 'dashboard'; // dashboard | pulls | operators | collection
 let _opFilter  = { q: '', rarity: 0, prof: '', source: '' };
-let _ownFilter = { q: '', source: '' };
+let _ownFilter = { q: '', rarity: 0, prof: '', source: '' };
 
 // How an operator is obtained, for the "source" filter + row label.
 function opSource(op) {
@@ -446,6 +446,22 @@ function _renderOperators(el) {
   ownedQ.value = _ownFilter.q;
   ownedQ.addEventListener('input', () => { _ownFilter.q = ownedQ.value; _renderOwnedList(ownedList); });
 
+  const ownedRar = document.createElement('select'); ownedRar.className = 'ak-filter-sel';
+  [{ v: 0, l: 'All rarities' }, ...RARITIES.map(r => ({ v: r, l: r + '★' }))].forEach(({ v, l }) => {
+    const opt = document.createElement('option'); opt.value = v; opt.textContent = l;
+    if (Number(v) === _ownFilter.rarity) opt.selected = true;
+    ownedRar.appendChild(opt);
+  });
+  ownedRar.addEventListener('change', () => { _ownFilter.rarity = parseInt(ownedRar.value); _renderOwnedList(ownedList); });
+
+  const ownedProf = document.createElement('select'); ownedProf.className = 'ak-filter-sel';
+  [{ v: '', l: 'All classes' }, ...PROFESSIONS.map(p => ({ v: p, l: profLabel(p) }))].forEach(({ v, l }) => {
+    const opt = document.createElement('option'); opt.value = v; opt.textContent = l;
+    if (v === _ownFilter.prof) opt.selected = true;
+    ownedProf.appendChild(opt);
+  });
+  ownedProf.addEventListener('change', () => { _ownFilter.prof = ownedProf.value; _renderOwnedList(ownedList); });
+
   const ownedSrc = document.createElement('select'); ownedSrc.className = 'ak-filter-sel';
   SOURCE_OPTS.forEach(({ v, l }) => {
     const opt = document.createElement('option'); opt.value = v; opt.textContent = l;
@@ -454,7 +470,7 @@ function _renderOperators(el) {
   });
   ownedSrc.addEventListener('change', () => { _ownFilter.source = ownedSrc.value; _renderOwnedList(ownedList); });
 
-  ownedFilterBar.append(ownedQ, ownedSrc);
+  ownedFilterBar.append(ownedQ, ownedRar, ownedProf, ownedSrc);
   ownedCol.appendChild(ownedFilterBar);
 
   const ownedList = document.createElement('div'); ownedList.className = 'ak-op-list';
@@ -525,11 +541,15 @@ function _renderOwnedList(list) {
 
   const q    = _ownFilter.q.toLowerCase();
   const sFil = _ownFilter.source;
+  const rFil = _ownFilter.rarity;
+  const pFil = _ownFilter.prof;
   const owned = Object.entries(col)
     .filter(([, c]) => c.owned)
     .map(([id, data]) => ({ op: OP_LIST.find(o => o.id === id), data }))
     .filter(({ op }) => op)
     .filter(({ op }) => !q || op.name.toLowerCase().includes(q))
+    .filter(({ op }) => !rFil || op.rarity === rFil)
+    .filter(({ op }) => !pFil || op.profession === pFil)
     .filter(({ op }) => !sFil || opSource(op) === sFil)
     .sort((a, b) => b.op.rarity - a.op.rarity || a.op.name.localeCompare(b.op.name));
 
