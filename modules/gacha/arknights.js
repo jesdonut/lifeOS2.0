@@ -206,6 +206,15 @@ function _renderPulls(el) {
   el.appendChild(_buildHistory());
 }
 
+// Resolve a typed name to an operator (case-insensitive, trims). null if unknown.
+function _findOp(name) {
+  const n = name.trim().toLowerCase();
+  if (!n) return null;
+  return OP_LIST.find(o => o.name.toLowerCase() === n)
+    ?? OP_LIST.find(o => o.name.toLowerCase().startsWith(n))
+    ?? null;
+}
+
 function _buildLogForm() {
   const wrap = document.createElement('div'); wrap.className = 'ak-log-form';
 
@@ -226,66 +235,94 @@ function _buildLogForm() {
   bannerRow.append(bannerLbl, bannerToggle);
   wrap.appendChild(bannerRow);
 
-  // Count + rarity + operator
-  const row2 = document.createElement('div'); row2.className = 'ak-log-row ak-log-pull-row';
-
-  const cntWrap = document.createElement('div'); cntWrap.className = 'ak-log-cnt-wrap';
-  const cntLbl  = document.createElement('span'); cntLbl.className = 'ak-log-lbl'; cntLbl.textContent = 'Pulls';
-  const cntInp  = document.createElement('input');
-  cntInp.type = 'number'; cntInp.min = '1'; cntInp.max = '300';
-  cntInp.className = 'ak-log-cnt'; cntInp.value = '10';
-  cntWrap.append(cntLbl, cntInp);
-  row2.appendChild(cntWrap);
-
-  // Rarity chips
-  const rarWrap = document.createElement('div'); rarWrap.className = 'ak-log-rar-wrap';
-  const rarLbl  = document.createElement('span'); rarLbl.className = 'ak-log-lbl'; rarLbl.textContent = 'Got';
-  const rarChips = document.createElement('div'); rarChips.className = 'ak-rarity-chips';
-  let selRarity = null;
-  const rarBtns = {};
-  RARITIES.forEach(r => {
-    const b = document.createElement('button');
-    b.className = 'ak-rarity-btn ' + RARITY_CLASS[r];
-    b.textContent = r + '★';
-    b.addEventListener('click', () => {
-      selRarity = selRarity === r ? null : r;
-      Object.entries(rarBtns).forEach(([rr, bb]) => bb.classList.toggle('active', Number(rr) === selRarity));
-      // Show/hide operator row
-      opRow.style.display = selRarity === 6 || selRarity === 5 ? '' : 'none';
-    });
-    rarBtns[r] = b; rarChips.appendChild(b);
+  // Pulls — the universal unit (orundum, HH permit, or originium all become pulls).
+  // Accepts a pull count directly, or paste an orundum amount and convert.
+  const pullsRow = document.createElement('div'); pullsRow.className = 'ak-log-row';
+  const pullsLbl = document.createElement('span'); pullsLbl.className = 'ak-log-lbl'; pullsLbl.textContent = 'Pulls';
+  const pullsInp = document.createElement('input');
+  pullsInp.type = 'number'; pullsInp.min = '0';
+  pullsInp.className = 'ak-log-cnt'; pullsInp.placeholder = '1, 10…';
+  const pullsHint = document.createElement('span'); pullsHint.className = 'ak-log-hint';
+  const fromOrundumBtn = document.createElement('button');
+  fromOrundumBtn.type = 'button'; fromOrundumBtn.className = 'ak-log-conv';
+  fromOrundumBtn.textContent = '÷600 from orundum';
+  fromOrundumBtn.title = 'Treat the number as orundum and convert to pulls';
+  fromOrundumBtn.addEventListener('click', () => {
+    const n = parseInt(pullsInp.value) || 0;
+    if (n >= 600) { pullsInp.value = Math.round(n / 600); updHint(); }
   });
-  rarWrap.append(rarLbl, rarChips);
-  row2.appendChild(rarWrap);
-  wrap.appendChild(row2);
+  const updHint = () => {
+    const count = parseInt(pullsInp.value) || 0;
+    pullsHint.textContent = count ? `≈ ${(count * 600).toLocaleString()} orundum` : '';
+  };
+  pullsInp.addEventListener('input', updHint); updHint();
+  pullsRow.append(pullsLbl, pullsInp, fromOrundumBtn, pullsHint);
+  wrap.appendChild(pullsRow);
 
-  // Operator name (shown when 5★ or 6★)
-  const opRow = document.createElement('div'); opRow.className = 'ak-log-row'; opRow.style.display = 'none';
-  const opLbl = document.createElement('span'); opLbl.className = 'ak-log-lbl'; opLbl.textContent = 'Operator';
+  // Operators obtained — typed names become chips, rarity auto-resolved from the DB
+  const got = []; // [{ name, rarity }]
+  const opRow = document.createElement('div'); opRow.className = 'ak-log-row';
+  const opLbl = document.createElement('span'); opLbl.className = 'ak-log-lbl'; opLbl.textContent = 'Got';
   const opInp = document.createElement('input');
-  opInp.type = 'text'; opInp.className = 'ak-log-name'; opInp.placeholder = 'Name (optional)';
-  // Datalist autocomplete if DB loaded
+  opInp.type = 'text'; opInp.className = 'ak-log-name'; opInp.placeholder = 'Type a name, Enter to add';
   const dlId = 'ak-op-dl';
   const dl = document.createElement('datalist'); dl.id = dlId;
-  OP_LIST.filter(o => o.rarity >= 5)
-    .sort((a, b) => b.rarity - a.rarity || a.name.localeCompare(b.name))
+  [...OP_LIST].sort((a, b) => b.rarity - a.rarity || a.name.localeCompare(b.name))
     .forEach(o => { const opt = document.createElement('option'); opt.value = o.name; dl.appendChild(opt); });
   opInp.setAttribute('list', dlId);
   opRow.append(opLbl, opInp, dl);
   wrap.appendChild(opRow);
 
+  const chipsEl = document.createElement('div'); chipsEl.className = 'ak-got-chips';
+  wrap.appendChild(chipsEl);
+  const tallyEl = document.createElement('div'); tallyEl.className = 'ak-got-tally';
+  wrap.appendChild(tallyEl);
+
+  function renderGot() {
+    chipsEl.innerHTML = '';
+    got.forEach((g, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'ak-got-chip ' + (RARITY_CLASS[g.rarity] ?? '');
+      chip.innerHTML = `<span class="ak-got-star">${g.rarity ? g.rarity + '★' : '?'}</span>${g.name}`;
+      const x = document.createElement('button'); x.className = 'ak-got-x'; x.textContent = '×';
+      x.addEventListener('click', () => { got.splice(i, 1); renderGot(); });
+      chip.appendChild(x);
+      chipsEl.appendChild(chip);
+    });
+    const c6 = got.filter(g => g.rarity === 6).length;
+    const c5 = got.filter(g => g.rarity === 5).length;
+    tallyEl.textContent = got.length ? `6★ ${c6} · 5★ ${c5}` : '';
+  }
+
+  function addName(raw) {
+    const name = raw.trim();
+    if (!name) return;
+    const op = _findOp(name);
+    got.push({ name: op?.name ?? name, rarity: op?.rarity ?? null });
+    renderGot();
+  }
+  opInp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addName(opInp.value); opInp.value = ''; }
+  });
+
   // Add button
   const addBtn = document.createElement('button'); addBtn.className = 'ak-log-add'; addBtn.textContent = '+ Log';
   addBtn.addEventListener('click', () => {
-    const cnt    = parseInt(cntInp.value) || 1;
-    const banner = s().banner;
+    if (opInp.value.trim()) { addName(opInp.value); opInp.value = ''; }
+    const count = parseInt(pullsInp.value) || 0;
+    if (!count && !got.length) { pullsInp.focus(); return; }
+    const banner  = s().banner;
+    const stars6  = got.filter(g => g.rarity === 6).length;
+    const stars5  = got.filter(g => g.rarity === 5).length;
     const oldPity = s().pity[banner] ?? 0;
-    const newPity = selRarity === 6 ? 0 : oldPity + cnt;
+    // If a 6★ dropped this session, pity resets; otherwise it climbs by the pulls done.
+    const newPity = stars6 > 0 ? 0 : oldPity + count;
     const pull = {
       id: uid(),
       date: new Date().toISOString().slice(0, 10),
-      banner, count: cnt, rarity: selRarity,
-      operator: opInp.value.trim() || null,
+      banner, count, spent: count * 600,
+      operators: got.map(g => ({ name: g.name, rarity: g.rarity })),
+      stars6, stars5,
     };
     _save({
       pulls: [pull, ...s().pulls],
@@ -315,14 +352,22 @@ function _buildHistory() {
 
     const dateEl   = document.createElement('span'); dateEl.className   = 'ak-h-date';   dateEl.textContent   = p.date ?? '';
     const bannerEl = document.createElement('span'); bannerEl.className = 'ak-h-banner'; bannerEl.textContent = bCfg?.label ?? p.banner;
-    const cntEl    = document.createElement('span'); cntEl.className    = 'ak-h-cnt';    cntEl.textContent    = p.count + 'x';
-    const rarEl    = document.createElement('span');
-    if (p.rarity) { rarEl.className = 'ak-rarity-tag ' + RARITY_CLASS[p.rarity]; rarEl.textContent = p.rarity + '★'; }
-    const opEl  = document.createElement('span'); opEl.className = 'ak-h-op'; opEl.textContent = p.operator ?? '';
-    const rm    = document.createElement('button'); rm.className = 'ak-h-rm'; rm.innerHTML = '&times;';
+    const cntEl    = document.createElement('span'); cntEl.className    = 'ak-h-cnt';    cntEl.textContent    = (p.count || 0) + 'x';
+
+    // Operators got — new model is an array; fall back to the old single-operator shape.
+    const ops = p.operators ?? (p.operator ? [{ name: p.operator, rarity: p.rarity ?? null }] : []);
+    const gotEl = document.createElement('span'); gotEl.className = 'ak-h-got';
+    ops.forEach(o => {
+      const tag = document.createElement('span');
+      tag.className = 'ak-rarity-tag ' + (RARITY_CLASS[o.rarity] ?? '');
+      tag.textContent = (o.rarity ? o.rarity + '★ ' : '') + o.name;
+      gotEl.appendChild(tag);
+    });
+
+    const rm = document.createElement('button'); rm.className = 'ak-h-rm'; rm.innerHTML = '&times;';
     rm.addEventListener('click', () => _save({ pulls: s().pulls.filter(x => x.id !== p.id) }));
 
-    row.append(dateEl, bannerEl, cntEl, rarEl, opEl, rm);
+    row.append(dateEl, bannerEl, cntEl, gotEl, rm);
     list.appendChild(row);
   });
   wrap.appendChild(list);

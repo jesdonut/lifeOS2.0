@@ -351,6 +351,45 @@
 }
 .ak-log-add:hover { opacity: 0.85; }
 
+/* ── Log: pulls hint + orundum convert + "got" chips ── */
+.ak-log-hint { font-size: var(--fs-xs); color: var(--text-3); white-space: nowrap; }
+
+.ak-log-conv {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  padding: 3px var(--s2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-dim);
+  transition: color var(--dur-fast), border-color var(--dur-fast);
+}
+.ak-log-conv:hover { color: var(--text-2); border-color: var(--border); }
+
+.ak-got-chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
+
+.ak-got-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  padding: 3px var(--s2) 3px var(--s2);
+  border-radius: 99px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--rc, var(--text-3)) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rc, var(--text-3)) 35%, transparent);
+}
+.ak-got-star { font-weight: 700; color: var(--rc, var(--text-3)); }
+.ak-got-x {
+  color: var(--text-3);
+  font-size: 13px;
+  line-height: 1;
+  padding: 0 1px;
+  transition: color var(--dur-fast);
+}
+.ak-got-x:hover { color: var(--red); }
+
+.ak-got-tally { font-size: var(--fs-xs); color: var(--text-2); font-weight: 600; }
+
 /* ── Pull history ── */
 .ak-history { display: flex; flex-direction: column; gap: var(--s2); }
 
@@ -368,7 +407,7 @@
 
 .ak-history-row {
   display: grid;
-  grid-template-columns: 76px 72px 44px auto 1fr 24px;
+  grid-template-columns: 76px 72px 44px 1fr 24px;
   align-items: center;
   gap: var(--s3);
   padding: var(--s2) var(--s4);
@@ -376,6 +415,7 @@
   border-bottom: 1px solid var(--border-dim);
   transition: background var(--dur-fast);
 }
+.ak-h-got { display: flex; flex-wrap: wrap; gap: 4px; }
 .ak-history-row:last-child { border-bottom: none; }
 .ak-history-row:hover { background: var(--surface-2); }
 
