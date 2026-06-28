@@ -90,8 +90,14 @@ Period uses the SAME structure but its own accent. Don't fight it: the header cl
 `var(--accent)` / `var(--accent-2)`, and period's view sets those to pink, so the same markup just
 renders pink. Keep the layout identical; only the accent variables differ.
 
+### View content padding — shared token (added 2026-06-28)
+A view's scrollable content area uses `padding: var(--view-pad)` (= `s4 / s5 / s6` top/sides/bottom),
+defined once in `base.css :root`. Applied to `.cal-month`, `.pr-content`, `.fin-body`, `.ak-view-body`.
+Notes is a different sidebar/editor layout and keeps its own spacing. Change the standard in one place.
+
 ### Cleanup TODO for this step
 - [x] Promote `.cal-header` container into `base.css` (was only in calendar.css; now shared)
+- [x] Add `--view-pad` token + apply to calendar/period/finance/gacha bodies; remove duplicate `.pr-top`
 - [ ] Optionally rename the `cal-*` shared classes to a neutral prefix (e.g. `view-head-*`) since
       they're app-wide, not calendar-specific — defer if risky, it touches every module's CSS+JS
 - [x] Add a one-line pointer to this rule in `CLAUDE.md` so "create" always triggers it

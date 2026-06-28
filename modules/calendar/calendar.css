@@ -141,7 +141,7 @@
 }
 
 .cal-month {
-  padding: var(--s4) var(--s5) var(--s6);
+  padding: var(--view-pad);
   border-bottom: 1px solid var(--border-dim);
 }
 
