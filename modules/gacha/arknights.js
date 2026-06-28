@@ -57,6 +57,18 @@ export function mountArknights(container, state, save) {
     save(patch);
     _render();
   };
+
+  // One-time cleanup: drop collection entries for operators removed from the DB.
+  const validIds = new Set(OP_LIST.map(o => o.id));
+  const col      = _state.collection ?? {};
+  const staleIds = Object.keys(col).filter(id => !validIds.has(id));
+  if (staleIds.length) {
+    console.warn('[gacha] removed stale collection entries (operator no longer in DB):', staleIds);
+    const cleaned = Object.fromEntries(Object.entries(col).filter(([id]) => validIds.has(id)));
+    _state.collection = cleaned;
+    save({ collection: cleaned });
+  }
+
   _render();
 }
 
@@ -601,7 +613,8 @@ function _renderOwnedList(list) {
 // ── Collection ─────────────────────────────────────────────────────
 function _renderCollection(el) {
   const col = s().collection ?? {};
-  const owned = Object.entries(col).filter(([, c]) => c.owned);
+  // Only operators that still exist in the DB (drop stale entries for removed ops).
+  const owned = Object.entries(col).filter(([id, c]) => c.owned && OP_LIST.some(o => o.id === id));
 
   // Filters
   const filterBar = document.createElement('div'); filterBar.className = 'ak-filter-bar';
@@ -639,9 +652,10 @@ function _renderCollection(el) {
 
     const filtered = owned.filter(([id, c]) => {
       const op = OP_LIST.find(o => o.id === id);
+      if (!op) return false;   // operator removed from the DB — hide stale collection entries
       if (_colFilter.fav && !c.favorite) return false;
-      if (rFil && op?.rarity !== rFil) return false;
-      if (q && !op?.name?.toLowerCase().includes(q) && !id.includes(q)) return false;
+      if (rFil && op.rarity !== rFil) return false;
+      if (q && !op.name.toLowerCase().includes(q) && !id.includes(q)) return false;
       return true;
     }).sort(([idA, cA], [idB, cB]) => {
       const ra = OP_LIST.find(o => o.id === idA)?.rarity ?? 0;
