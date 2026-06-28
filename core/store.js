@@ -205,12 +205,14 @@ function loadFromLocalStorage() {
   }
 }
 
-// Normalize period to the canonical entry shape, persist once if it changed.
+// Normalize period to the canonical entry shape — IN MEMORY ONLY.
+// We deliberately do NOT write the migrated shape back to Supabase here. Reads
+// are correct on every device because each one migrates on load; the server copy
+// stays in its original shape (a safety net) until a normal period edit naturally
+// saves the new shape. Never let a load silently overwrite Supabase.
 function _finishLoad(data) {
-  const { period, changed } = migratePeriod(data.period);
-  data.period = period;
+  data.period = migratePeriod(data.period).period;
   _data = data;
-  if (changed) save({ period });   // upgrade old-shape entries permanently
   return _data;
 }
 

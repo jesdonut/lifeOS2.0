@@ -159,7 +159,9 @@ Not just duplicated logic — the DATA MODELS differ, so the two devices misread
    addSpotting/removeSpotting, setSymptom, periodStats, currentWindow, getPhase). Deleted its inline
    `_logFlow` merge copy, `_removeDate`, `_cycleStatus`, and dead `_shiftDate`.
 2. [x] `migratePeriod()` added to period-data.js; runs in store.js `load()` (`_finishLoad`), converts
-   old string-flow entries to the per-day map shape, idempotent, persists once if changed.
+   old string-flow entries to the per-day map shape, idempotent. IN-MEMORY ONLY — does NOT write back
+   to Supabase on load (server copy stays original as a safety net until a real edit saves new shape).
+   Data lives in Supabase, so never auto-overwrite it from a load.
 3. [x] 13 logic tests pass (scratchpad/ptest.mjs): migration correctness, idempotency, write path, guards.
 4. [x] sw cache bumped to v13.
 5. [ ] **PENDING: Jessica tests period flow on her phone after push** (log flow, symptoms, check desktop
