@@ -1,17 +1,7 @@
 /* calendar.css */
 
 /* ── Shell ── */
-.cal-header {
-  display: flex;
-  align-items: center;
-  gap: var(--s2);
-  padding: 0 var(--s5);
-  height: 48px;
-  border-bottom: 1px solid var(--border-dim);
-  flex-shrink: 0;
-}
-
-/* cal-year-btn, cal-year-label, cal-today-btn, cal-view-toggle, cal-view-btn → base.css */
+/* cal-header, cal-year-btn, cal-year-label, cal-today-btn, cal-view-toggle, cal-view-btn → base.css */
 
 .cal-add-btn {
   margin-left: auto;
