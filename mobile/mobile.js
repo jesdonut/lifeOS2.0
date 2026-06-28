@@ -631,19 +631,60 @@ function _buildNotesTab() {
   for (const note of notes) {
     const isOpen = _expandedNote === note.id;
     const card   = el('div', 'note-card' + (isOpen ? ' expanded' : ''));
-    card.appendChild(el('div', 'note-title', note.title || note.text?.split('\n')[0] || 'Untitled'));
+
     if (isOpen) {
-      card.appendChild(el('div', 'note-body', note.text || ''));
-    } else if (note.text) {
-      card.appendChild(el('div', 'note-preview',
-        note.text.slice(0, 140) + (note.text.length > 140 ? '…' : '')
-      ));
+      // Editable: title + body, with delete. Edits save on blur (no re-render so focus is kept).
+      const titleInp = el('input', 'note-edit-title'); titleInp.value = note.title || ''; titleInp.placeholder = 'Title';
+      const bodyInp  = el('textarea', 'note-edit-body'); bodyInp.value = note.text || ''; bodyInp.placeholder = 'Write a note…';
+      const persist  = () => _updateNote(note.id, { title: titleInp.value, text: bodyInp.value });
+      [titleInp, bodyInp].forEach(inp => {
+        inp.addEventListener('click', e => e.stopPropagation());
+        inp.addEventListener('blur', persist);
+      });
+      const autoGrow = () => { bodyInp.style.height = 'auto'; bodyInp.style.height = bodyInp.scrollHeight + 'px'; };
+      bodyInp.addEventListener('input', autoGrow);
+
+      const actions = el('div', 'note-edit-actions');
+      const collapseBtn = el('button', 'note-act-btn', 'Done');
+      collapseBtn.addEventListener('click', e => { e.stopPropagation(); persist(); _expandedNote = null; _render(); });
+      const delBtn = el('button', 'note-act-btn note-del-btn', 'Delete');
+      delBtn.addEventListener('click', e => { e.stopPropagation(); if (confirm('Delete this note?')) _deleteNote(note.id); });
+      actions.append(collapseBtn, delBtn);
+
+      card.append(titleInp, bodyInp, actions);
+      requestAnimationFrame(autoGrow);
+    } else {
+      card.appendChild(el('div', 'note-title', note.title || note.text?.split('\n')[0] || 'Untitled'));
+      if (note.text) {
+        card.appendChild(el('div', 'note-preview',
+          note.text.slice(0, 140) + (note.text.length > 140 ? '…' : '')
+        ));
+      }
+      card.addEventListener('click', () => { _expandedNote = note.id; _render(); });
     }
-    card.addEventListener('click', () => { _expandedNote = isOpen ? null : note.id; _render(); });
     list.appendChild(card);
   }
   wrap.appendChild(list);
   return wrap;
+}
+
+// Save a note edit in place (no re-render, so the open editor keeps focus).
+function _updateNote(id, patch) {
+  const d = _D();
+  const items = (d.notes?.items || []).map(n => n.id === id ? { ...n, ...patch, updatedAt: new Date().toISOString() } : n);
+  d.notes = { ...(d.notes || {}), items };
+  _mobileData = d;
+  save({ notes: d.notes });
+}
+
+function _deleteNote(id) {
+  const d = _D();
+  const items = (d.notes?.items || []).filter(n => n.id !== id);
+  d.notes = { ...(d.notes || {}), items };
+  _mobileData = d;
+  save({ notes: d.notes });
+  _expandedNote = null;
+  _render();
 }
 
 // ── Bottom nav ───────────────────────────────────────────────────────

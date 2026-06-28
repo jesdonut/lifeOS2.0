@@ -358,6 +358,47 @@ html, body {
 
 .note-title { font-size: var(--fs-sm); font-weight: 600; color: var(--text); margin-bottom: 4px; }
 
+/* ── Mobile note editor (expanded card) ── */
+.note-edit-title {
+  width: 100%;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+  background: none;
+  border: none;
+  padding: 0 0 var(--s2);
+  outline: none;
+}
+.note-edit-body {
+  width: 100%;
+  min-height: 80px;
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  line-height: 1.5;
+  background: none;
+  border: none;
+  resize: none;
+  outline: none;
+}
+.note-edit-actions {
+  display: flex;
+  gap: var(--s2);
+  margin-top: var(--s3);
+  padding-top: var(--s2);
+  border-top: 1px solid var(--border-dim);
+}
+.note-act-btn {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  padding: var(--s2) var(--s4);
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  background: var(--surface-2);
+}
+.note-del-btn { color: var(--red); border-color: color-mix(in srgb, var(--red) 35%, transparent); margin-left: auto; }
+
 .note-preview {
   font-size: var(--fs-xs);
   color: var(--text-3);
