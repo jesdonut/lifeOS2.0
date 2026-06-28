@@ -171,11 +171,13 @@ Not just duplicated logic — the DATA MODELS differ, so the two devices misread
 - These are simplified mobile renders, not 1:1 with desktop. Dedup is harder and less urgent than
   the period LOGIC above. Leave UI alone; only share the data/logic layer.
 
-### Orphan page candidates (verify intent before deleting — both outward-facing)
-- `changelog.html` — 191-byte stub that `<meta refresh>` redirects to `about.html`. No inbound links,
-  no JS ref. Likely leftover for an old `/changelog` bookmark. Safe-ish to delete; low value either way.
-- `coming-soon.html` — no inbound links, no JS ref. Either a Vercel destination for unbuilt features
-  or dead. Confirm with Jessica before removing.
+### Orphan pages — RESOLVED (2026-06-28): gitignored, kept local
+Verified neither is linked anywhere (footers link 11 other pages, not these; "Coming soon" in
+finance/notes are text badges, not links). Decision: gitignore both like `period-standalone.html`
+(untracked via `git rm --cached`, files kept on disk, removed from repo + deploy).
+- `changelog.html` — was a meta-refresh stub → about.html. Now gitignored. NOTE: `/changelog.html`
+  will 404 on the live site (no redirect added). Roadmap content lives in about.html anyway.
+- `coming-soon.html` — gitignored. Nothing linked it.
 
 ### NOT orphans (explained)
 - `app.html` — 0 static hrefs but reached via JS (`index.html` sets `a.href='app.html'`, app.js redirects). Live.
@@ -209,6 +211,9 @@ Each split keeps the module contract (`init`/`destroy`/`onDataChange`). One file
 ---
 
 ## Log (newest first)
+- 2026-06-28 — settings.js split (1222→883): extracted settings/util.js + settings/data.js. Pushed (v16), tested OK.
+- 2026-06-28 — Padding rule: --view-pad token applied to calendar/period/finance/gacha. Pushed (v14), tested OK.
+- 2026-06-28 — Migration made in-memory-only (never auto-overwrites Supabase). Pushed (v15), tested OK.
 - 2026-06-28 — Period dedup: unified mobile+desktop on period-data.js, added migratePeriod, 13 tests pass, sw v13. Pending phone test.
 - 2026-06-28 — Step 2 analysis: found period-logic duplication (mobile.js vs period-data.js) + 2 orphan page candidates. Recorded, nothing deleted.
 - 2026-06-28 — Level 2: grouped mobile build into mobile/, fixed paths, vercel redirect for old PWA URL, sw v12. Marketing pages stay at root (decided).
