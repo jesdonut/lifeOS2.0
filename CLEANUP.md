@@ -135,12 +135,33 @@ Only the loose mobile build gets foldered.
 
 ---
 
-## STEP 2 — Identify used vs unused (deeper pass, after Step 1 settles structure)
-- [ ] Dead-function scan in the 3 giant files before splitting them
-- [ ] Confirm every `*.html` page is still linked from somewhere (orphan page check)
-- [ ] Check `scripts/import-health.py` — still used by the cron pipeline?
-- [ ] Check duplicated logic between `mobile.js` and `core/app.js` + modules (biggest dedup opportunity)
-- [ ] Record findings here under "Audit snapshot" before deleting anything
+## STEP 2 — Identify used vs unused — FINDINGS (2026-06-28)
+
+### 🔴 Biggest issue: duplicated period logic (divergence risk)
+`mobile/mobile.js` does NOT import the period module. It reimplements the period merge/adjacency
+algorithm inline in `_logFlow` (~line 98) and `_cycleStatus` (~line 160). This is the SAME rule as
+`modules/period/period-data.js` → `mergeEntry` (line 349), which CLAUDE.md marks as critical.
+Two copies = they can silently drift apart. **Fix later: have mobile.js import period-data.js
+functions instead of its own copy.** Medium-risk refactor; do as its own focused task.
+
+### mobile.js also reimplements (lower priority — different mobile UX, not pure dupes)
+- mini calendar (`_buildMiniCal`), week view (`_buildWeekView`), notes tab (`_buildNotesTab`).
+- These are simplified mobile renders, not 1:1 with desktop. Dedup is harder and less urgent than
+  the period LOGIC above. Leave UI alone; only share the data/logic layer.
+
+### Orphan page candidates (verify intent before deleting — both outward-facing)
+- `changelog.html` — 191-byte stub that `<meta refresh>` redirects to `about.html`. No inbound links,
+  no JS ref. Likely leftover for an old `/changelog` bookmark. Safe-ish to delete; low value either way.
+- `coming-soon.html` — no inbound links, no JS ref. Either a Vercel destination for unbuilt features
+  or dead. Confirm with Jessica before removing.
+
+### NOT orphans (explained)
+- `app.html` — 0 static hrefs but reached via JS (`index.html` sets `a.href='app.html'`, app.js redirects). Live.
+- `period-standalone.html` — gitignored (local only), not in repo. Ignore.
+- `scripts/import-health.py` — `scripts/` is gitignored; local cron tooling. Leave alone.
+
+### Remaining for Step 2
+- [ ] Dead-function scan inside the 3 giants (do as part of Step 3, right before splitting each)
 
 ---
 
@@ -163,6 +184,7 @@ Each split keeps the module contract (`init`/`destroy`/`onDataChange`). One file
 ---
 
 ## Log (newest first)
+- 2026-06-28 — Step 2 analysis: found period-logic duplication (mobile.js vs period-data.js) + 2 orphan page candidates. Recorded, nothing deleted.
 - 2026-06-28 — Level 2: grouped mobile build into mobile/, fixed paths, vercel redirect for old PWA URL, sw v12. Marketing pages stay at root (decided).
 - 2026-06-28 — Level 1: moved period.css into modules/period/, grouped import files into core/import/, sw cache v11.
 - 2026-06-28 — Level 0: removed dead `modules/tasks/` (orphan; real tasks UI is in notes-tab.js). DS_Store already clean.
