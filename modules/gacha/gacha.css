@@ -443,6 +443,24 @@
 .ak-db-refresh:hover { color: var(--text-2); background: var(--surface-3); }
 .ak-db-refresh .material-symbols-outlined { font-size: 16px; }
 
+.ak-op-avatar-ph {
+  width: 32px; height: 32px; flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  color: #fff;
+  background: color-mix(in srgb, var(--rc, var(--text-3)) 40%, var(--surface-3));
+}
+
+.ak-col-avatar-ph {
+  width: 72px; height: 72px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 700;
+  color: #fff;
+  background: color-mix(in srgb, var(--rc, var(--text-3)) 40%, var(--surface-3));
+}
+
 .ak-op-list {
   display: flex;
   flex-direction: column;
