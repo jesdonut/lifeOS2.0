@@ -185,6 +185,7 @@ function _buildFundCard(fund) {
       e.stopPropagation(); _editValueFundId = null; _render();
     });
     inp.addEventListener('click', e => e.stopPropagation());
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save.click(); } if (e.key === 'Escape') { e.preventDefault(); cancel.click(); } });
     const editRow = div('nisa-inline-row'); editRow.append(inp, save, cancel);
     right.appendChild(editRow);
   } else {
@@ -253,6 +254,7 @@ function _buildFundCard(fund) {
         _editRatioFundId = null; _render();
       });
       const cancel = btn('nisa-inline-cancel', 'Cancel', () => { _editRatioFundId = null; _render(); });
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save.click(); } if (e.key === 'Escape') { e.preventDefault(); cancel.click(); } });
       const r = div('nisa-inline-row'); r.append(inp, save, cancel);
       ratioStat.appendChild(r);
     } else {
