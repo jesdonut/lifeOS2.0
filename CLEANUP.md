@@ -164,8 +164,7 @@ Not just duplicated logic — the DATA MODELS differ, so the two devices misread
    Data lives in Supabase, so never auto-overwrite it from a load.
 3. [x] 13 logic tests pass (scratchpad/ptest.mjs): migration correctness, idempotency, write path, guards.
 4. [x] sw cache bumped to v13.
-5. [ ] **PENDING: Jessica tests period flow on her phone after push** (log flow, symptoms, check desktop
-   shows same). She exported a JSON backup first as rollback.
+5. [x] Jessica tested on device after push (cache v15) — "looks ok". Verified live. Backup retained.
 
 ### mobile.js also reimplements (lower priority — different mobile UX, not pure dupes)
 - mini calendar (`_buildMiniCal`), week view (`_buildWeekView`), notes tab (`_buildNotesTab`).
@@ -190,7 +189,10 @@ Not just duplicated logic — the DATA MODELS differ, so the two devices misread
 
 ## STEP 3 — Cleanup the giants (split in chunks, highest risk last)
 Each split keeps the module contract (`init`/`destroy`/`onDataChange`). One file per logical piece.
-- [ ] `core/settings.js` (1222) → split by settings section
+- [~] `core/settings.js` (1222) → smaller-scope split DONE: extracted `core/settings/util.js`
+  (sectionLabel/field/esc) and `core/settings/data.js` (Data section: export/import/logout/clear,
+  takes closeSettings as a param to avoid a circular import). settings.js now 883 lines.
+  Profile/Calendar/Spending/Appearance + makeTagInput still live in settings.js (can split later).
 - [ ] `modules/period/period-ui.js` (1231) → split render vs interaction vs sub-views
 - [ ] `modules/calendar/calendar.js` (1890) → split month/week/event-edit/etc.
 - [ ] CSS giants: split only if it helps; CSS size is less urgent than JS

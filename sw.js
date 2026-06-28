@@ -1,4 +1,4 @@
-const CACHE = 'seratus-v15';
+const CACHE = 'seratus-v16';
 
 const SHELL = [
   '/app.html',
@@ -17,6 +17,8 @@ const SHELL = [
   '/core/app.js',
   '/core/store.js',
   '/core/settings.js',
+  '/core/settings/util.js',
+  '/core/settings/data.js',
   '/core/gestures.js',
   '/core/lang.js',
   '/core/import/import-delta.js',
