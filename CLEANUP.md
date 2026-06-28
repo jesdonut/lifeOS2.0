@@ -137,12 +137,27 @@ Only the loose mobile build gets foldered.
 
 ## STEP 2 — Identify used vs unused — FINDINGS (2026-06-28)
 
-### 🔴 Biggest issue: duplicated period logic (divergence risk)
-`mobile/mobile.js` does NOT import the period module. It reimplements the period merge/adjacency
-algorithm inline in `_logFlow` (~line 98) and `_cycleStatus` (~line 160). This is the SAME rule as
-`modules/period/period-data.js` → `mergeEntry` (line 349), which CLAUDE.md marks as critical.
-Two copies = they can silently drift apart. **Fix later: have mobile.js import period-data.js
-functions instead of its own copy.** Medium-risk refactor; do as its own focused task.
+### 🔴🔴 CRITICAL: mobile and desktop store period FLOW in different shapes
+Not just duplicated logic — the DATA MODELS differ, so the two devices misread each other's data.
+- Desktop (`period-data.js` mergeEntry): entry = `{ id:'p_2026_06_28', start, end,
+  flow:{ '2026-06-28':'heavy' }, symptoms:{}, bbt:{}, discharge:{}, notes }`. flow is a DATE-KEYED MAP.
+- Mobile (`mobile.js` `_logFlow` ~L125): entry = `{ id:'mob_xxx', start, end, flow:'heavy' }`.
+  flow is a SINGLE STRING for the whole entry. No bbt/discharge/notes.
+- They share `period.entries` via the synced store, so: log flow on mobile → desktop sees the day as a
+  period but `entry.flow[dateStr]` is undefined (no intensity), and vice versa. Symptoms (top-level
+  `period.symptoms[date]`) DO line up; flow/bbt/discharge/notes/id do NOT.
+- This is the likely real cause of "mobile and desktop feel slightly different."
+
+**Two-part fix — DONE (2026-06-28, pending Jessica's phone test):**
+1. [x] mobile.js now imports prediction math + write helpers from period-data.js (mergeEntry, removeDay,
+   addSpotting/removeSpotting, setSymptom, periodStats, currentWindow, getPhase). Deleted its inline
+   `_logFlow` merge copy, `_removeDate`, `_cycleStatus`, and dead `_shiftDate`.
+2. [x] `migratePeriod()` added to period-data.js; runs in store.js `load()` (`_finishLoad`), converts
+   old string-flow entries to the per-day map shape, idempotent, persists once if changed.
+3. [x] 13 logic tests pass (scratchpad/ptest.mjs): migration correctness, idempotency, write path, guards.
+4. [x] sw cache bumped to v13.
+5. [ ] **PENDING: Jessica tests period flow on her phone after push** (log flow, symptoms, check desktop
+   shows same). She exported a JSON backup first as rollback.
 
 ### mobile.js also reimplements (lower priority — different mobile UX, not pure dupes)
 - mini calendar (`_buildMiniCal`), week view (`_buildWeekView`), notes tab (`_buildNotesTab`).
@@ -184,6 +199,7 @@ Each split keeps the module contract (`init`/`destroy`/`onDataChange`). One file
 ---
 
 ## Log (newest first)
+- 2026-06-28 — Period dedup: unified mobile+desktop on period-data.js, added migratePeriod, 13 tests pass, sw v13. Pending phone test.
 - 2026-06-28 — Step 2 analysis: found period-logic duplication (mobile.js vs period-data.js) + 2 orphan page candidates. Recorded, nothing deleted.
 - 2026-06-28 — Level 2: grouped mobile build into mobile/, fixed paths, vercel redirect for old PWA URL, sw v12. Marketing pages stay at root (decided).
 - 2026-06-28 — Level 1: moved period.css into modules/period/, grouped import files into core/import/, sw cache v11.

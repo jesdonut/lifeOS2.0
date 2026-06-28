@@ -2,6 +2,10 @@
 // Reads/writes via Supabase store (same data as desktop)
 
 import { load, get, save, getSession, signIn } from '../core/store.js';
+import {
+  mergeEntry, removeDay, addSpotting, removeSpotting, setSymptom,
+  getPeriodEntries, periodStats, currentWindow, getPhase,
+} from '../modules/period/period-data.js';
 
 let _mobileData = null;
 
@@ -81,114 +85,67 @@ function _uid() {
   return 'mob_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
-function _shiftDate(s, n) {
-  const [y, m, d] = s.split('-').map(Number);
-  const dt = new Date(y, m - 1, d + n);
-  return _ds(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
-}
-
-// ── Period logic ─────────────────────────────────────────────────────
+// ── Period logic (shared engine: ../modules/period/period-data.js) ───
+// Flow is stored per-day inside an entry: entry.flow[dateStr] = 'heavy'.
+// All writes go through the same mergeEntry/removeDay helpers desktop uses,
+// so the two clients can never drift apart.
 function _getFlow(date) {
   const { entries = [], spotting = [] } = _D().period || {};
   if (spotting.includes(date)) return 'spotting';
   const e = entries.find(e => e.start <= date && date <= e.end);
-  return e?.flow ?? 'none';
+  return e?.flow?.[date] ?? 'none';
 }
 
 function _logFlow(date, flow) {
   const d = _D();
   const p = d.period || { entries: [], spotting: [], symptoms: {} };
-  p.spotting = (p.spotting || []).filter(s => s !== date);
+  let entries  = p.entries  || [];
+  let spotting = p.spotting || [];
 
   if (flow === 'spotting') {
-    p.entries = _removeDate(p.entries || [], date);
-    p.spotting.push(date);
-    d.period = p; _saveD(d); return;
+    entries  = removeDay(entries, date);
+    spotting = addSpotting(spotting, date);
+  } else if (flow === 'none') {
+    entries  = removeDay(entries, date);
+    spotting = removeSpotting(spotting, date);
+  } else {
+    spotting = removeSpotting(spotting, date);
+    entries  = mergeEntry(entries, date, 'flow', flow);
   }
-  if (flow === 'none') {
-    p.entries = _removeDate(p.entries || [], date);
-    d.period = p; _saveD(d); return;
-  }
 
-  const entries = p.entries || [];
-  const within  = entries.find(e => e.start <= date && date <= e.end);
-  if (within) { within.flow = flow; d.period = p; _saveD(d); return; }
-
-  const prev = _shiftDate(date, -1);
-  const next = _shiftDate(date, 1);
-  const A = entries.find(e => e.end   === prev);
-  const B = entries.find(e => e.start === next);
-
-  if (A && B) { A.end = B.end; p.entries = entries.filter(e => e !== B); }
-  else if (A)  { A.end   = date; }
-  else if (B)  { B.start = date; B.flow = flow; }
-  else         { entries.push({ id: _uid(), start: date, end: date, flow }); }
-
-  d.period = p; _saveD(d);
-}
-
-function _removeDate(entries, date) {
-  const out = [];
-  for (const e of entries) {
-    if (date < e.start || date > e.end)    { out.push(e); continue; }
-    if (date === e.start && date === e.end) continue;
-    if (date === e.start) { out.push({ ...e, start: _shiftDate(date, 1) }); continue; }
-    if (date === e.end)   { out.push({ ...e, end:   _shiftDate(date, -1) }); continue; }
-    out.push({ ...e, end: _shiftDate(date, -1) });
-    out.push({ ...e, id: _uid(), start: _shiftDate(date, 1) });
-  }
-  return out;
+  p.entries  = entries;
+  p.spotting = spotting;
+  d.period   = p;
+  _saveD(d);
 }
 
 function _toggleSymptom(date, key) {
-  const d    = _D();
-  const p    = d.period || {};
-  const syms = p.symptoms || {};
-  if (!syms[date]) syms[date] = {};
-  if (syms[date][key]) {
-    delete syms[date][key];
-    if (!Object.keys(syms[date]).length) delete syms[date];
-  } else {
-    syms[date][key] = true;
-  }
-  p.symptoms = syms;
+  const d   = _D();
+  const p   = d.period || {};
+  const on  = !!(p.symptoms?.[date]?.[key]);
+  p.symptoms = setSymptom(p.symptoms || {}, date, key, on ? null : true);
   d.period   = p;
   _saveD(d);
 }
 
 function _cycleStatus() {
-  const { entries = [] } = _D().period || {};
-  const today = _todayStr();
-  const past  = entries.filter(e => e.start <= today).sort((a, b) => b.start.localeCompare(a.start));
+  const data    = _D();
+  const entries = getPeriodEntries(data);   // sorted by start
+  const today   = _todayStr();
+  const past    = entries.filter(e => e.start <= today);
   if (!past.length) return null;
 
-  const last = past[0];
+  const stats = periodStats(entries);
+  const last  = past[past.length - 1];
   const [ly, lm, ld] = last.start.split('-').map(Number);
   const [ty, tm, td] = today.split('-').map(Number);
-  const startDate = new Date(ly, lm - 1, ld);
-  const todayDate = new Date(ty, tm - 1, td);
-  const cycleDay  = Math.floor((todayDate - startDate) / 86400000) + 1;
+  const cycleDay = Math.floor((new Date(ty, tm - 1, td) - new Date(ly, lm - 1, ld)) / 86400000) + 1;
 
-  let avgCycle = 28;
-  if (past.length >= 2) {
-    const gaps = [];
-    for (let i = 0; i < Math.min(past.length - 1, 5); i++) {
-      const [ay, am, ad] = past[i].start.split('-').map(Number);
-      const [by, bm, bd] = past[i + 1].start.split('-').map(Number);
-      gaps.push(Math.floor((new Date(ay, am - 1, ad) - new Date(by, bm - 1, bd)) / 86400000));
-    }
-    avgCycle = Math.round(gaps.reduce((s, g) => s + g, 0) / gaps.length);
-  }
+  const ph    = getPhase(entries, stats, today);
+  const phase = ph ? ph.charAt(0).toUpperCase() + ph.slice(1) : '—';
 
-  const nextDate = new Date(startDate);
-  nextDate.setDate(nextDate.getDate() + avgCycle);
-  const nextStr = nextDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-  let phase;
-  if (cycleDay <= 5)       phase = 'Menstrual';
-  else if (cycleDay <= 13) phase = 'Follicular';
-  else if (cycleDay <= 16) phase = 'Ovulation';
-  else                     phase = 'Luteal';
+  const win     = currentWindow(entries, stats);
+  const nextStr = win ? win.center.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
 
   return { cycleDay, phase, nextStr };
 }
@@ -608,7 +565,7 @@ function _buildPeriodTab() {
     const bar = el('div', 'cycle-bar');
     bar.appendChild(el('span', 'cycle-day', `Day ${status.cycleDay}`));
     bar.appendChild(el('span', 'cycle-phase', status.phase));
-    bar.appendChild(el('span', 'cycle-next', `Next ~${status.nextStr}`));
+    if (status.nextStr) bar.appendChild(el('span', 'cycle-next', `Next ~${status.nextStr}`));
     wrap.appendChild(bar);
   }
 

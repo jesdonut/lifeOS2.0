@@ -1,6 +1,7 @@
 // store.js — Supabase-backed load/save, pub/sub
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { migratePeriod } from '../modules/period/period-data.js';
 
 const SUPABASE_URL = 'https://gexqhppvqkokaxmgyonb.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdleHFocHB2cWtva2F4bWd5b25iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjMyMjEsImV4cCI6MjA5Nzk5OTIyMX0.h4mBPSPEUlRGq6JBMPtZLtUr5dYSTxTMeUr33BhcOI4';
@@ -204,22 +205,28 @@ function loadFromLocalStorage() {
   }
 }
 
+// Normalize period to the canonical entry shape, persist once if it changed.
+function _finishLoad(data) {
+  const { period, changed } = migratePeriod(data.period);
+  data.period = period;
+  _data = data;
+  if (changed) save({ period });   // upgrade old-shape entries permanently
+  return _data;
+}
+
 export function load() {
   if (_data) return _data;
   // Check if there's a Supabase session — if yes, use Supabase; otherwise localStorage
   return sb.auth.getSession().then(({ data: { session } }) => {
     if (!session) {
-      _data = loadFromLocalStorage();
-      return _data;
+      return _finishLoad(loadFromLocalStorage());
     }
-    return fetchFromSupabase().then(data => {
-      _data = data;
-      return _data;
-    }).catch(err => {
-      console.error('[store] Supabase load failed, falling back to localStorage', err);
-      _data = loadFromLocalStorage();
-      return _data;
-    });
+    return fetchFromSupabase()
+      .then(_finishLoad)
+      .catch(err => {
+        console.error('[store] Supabase load failed, falling back to localStorage', err);
+        return _finishLoad(loadFromLocalStorage());
+      });
   });
 }
 

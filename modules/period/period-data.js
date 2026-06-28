@@ -410,3 +410,44 @@ export function mergeEntry(entries, dateStr, field, value) {
 
   return sorted;
 }
+
+// ── One-time shape migration ───────────────────────────────────────
+// Older mobile builds stored an entry's flow as a single string for the whole
+// range (`flow: 'heavy'`). The canonical shape is a per-day map keyed by date
+// (`flow: { '2026-06-28': 'heavy' }`) plus symptoms/bbt/discharge/notes fields.
+// This upgrades any old-shape entries to the canonical shape so mobile and
+// desktop read the same data. Idempotent: returns changed=false if nothing
+// needed upgrading (e.g. data already written by desktop).
+export function migratePeriod(period) {
+  if (!period || !Array.isArray(period.entries)) return { period, changed: false };
+
+  let changed = false;
+  const entries = period.entries.map(e => {
+    const flowIsString = typeof e.flow === 'string';
+    const missingField = e.flow === undefined || e.symptoms === undefined
+      || e.bbt === undefined || e.discharge === undefined || e.notes === undefined;
+    if (!flowIsString && !missingField) return e;
+
+    changed = true;
+    const out = { ...e };
+
+    if (flowIsString) {
+      // Spread the single flow value across every day in [start, end].
+      const map = {};
+      let d = parseDate(e.start);
+      const end = parseDate(e.end);
+      while (d <= end) { map[fd(d)] = e.flow; d = addDays(d, 1); }
+      out.flow = map;
+    } else if (e.flow === undefined) {
+      out.flow = {};
+    }
+
+    out.symptoms  = e.symptoms  ?? {};
+    out.bbt       = e.bbt       ?? {};
+    out.discharge = e.discharge ?? {};
+    out.notes     = e.notes     ?? '';
+    return out;
+  });
+
+  return { period: { ...period, entries }, changed };
+}
