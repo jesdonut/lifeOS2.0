@@ -177,10 +177,13 @@ function _bondCalc(b) {
 }
 
 function _fmtIDR(v) {
-  if (v >= 1_000_000_000) return 'Rp' + (v / 1_000_000_000).toFixed(2).replace(/\.?0+$/, '') + 'B';
-  if (v >= 1_000_000)     return 'Rp' + (v / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
-  if (v >= 1_000)         return 'Rp' + Math.round(v / 1_000) + 'K';
   return 'Rp' + Math.round(v).toLocaleString();
+}
+
+const _MON = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+function _fmtMaturity(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return _MON[d.getMonth()] + ' ' + d.getFullYear();
 }
 
 function _buildBondSection(bonds) {
@@ -251,8 +254,7 @@ function _buildBondRow(b, isMatured, gridClass) {
   } else {
     const moEl  = document.createElement('span'); moEl.textContent  = _fmtIDR(calc.netMonth);
     const matEl = document.createElement('span'); matEl.className = 'bc-matures';
-    const d = new Date(b.maturityDate + 'T00:00:00');
-    matEl.textContent = d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+    matEl.textContent = _fmtMaturity(b.maturityDate);
     row.append(seriesEl, amtEl, rateEl, moEl, totalEl, matEl);
   }
 

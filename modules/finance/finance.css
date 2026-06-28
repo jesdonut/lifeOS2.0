@@ -1224,8 +1224,9 @@
   gap: var(--s1);
 }
 .bond-row:last-child { border-bottom: none; }
-.bond-tbl-active  { grid-template-columns: 1.4fr 1.3fr 0.8fr 1.3fr 1.3fr 1.2fr; }
-.bond-tbl-matured { grid-template-columns: 1.4fr 1.3fr 0.8fr 1.4fr; }
+/* series≈80px, rate≈60px, maturity≈76px — rest goes to amounts */
+.bond-tbl-active  { grid-template-columns: 80px 1fr 60px 1fr 1fr 76px; }
+.bond-tbl-matured { grid-template-columns: 80px 1fr 60px 1fr; }
 .bc-series  { font-weight: 500; color: var(--text); }
 .bc-rate    { color: var(--accent); }
 .bc-matures { color: var(--text-3); }
