@@ -304,7 +304,6 @@ export const OP_LIST = [
   { id: 'tuye',               name: 'Tuye',                         rarity: 5, profession: 'MEDIC', welfare: true, freeType: 'cc' },
   { id: 'robin',              name: 'Robin',                        rarity: 5, profession: 'MEDIC', welfare: true, freeType: 'event' },
   { id: 'lucilla',            name: 'Lucilla',                      rarity: 5, profession: 'MEDIC', welfare: true, freeType: 'event' },
-  { id: 'thornapple',         name: 'Thornapple',                   rarity: 5, profession: 'MEDIC', welfare: true, freeType: 'event' },
   { id: 'harold',             name: 'Harold',                       rarity: 5, profession: 'MEDIC' },
   { id: 'paprika',            name: 'Paprika',                      rarity: 5, profession: 'MEDIC' },
   { id: 'rose_salt',          name: 'Rose Salt',                    rarity: 5, profession: 'MEDIC' },
@@ -438,7 +437,7 @@ export const OP_LIST = [
   { id: 'greyy',              name: 'Greyy',                        rarity: 4, profession: 'CASTER' },
   { id: 'pudding',            name: 'Pudding',                      rarity: 4, profession: 'CASTER' },
   { id: 'sega',               name: 'Sega',                         rarity: 4, profession: 'SPECIALIST', collab: true, welfare: true, freeType: 'collab' },
-  { id: 'chilchuck',          name: 'Chilchuck',                    rarity: 4, profession: 'SPECIALIST', collab: true },
+  { id: 'chilchuck',          name: 'Chilchuck',                    rarity: 5, profession: 'SPECIALIST', collab: true },
 
   // ── 3★ (recruitment only) ─────────────────────────────────────────
   { id: 'vanilla',            name: 'Vanilla',                      rarity: 3, profession: 'VANGUARD', recruit: true },
