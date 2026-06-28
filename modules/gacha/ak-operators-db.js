@@ -37,7 +37,7 @@ export const OP_LIST = [
   { id: 'shuu',               name: 'Shū',                          rarity: 6, profession: 'DEFENDER', limited: true },
   { id: 'jessica_liberated',  name: 'Jessica the Liberated',        rarity: 5, profession: 'DEFENDER' },
   { id: 'yuu',                name: 'Yūu',                          rarity: 6, profession: 'DEFENDER', limited: true },
-  { id: 'sancta_mixer',       name: 'Sancta Mixer',                 rarity: 6, profession: 'DEFENDER' },
+  { id: 'sankta_miksaparato', name: 'Sankta Miksaparato',           rarity: 6, profession: 'DEFENDER' },
   { id: 'hoshiguma_slash',    name: 'Hoshiguma the Breacher',        rarity: 6, profession: 'DEFENDER' },
 
   // ── 6★ Guards (前衛) ──────────────────────────────────────────────
