@@ -52,17 +52,20 @@
   flex-shrink: 0;
 }
 
-/* Left nav fills the row so the tabs anchor to a fixed right position in every
-   view (Day/Year have prev/next/today, Cycles only a label — flex:1 keeps the
-   tabs from sliding when you switch). */
+/* Left nav = natural width, tabs sit immediately after it (left-aligned, like
+   Calendar). Every view renders [‹][label][›][today] so this width is constant
+   and the tabs never move. */
 .pr-top-left {
   display: flex;
   align-items: center;
   gap: var(--s2);
-  flex: 1;
-  min-width: 0;
 }
-/* Tabs anchored right, never affected by left content width */
+/* Fixed label width so day/year/cycles labels are all the same size → tabs aligned */
+.pr-top .cal-year-label {
+  width: 128px;
+  min-width: 128px;
+}
+/* Tabs sit immediately after the nav, left-aligned — same as Calendar */
 .pr-view-tabs {
   flex-shrink: 0;
   margin-left: var(--s3);

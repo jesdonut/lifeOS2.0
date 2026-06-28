@@ -199,16 +199,20 @@ function _buildTop() {
 
   const today = _todayStr();
 
-  // Left zone always takes flex:1 so tabs are anchored to the same right position in all views
+  // Header follows the Calendar pattern: [‹][fixed-width label][›][today] then tabs
+  // immediately after, left-aligned. Every view renders all four so the tabs NEVER
+  // move. Views that don't navigate (cycles) just hide the arrows/today, keeping space.
   const left = document.createElement('div');
   left.className = 'pr-top-left';
 
   if (_view === 'cycles') {
-    const lbl = document.createElement('span');
-    lbl.className = 'cal-year-label';
+    const prevBtn = document.createElement('button'); prevBtn.className = 'cal-year-btn';  prevBtn.textContent = '‹';     prevBtn.style.visibility = 'hidden';
+    const lbl     = document.createElement('span');   lbl.className     = 'cal-year-label';
+    const nextBtn = document.createElement('button'); nextBtn.className = 'cal-year-btn';  nextBtn.textContent = '›';     nextBtn.style.visibility = 'hidden';
+    const todBtn  = document.createElement('button'); todBtn.className  = 'cal-today-btn'; todBtn.textContent  = 'today'; todBtn.style.visibility  = 'hidden';
     const cycleDay = _cycleDay(today);
     lbl.textContent = _fmtDate(today) + (cycleDay ? ` · Day ${cycleDay}` : '');
-    left.appendChild(lbl);
+    left.append(prevBtn, lbl, nextBtn, todBtn);
   } else {
     const prevBtn = document.createElement('button'); prevBtn.className = 'cal-year-btn'; prevBtn.textContent = '‹';
     const lbl     = document.createElement('span');   lbl.className = 'cal-year-label';
