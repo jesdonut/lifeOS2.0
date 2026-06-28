@@ -2,7 +2,7 @@
 
 A personal life OS, yours for 100 years, starting from your birthday.
 
-Set your name, birth date, timezone, and currencies once. Everything adapts from there. Data lives in your browser. No account. No server. No subscription.
+Set your name, birth date, timezone, and currencies once. Everything adapts from there. Your data lives in a private Supabase backend (personal use only) and syncs across your devices, with a local copy so it keeps working offline. Export to JSON anytime. No subscription.
 
 ---
 
@@ -23,8 +23,11 @@ Monthly income ledger with Japan-specific salary breakdown (salary, transport al
 **Drawings**
 Daily scratch canvas in the Notes tab. Clears automatically each day. Export to PNG.
 
+**Gacha tracker**
+Personal Arknights pull tracker: resource counts, per-banner pity, pull logging, and a full operator collection (rarity/class/acquisition flags) with an Add/Owned layout and potential levels.
+
 **Mobile companion**
-Dedicated mobile view at /mobile.html, matching the desktop visual language: Fraunces title, frosted glass header, same color tokens. Day and week calendar views, period logging, notes list, and dark/light theme toggle.
+Dedicated mobile build at /mobile/ (mobile user-agents are redirected there automatically), matching the desktop visual language: Fraunces title, frosted glass header, same color tokens. It shares the same synced data and the same period logic as desktop. Day and week calendar views, period logging, notes list, and dark/light theme toggle.
 
 **Language**
 EN/ID toggle on all public pages.
@@ -56,15 +59,15 @@ Guided setup page on first visit. Everything editable later in settings.
 
 ## Stack
 
-Vanilla JS (ES Modules) · No build step · localStorage · SortableJS (drag and drop only)
+Vanilla JS (ES Modules) · No build step · Supabase (private backend) · localStorage fallback · SortableJS (drag and drop only)
 
 ---
 
 ## Data
 
-Everything is stored in `localStorage`. Export to JSON anytime from Settings. Nothing is sent anywhere.
+Data is stored in a private Supabase backend for personal use and syncs across devices. A local `localStorage` copy keeps the app working when offline. Export to JSON anytime from Settings.
 
-Apple Health period data and Seratus v1 data can be imported via [import-data.html](import-data.html). Parsed locally, nothing leaves your device.
+Apple Health period data and Seratus v1 data can be imported via [import-data.html](import-data.html). Import parsing is local, the file itself never leaves your device.
 
 ---
 

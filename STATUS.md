@@ -44,10 +44,16 @@
 - [x] Settings: first day of week toggle (Mon/Sun) — *31 May*
 - [x] Settings: accent color picker (6 presets, dark/light variants) — *31 May*
 - [x] Bank module removed — Finance covers what was planned for Bank — *31 May*
+- [x] `core/store.js` moved to Supabase backend — load/save via Supabase, localStorage fallback when signed out/offline; JSON export/import unchanged — *Jun*
+- [x] `mobile/` build — standalone mobile companion (mobile.html/js/css); mobile user-agents auto-redirected; shares `core/store.js` and `period-data.js` — *Jun*
+- [x] `modules/gacha/` — Arknights pull tracker: resources, per-banner pity, pull log, ~300-operator collection DB with rarity/class/acquisition flags — *Jun*
+- [x] Cleanup + reorg — removed dead `modules/tasks/`; grouped `core/import/`, `core/settings/`, `mobile/`; moved `period.css` into its module; gitignored orphan pages — *28-29 Jun*
+- [x] Period logic unified — mobile + desktop both use `period-data.js`; `migratePeriod()` upgrades old string-flow entries to the per-day map shape (in memory only, never auto-overwrites Supabase) — *28 Jun*
+- [x] UI consistency tokens + rules — `--view-pad`, `--view-head-h`, `.cal-header` promoted to base.css; tab position locked to the Calendar pattern (never moves); timeline shows auto age; spending colors get a typeable hex field — *28-29 Jun*
 
 ## In progress
 
-(none)
+(none — cleanup tracked in `CLEANUP.md`)
 
 ## Next
 
@@ -58,7 +64,9 @@
 
 ## Decisions
 
-- localStorage primary (no download-per-save)
+- Supabase is the primary store (private, personal use); `localStorage` is the offline/signed-out fallback. Login details are intentionally not documented anywhere.
+- Period entry shape is canonical in `period-data.js` (flow as a per-day map). Mobile and desktop share it; never let a load auto-overwrite the Supabase copy — only a real edit persists the migrated shape.
+- View consistency via tokens: `--view-pad` (content padding), `--view-head-h` (header height). Header/tab layout always follows the Calendar pattern; tabs never move when switched (see CLAUDE.md).
 - Timezone is a user setting (`settings.timezone`), default `Asia/Tokyo`
 - Period standalone first — proved data model before building app shell
 - `mergeEntry` merges adjacent entries automatically (gap <= 1 day)
