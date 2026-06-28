@@ -163,8 +163,14 @@ export function onDataChange(newData) {
 
 // ── Rendering ──────────────────────────────────────────────────────
 
+let _calLast = { view: null, year: null };
 function render() {
   _modal = null;
+  // Preserve scroll on a same view+year rebuild (editing an event shouldn't jump
+  // to the top). Auto-scroll-to-today only runs when the view/year actually changes.
+  const sameViewYear = _calLast.view === _view && _calLast.year === _year;
+  const prevScroll   = sameViewYear ? (_container.querySelector('#cal-scroll')?.scrollTop ?? 0) : 0;
+
   _container.innerHTML = '';
 
   // Header
@@ -260,17 +266,20 @@ function render() {
 
   if (_view === 'month') {
     buildMonths(scroll);
-    if (_year === new Date().getFullYear()) {
+    if (!sameViewYear && _year === new Date().getFullYear()) {
       requestAnimationFrame(() => scrollToMonth(new Date().getMonth()));
     }
   } else if (_view === 'week') {
     buildWeek(scroll);
   } else if (_view === 'timeline') {
     buildTimeline(scroll);
-    requestAnimationFrame(() => scrollToTimelineYear(new Date().getFullYear()));
+    if (!sameViewYear) requestAnimationFrame(() => scrollToTimelineYear(new Date().getFullYear()));
   } else {
     buildYear(scroll);
   }
+
+  scroll.scrollTop = prevScroll;
+  _calLast = { view: _view, year: _year };
 }
 
 function renderGrid() {

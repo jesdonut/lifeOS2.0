@@ -174,9 +174,15 @@ export function onDataChange(newData) {
 }
 
 // ── Render ─────────────────────────────────────────────────────────
+let _prLast = { view: null, nav: null };
 function _render() {
   if (!_container) return;
   _hideTip();
+  // Keep scroll position when re-rendering the same view/date (e.g. logging a
+  // symptom shouldn't jump to the top). Changing view or date starts at the top.
+  const same       = _prLast.view === _view && _prLast.nav === _navDate;
+  const prevScroll = same ? (_container.querySelector('.pr-content')?.scrollTop ?? 0) : 0;
+
   _container.innerHTML = '';
   const root = document.createElement('div');
   root.className = 'pr-root';
@@ -190,6 +196,9 @@ function _render() {
   else                         _buildOverview(content);
   root.appendChild(content);
   _container.appendChild(root);
+
+  content.scrollTop = prevScroll;
+  _prLast = { view: _view, nav: _navDate };
 }
 
 // ── Top bar ────────────────────────────────────────────────────────

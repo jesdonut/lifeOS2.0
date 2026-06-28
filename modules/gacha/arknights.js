@@ -73,7 +73,13 @@ export function mountArknights(container, state, save) {
 }
 
 // ── Root render ────────────────────────────────────────────────────
+let _lastRenderedView = null;
 function _render() {
+  // Preserve scroll across a same-view rebuild (e.g. hearting an operator
+  // shouldn't fling you to the top). Switching tabs still starts at the top.
+  const sameView   = _view === _lastRenderedView;
+  const prevScroll = sameView ? (_el.querySelector('.ak-view-body')?.scrollTop ?? 0) : 0;
+
   _el.innerHTML = '';
 
   const nav = _buildNav();
@@ -87,6 +93,9 @@ function _render() {
   if (_view === 'pulls')      _renderPulls(body);
   if (_view === 'operators')  _renderOperators(body);
   if (_view === 'collection') _renderCollection(body);
+
+  body.scrollTop = prevScroll;
+  _lastRenderedView = _view;
 }
 
 function _buildNav() {
