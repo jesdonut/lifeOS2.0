@@ -2,6 +2,21 @@
 // Source: appmedia.jp/ark_nights/78694856 (6★) + appmedia.jp/ark_nights/78695072
 // Classes verified against JP kanji: 先鋒=Vanguard 前衛=Guard 重装=Defender 狙撃=Sniper
 //                                    術師=Caster 医療=Medic 補助=Supporter 特殊=Specialist
+//
+// Acquisition flags:
+//   limited: true           — limited banner (pullable, not always available)
+//   collab: true            — crossover banner (pullable during collab run)
+//   welfare: true           — not pullable; obtained for free
+//   freeType: "event"       — event stage/mission/shop reward
+//   freeType: "story"       — main story chapter milestone
+//   freeType: "cc"          — Contingency Contract permanent shop
+//   freeType: "is"          — Integrated Strategies / permanent mode milestone
+//   freeType: "collab"      — given free during a crossover event
+//   freeType: "april_fools" — April Fools event
+//   freeType: "robot"       — robot unit, free via Recruitment (not welfare)
+//   freeType: "starter"     — given automatically at game start
+//
+// No flag = standard pool (always pullable)
 
 export const PROF_LABEL = {
   GUARD: 'Guard', DEFENDER: 'Defender', VANGUARD: 'Vanguard',
@@ -40,7 +55,7 @@ export const OP_LIST = [
   { id: 'qiubai',             name: 'Qiubai',                       rarity: 6, profession: 'GUARD' },
   { id: 'irene',              name: 'Irene',                        rarity: 6, profession: 'GUARD' },
   { id: 'viviana',            name: 'Viviana',                      rarity: 6, profession: 'GUARD' },
-  { id: 'lessing',            name: 'Lessing',                      rarity: 6, profession: 'GUARD' },
+  { id: 'lessing',            name: 'Lessing',                      rarity: 6, profession: 'GUARD', welfare: true, freeType: 'is' },
   { id: 'degenbrecher',       name: 'Degenbrecher',                 rarity: 6, profession: 'GUARD' },
   { id: 'zuo_le',             name: 'Zuo Le',                       rarity: 6, profession: 'GUARD' },
   { id: 'headley',            name: 'Headley',                      rarity: 6, profession: 'GUARD' },
@@ -60,10 +75,10 @@ export const OP_LIST = [
   { id: 'bagpipe',            name: 'Bagpipe',                      rarity: 6, profession: 'VANGUARD' },
   { id: 'saga',               name: 'Saga',                         rarity: 6, profession: 'VANGUARD' },
   { id: 'saileach',           name: 'Saileach',                     rarity: 6, profession: 'VANGUARD' },
-  { id: 'vigil',              name: 'Vigil',                        rarity: 6, profession: 'VANGUARD' },
+  { id: 'vigil',              name: 'Vigil',                        rarity: 6, profession: 'VANGUARD', welfare: true, freeType: 'event' },
   { id: 'ines',               name: 'Ines',                         rarity: 6, profession: 'VANGUARD' },
   { id: 'muelsyse',           name: 'Muelsyse',                     rarity: 6, profession: 'VANGUARD', limited: true },
-  { id: 'silverash_reignfrost', name: 'SilverAsh the Reignfrost',   rarity: 6, profession: 'VANGUARD', limited: true },
+  { id: 'silverash_rf',       name: 'SilverAsh the Reignfrost',     rarity: 6, profession: 'VANGUARD', limited: true },
   { id: 'ulpisfolia',         name: 'Ulpisfolia',                   rarity: 6, profession: 'VANGUARD', limited: true },
 
   // ── 6★ Snipers (狙撃) ─────────────────────────────────────────────
@@ -81,6 +96,7 @@ export const OP_LIST = [
   { id: 'lemuen',             name: 'Lemuen',                       rarity: 6, profession: 'SNIPER' },
   { id: 'pozyomka',           name: 'Pozyomka',                     rarity: 6, profession: 'SNIPER' },
   { id: 'rosa',               name: 'Rosa',                         rarity: 6, profession: 'SNIPER' },
+  { id: 'kroos_glint',        name: 'Kroos the Keen Glint',         rarity: 6, profession: 'SNIPER', welfare: true, freeType: 'event' },
   { id: 'ash',                name: 'Ash',                          rarity: 6, profession: 'SNIPER', collab: true },
 
   // ── 6★ Casters (術師) ─────────────────────────────────────────────
@@ -98,21 +114,23 @@ export const OP_LIST = [
   { id: 'mantra',             name: 'Mantra',                       rarity: 6, profession: 'CASTER' },
   { id: 'necrass',            name: 'Necrass',                      rarity: 6, profession: 'CASTER' },
   { id: 'hoolheyak',          name: "Ho'olheyak",                   rarity: 6, profession: 'CASTER' },
+  { id: 'theresa',            name: 'Theresa',                      rarity: 6, profession: 'CASTER', welfare: true, freeType: 'story' },
   { id: 'dusk',               name: 'Dusk',                         rarity: 6, profession: 'CASTER', limited: true },
   { id: 'lappland_decadenza', name: 'Lappland the Decadenza',       rarity: 6, profession: 'CASTER', limited: true },
   { id: 'pramanix_holy',      name: 'Pramanix the Holy',            rarity: 6, profession: 'CASTER', limited: true },
   { id: 'blaze_igniting',     name: 'Blaze the Igniting Spark',     rarity: 6, profession: 'CASTER', limited: true },
-  { id: 'marcille',           name: 'Marcille',                     rarity: 6, profession: 'CASTER', collab: true },
+  { id: 'marcille',           name: 'Marcille',                     rarity: 6, profession: 'CASTER', collab: true, welfare: true, freeType: 'collab' },
 
   // ── 6★ Medics (医療) ──────────────────────────────────────────────
   { id: 'shining',            name: 'Shining',                      rarity: 6, profession: 'MEDIC' },
   { id: 'nightingale',        name: 'Nightingale',                  rarity: 6, profession: 'MEDIC' },
   { id: 'aak',                name: 'Aak',                          rarity: 6, profession: 'SPECIALIST' },
   { id: 'kaltsit',            name: "Kal'tsit",                     rarity: 6, profession: 'MEDIC' },
-  { id: 'lumen',              name: 'Lumen',                        rarity: 6, profession: 'MEDIC' },
-  { id: 'silence_alter',      name: 'Silence the Paradigmatic',     rarity: 6, profession: 'MEDIC' },
+  { id: 'lumen',              name: 'Lumen',                        rarity: 6, profession: 'MEDIC', welfare: true, freeType: 'event' },
+  { id: 'silence_alter',      name: 'Silence the Paradigmatic',     rarity: 6, profession: 'MEDIC', welfare: true, freeType: 'event' },
   { id: 'reed_alter',         name: 'Reed the Flame Shadow',        rarity: 6, profession: 'MEDIC' },
   { id: 'titi',               name: 'Titi',                         rarity: 6, profession: 'MEDIC' },
+  { id: 'amiya_medic',        name: 'Amiya (Medic)',                rarity: 6, profession: 'MEDIC', welfare: true, freeType: 'story' },
   { id: 'eyjafjalla_pure',    name: 'Eyjafjalla the Hvít Aska',     rarity: 6, profession: 'MEDIC', limited: true },
   { id: 'mon3tr',             name: 'Mon3tr',                       rarity: 6, profession: 'MEDIC', limited: true },
 
@@ -124,9 +142,10 @@ export const OP_LIST = [
   { id: 'lee',                name: 'Lee',                          rarity: 6, profession: 'SPECIALIST' },
   { id: 'ascalon',            name: 'Ascalon',                      rarity: 6, profession: 'SPECIALIST' },
   { id: 'gladiia',            name: 'Gladiia',                      rarity: 6, profession: 'SPECIALIST' },
+  { id: 'shalem',             name: 'Shalem',                       rarity: 6, profession: 'SPECIALIST', welfare: true, freeType: 'is' },
+  { id: 'crownslayer',        name: 'Crownslayer',                  rarity: 6, profession: 'SPECIALIST', welfare: true, freeType: 'event' },
   { id: 'greyy_alter',        name: 'Greyy the Lightningbearer',    rarity: 6, profession: 'SPECIALIST', limited: true },
   { id: 'specter_unchained',  name: 'Specter the Unchained',        rarity: 6, profession: 'SPECIALIST', limited: true },
-  { id: 'crownslayer',        name: 'Crownslayer',                  rarity: 6, profession: 'SPECIALIST', limited: true },
   { id: 'thorns_lodestar',    name: 'Thorns the Lodestar',          rarity: 6, profession: 'SPECIALIST', limited: true },
   { id: 'texas_omertosa',     name: 'Texas the Omertosa',           rarity: 6, profession: 'SPECIALIST', limited: true },
   { id: 'kirara',             name: 'Kirin R Yato',                 rarity: 6, profession: 'SPECIALIST', collab: true },
@@ -145,7 +164,7 @@ export const OP_LIST = [
   { id: 'radiant',            name: 'Radiant',                      rarity: 6, profession: 'SUPPORTER' },
   { id: 'haruka',             name: 'Haruka',                       rarity: 6, profession: 'SUPPORTER' },
   { id: 'tragodia',           name: 'Tragodia',                     rarity: 6, profession: 'SUPPORTER', limited: true },
-  { id: 'astgenne',           name: 'Astgenne the Shining',         rarity: 6, profession: 'SUPPORTER' },
+  { id: 'astgenne',           name: 'Astgenne the Shining',         rarity: 6, profession: 'SUPPORTER', welfare: true, freeType: 'event' },
   { id: 'nasti',              name: 'Nasti',                        rarity: 6, profession: 'SUPPORTER' },
   { id: 'virtuosa',           name: 'Virtuosa',                     rarity: 6, profession: 'SUPPORTER', limited: true },
   { id: 'skadi_alter',        name: 'Skadi the Corrupting Heart',   rarity: 6, profession: 'SUPPORTER', limited: true },
@@ -159,15 +178,18 @@ export const OP_LIST = [
   { id: 'indra',              name: 'Indra',                        rarity: 5, profession: 'GUARD' },
   { id: 'broca',              name: 'Broca',                        rarity: 5, profession: 'GUARD' },
   { id: 'astesia',            name: 'Astesia',                      rarity: 5, profession: 'GUARD' },
-  { id: 'bibeak',             name: 'Bibeak',                       rarity: 5, profession: 'GUARD' },
-  { id: 'sideroca',           name: 'Sideroca',                     rarity: 5, profession: 'GUARD' },
+  { id: 'bibeak',             name: 'Bibeak',                       rarity: 5, profession: 'GUARD', welfare: true, freeType: 'cc' },
+  { id: 'sideroca',           name: 'Sideroca',                     rarity: 5, profession: 'GUARD', welfare: true, freeType: 'event' },
   { id: 'swire',              name: 'Swire',                        rarity: 5, profession: 'GUARD' },
-  { id: 'flamebringer',       name: 'Flamebringer',                 rarity: 5, profession: 'GUARD' },
+  { id: 'flamebringer',       name: 'Flamebringer',                 rarity: 5, profession: 'GUARD', welfare: true, freeType: 'event' },
   { id: 'akafuyu',            name: 'Akafuyu',                      rarity: 5, profession: 'GUARD' },
-  { id: 'amiya_guard',        name: 'Amiya (Guard)',                rarity: 5, profession: 'GUARD' },
-  { id: 'whislash',           name: 'Whislash',                     rarity: 5, profession: 'GUARD' },
+  { id: 'amiya_guard',        name: 'Amiya (Guard)',                rarity: 5, profession: 'GUARD', welfare: true, freeType: 'story' },
+  { id: 'whislash',           name: 'Whislash',                     rarity: 5, profession: 'GUARD', welfare: true, freeType: 'event' },
   { id: 'flint',              name: 'Flint',                        rarity: 5, profession: 'GUARD' },
-  { id: 'tachanka',           name: 'Tachanka',                     rarity: 5, profession: 'GUARD', collab: true },
+  { id: 'tachanka',           name: 'Tachanka',                     rarity: 5, profession: 'GUARD', collab: true, welfare: true, freeType: 'collab' },
+  { id: 'bena',               name: 'Bena',                         rarity: 5, profession: 'GUARD', welfare: true, freeType: 'event' },
+  { id: 'tequila',            name: 'Tequila',                      rarity: 5, profession: 'GUARD', welfare: true, freeType: 'event' },
+  { id: 'highmore',           name: 'Highmore',                     rarity: 5, profession: 'GUARD', welfare: true, freeType: 'is' },
   { id: 'utage',              name: 'Utage',                        rarity: 5, profession: 'GUARD' },
 
   // ── 5★ Defenders (重装) ───────────────────────────────────────────
@@ -175,16 +197,20 @@ export const OP_LIST = [
   { id: 'croissant',          name: 'Croissant',                    rarity: 5, profession: 'DEFENDER' },
   { id: 'liskarm',            name: 'Liskarm',                      rarity: 5, profession: 'DEFENDER' },
   { id: 'vulcan',             name: 'Vulcan',                       rarity: 5, profession: 'DEFENDER' },
-  { id: 'bison',              name: 'Bison',                        rarity: 5, profession: 'DEFENDER' },
+  { id: 'bison',              name: 'Bison',                        rarity: 5, profession: 'DEFENDER', welfare: true, freeType: 'event' },
   { id: 'asbestos',           name: 'Asbestos',                     rarity: 5, profession: 'DEFENDER' },
   { id: 'hung',               name: 'Hung',                         rarity: 5, profession: 'DEFENDER' },
   { id: 'salmiao',            name: 'Salmiao',                      rarity: 5, profession: 'DEFENDER' },
-  { id: 'bryophyta',          name: 'Bryophyta',                    rarity: 5, profession: 'DEFENDER' },
+  { id: 'bryophyta',          name: 'Bryophyta',                    rarity: 5, profession: 'DEFENDER', welfare: true, freeType: 'event' },
+  { id: 'heavyrain',          name: 'Heavyrain',                    rarity: 5, profession: 'DEFENDER', welfare: true, freeType: 'event' },
+  { id: 'dagda',              name: 'Dagda',                        rarity: 5, profession: 'DEFENDER', welfare: true, freeType: 'story' },
+  { id: 'odda',               name: 'Odda',                         rarity: 5, profession: 'DEFENDER', welfare: true, freeType: 'event' },
+  { id: 'tin_man',            name: 'Tin Man',                      rarity: 5, profession: 'DEFENDER', welfare: true, freeType: 'is' },
   { id: 'blitz',              name: 'Blitz',                        rarity: 5, profession: 'DEFENDER', collab: true },
 
   // ── 5★ Vanguards (先鋒) ───────────────────────────────────────────
   { id: 'texas',              name: 'Texas',                        rarity: 5, profession: 'VANGUARD' },
-  { id: 'grani',              name: 'Grani',                        rarity: 5, profession: 'VANGUARD' },
+  { id: 'grani',              name: 'Grani',                        rarity: 5, profession: 'VANGUARD', welfare: true, freeType: 'event' },
   { id: 'reed',               name: 'Reed',                         rarity: 5, profession: 'VANGUARD' },
   { id: 'elysium',            name: 'Elysium',                      rarity: 5, profession: 'VANGUARD' },
   { id: 'cantabile',          name: 'Cantabile',                    rarity: 5, profession: 'VANGUARD' },
@@ -202,32 +228,38 @@ export const OP_LIST = [
   { id: 'aosta',              name: 'Aosta',                        rarity: 5, profession: 'SNIPER' },
   { id: 'executor',           name: 'Executor',                     rarity: 5, profession: 'SNIPER' },
   { id: 'april',              name: 'April',                        rarity: 5, profession: 'SNIPER' },
+  { id: 'coldshot',           name: 'Coldshot',                     rarity: 5, profession: 'SNIPER', welfare: true, freeType: 'event' },
   { id: 'toddifons',          name: 'Toddifons',                    rarity: 5, profession: 'SNIPER' },
   { id: 'frost',              name: 'Frost',                        rarity: 5, profession: 'SNIPER', collab: true },
 
   // ── 5★ Casters (術師) ─────────────────────────────────────────────
-  { id: 'amiya',              name: 'Amiya',                        rarity: 5, profession: 'CASTER' },
+  { id: 'amiya',              name: 'Amiya',                        rarity: 5, profession: 'CASTER', freeType: 'starter' },
   { id: 'skyfire',            name: 'Skyfire',                      rarity: 5, profession: 'CASTER' },
   { id: 'nightmare',          name: 'Nightmare',                    rarity: 5, profession: 'CASTER' },
   { id: 'beeswax',            name: 'Beeswax',                      rarity: 5, profession: 'CASTER' },
   { id: 'leizi',              name: 'Leizi',                        rarity: 5, profession: 'CASTER' },
-  { id: 'absinthe',           name: 'Absinthe',                     rarity: 5, profession: 'CASTER' },
+  { id: 'absinthe',           name: 'Absinthe',                     rarity: 5, profession: 'CASTER', welfare: true, freeType: 'event' },
   { id: 'leonhardt',          name: 'Leonhardt',                    rarity: 5, profession: 'CASTER' },
-  { id: 'tomimi',             name: 'Tomimi',                       rarity: 5, profession: 'CASTER' },
-  { id: 'mint',               name: 'Mint',                         rarity: 5, profession: 'CASTER' },
+  { id: 'tomimi',             name: 'Tomimi',                       rarity: 5, profession: 'CASTER', welfare: true, freeType: 'event' },
+  { id: 'mint',               name: 'Mint',                         rarity: 5, profession: 'CASTER', welfare: true, freeType: 'event' },
   { id: 'iris',               name: 'Iris',                         rarity: 5, profession: 'CASTER' },
-  { id: 'lava_purgatory',     name: 'Lava the Purgatory',           rarity: 5, profession: 'CASTER' },
-  { id: 'kjera',              name: 'Kjera',                        rarity: 5, profession: 'CASTER' },
+  { id: 'lava_purgatory',     name: 'Lava the Purgatory',           rarity: 5, profession: 'CASTER', welfare: true, freeType: 'event' },
+  { id: 'minimalist',         name: 'Minimalist',                   rarity: 5, profession: 'CASTER', welfare: true, freeType: 'event' },
+  { id: 'sand_reckoner',      name: 'Sand Reckoner',                rarity: 5, profession: 'CASTER', welfare: true, freeType: 'event' },
+  { id: 'kjera',              name: 'Kjera',                        rarity: 5, profession: 'CASTER', welfare: true, freeType: 'event' },
   { id: 'corroserum',         name: 'Corroserum',                   rarity: 5, profession: 'CASTER' },
 
   // ── 5★ Medics (医療) ──────────────────────────────────────────────
   { id: 'ptilopsis',          name: 'Ptilopsis',                    rarity: 5, profession: 'MEDIC' },
   { id: 'silence',            name: 'Silence',                      rarity: 5, profession: 'MEDIC' },
   { id: 'warfarin',           name: 'Warfarin',                     rarity: 5, profession: 'MEDIC' },
-  { id: 'folinic',            name: 'Folinic',                      rarity: 5, profession: 'MEDIC' },
-  { id: 'ceylon',             name: 'Ceylon',                       rarity: 5, profession: 'MEDIC' },
+  { id: 'folinic',            name: 'Folinic',                      rarity: 5, profession: 'MEDIC', welfare: true, freeType: 'event' },
+  { id: 'ceylon',             name: 'Ceylon',                       rarity: 5, profession: 'MEDIC', welfare: true, freeType: 'event' },
   { id: 'breeze',             name: 'Breeze',                       rarity: 5, profession: 'MEDIC' },
-  { id: 'tuye',               name: 'Tuye',                         rarity: 5, profession: 'MEDIC' },
+  { id: 'tuye',               name: 'Tuye',                         rarity: 5, profession: 'MEDIC', welfare: true, freeType: 'cc' },
+  { id: 'robin',              name: 'Robin',                        rarity: 5, profession: 'MEDIC', welfare: true, freeType: 'event' },
+  { id: 'lucilla',            name: 'Lucilla',                      rarity: 5, profession: 'MEDIC', welfare: true, freeType: 'event' },
+  { id: 'thornapple',         name: 'Thornapple',                   rarity: 5, profession: 'MEDIC', welfare: true, freeType: 'event' },
   { id: 'whisperain',         name: 'Whisperain',                   rarity: 5, profession: 'MEDIC' },
   { id: 'quercus',            name: 'Quercus',                      rarity: 5, profession: 'SUPPORTER' },
 
@@ -238,8 +270,13 @@ export const OP_LIST = [
   { id: 'waai_fu',            name: 'Waai Fu',                      rarity: 5, profession: 'SPECIALIST' },
   { id: 'kafka',              name: 'Kafka',                        rarity: 5, profession: 'SPECIALIST' },
   { id: 'chiave',             name: 'Chiave',                       rarity: 5, profession: 'SPECIALIST' },
-  { id: 'snowsant',           name: 'Snowsant',                     rarity: 5, profession: 'SPECIALIST' },
-  { id: 'heidi',              name: 'Heidi',                        rarity: 5, profession: 'SUPPORTER' },
+  { id: 'snowsant',           name: 'Snowsant',                     rarity: 5, profession: 'SPECIALIST', welfare: true, freeType: 'event' },
+  { id: 'enforcer',           name: 'Enforcer',                     rarity: 5, profession: 'SPECIALIST', welfare: true, freeType: 'event' },
+  { id: 'insider',            name: 'Insider',                      rarity: 5, profession: 'SPECIALIST', welfare: true, freeType: 'event' },
+  { id: 'philae',             name: 'Philae',                       rarity: 5, profession: 'SPECIALIST', welfare: true, freeType: 'event' },
+  { id: 'morgan',             name: 'Morgan',                       rarity: 5, profession: 'SPECIALIST', welfare: true, freeType: 'story' },
+  { id: 'luo_xiaohei',        name: 'Luo Xiaohei',                  rarity: 5, profession: 'SPECIALIST', collab: true, welfare: true, freeType: 'collab' },
+  { id: 'heidi',              name: 'Heidi',                        rarity: 5, profession: 'SUPPORTER', welfare: true, freeType: 'story' },
   { id: 'mr_nothing',         name: 'Mr. Nothing',                  rarity: 5, profession: 'SPECIALIST' },
 
   // ── 5★ Supporters (補助) ──────────────────────────────────────────
@@ -251,7 +288,15 @@ export const OP_LIST = [
   { id: 'shamare',            name: 'Shamare',                      rarity: 5, profession: 'SUPPORTER' },
   { id: 'tsukinogi',          name: 'Tsukinogi',                    rarity: 5, profession: 'SUPPORTER' },
   { id: 'ayerscarpe',         name: 'Ayerscarpe',                   rarity: 5, profession: 'SUPPORTER' },
-  { id: 'scene',              name: 'Scene',                        rarity: 5, profession: 'SUPPORTER' },
+  { id: 'scene',              name: 'Scene',                        rarity: 5, profession: 'SUPPORTER', welfare: true, freeType: 'cc' },
+  { id: 'wild_mane',          name: 'Wild Mane',                    rarity: 5, profession: 'SUPPORTER', welfare: true, freeType: 'event' },
+  { id: 'czerny',             name: 'Czerny',                       rarity: 5, profession: 'SUPPORTER', welfare: true, freeType: 'event' },
+  { id: 'jieyun',             name: 'Jieyun',                       rarity: 5, profession: 'SUPPORTER', welfare: true, freeType: 'event' },
+  { id: 'papyrus',            name: 'Papyrus',                      rarity: 5, profession: 'SUPPORTER', welfare: true, freeType: 'event' },
+  { id: 'erato',              name: 'Erato',                        rarity: 5, profession: 'SUPPORTER', welfare: true, freeType: 'cc' },
+  { id: 'valarqvin',          name: 'Valarqvin',                    rarity: 5, profession: 'SUPPORTER', welfare: true, freeType: 'is' },
+  { id: 'nine_colored_deer',  name: 'Nine-Colored Deer',            rarity: 5, profession: 'SUPPORTER', collab: true, welfare: true, freeType: 'collab' },
+  { id: 'u_official',         name: 'U-Official',                   rarity: 5, profession: 'SUPPORTER', welfare: true, freeType: 'april_fools' },
 
   // ── 4★ ────────────────────────────────────────────────────────────
   { id: 'midnight',           name: 'Midnight',                     rarity: 4, profession: 'GUARD' },
@@ -260,7 +305,7 @@ export const OP_LIST = [
   { id: 'cutter',             name: 'Cutter',                       rarity: 4, profession: 'GUARD' },
   { id: 'arene',              name: 'Arene',                        rarity: 4, profession: 'GUARD' },
   { id: 'beehunter',          name: 'Beehunter',                    rarity: 4, profession: 'GUARD' },
-  { id: 'conviction',         name: 'Conviction',                   rarity: 4, profession: 'GUARD' },
+  { id: 'conviction',         name: 'Conviction',                   rarity: 4, profession: 'GUARD', welfare: true, freeType: 'april_fools' },
   { id: 'jackie',             name: 'Jackie',                       rarity: 4, profession: 'GUARD' },
   { id: 'matoimaru',          name: 'Matoimaru',                    rarity: 4, profession: 'GUARD' },
   { id: 'mousse',             name: 'Mousse',                       rarity: 4, profession: 'GUARD' },
@@ -270,7 +315,7 @@ export const OP_LIST = [
   { id: 'vigna',              name: 'Vigna',                        rarity: 4, profession: 'VANGUARD' },
   { id: 'scavenger',          name: 'Scavenger',                    rarity: 4, profession: 'VANGUARD' },
   { id: 'courier',            name: 'Courier',                      rarity: 4, profession: 'VANGUARD' },
-  { id: 'puzzle',             name: 'Puzzle',                       rarity: 4, profession: 'VANGUARD' },
+  { id: 'puzzle',             name: 'Puzzle',                       rarity: 4, profession: 'VANGUARD', welfare: true, freeType: 'event' },
   { id: 'gummy',              name: 'Gummy',                        rarity: 4, profession: 'DEFENDER' },
   { id: 'dur_nar',            name: 'Dur-nar',                      rarity: 4, profession: 'DEFENDER' },
   { id: 'bubble',             name: 'Bubble',                       rarity: 4, profession: 'DEFENDER' },
@@ -297,7 +342,7 @@ export const OP_LIST = [
   { id: 'shaw',               name: 'Shaw',                         rarity: 4, profession: 'SPECIALIST' },
   { id: 'rope',               name: 'Rope',                         rarity: 4, profession: 'SPECIALIST' },
   { id: 'jaye',               name: 'Jaye',                         rarity: 4, profession: 'SPECIALIST' },
-  { id: 'pith',               name: 'Pith',                         rarity: 4, profession: 'SPECIALIST' },
+  { id: 'pith',               name: 'Pith',                         rarity: 4, profession: 'SNIPER' },
   { id: 'beanstalk',          name: 'Beanstalk',                    rarity: 4, profession: 'SPECIALIST' },
   { id: 'ethan',              name: 'Ethan',                        rarity: 4, profession: 'SPECIALIST' },
   { id: 'podenco',            name: 'Podenco',                      rarity: 4, profession: 'SUPPORTER' },
@@ -311,6 +356,7 @@ export const OP_LIST = [
   { id: 'haze',               name: 'Haze',                         rarity: 4, profession: 'CASTER' },
   { id: 'greyy',              name: 'Greyy',                        rarity: 4, profession: 'CASTER' },
   { id: 'pudding',            name: 'Pudding',                      rarity: 4, profession: 'CASTER' },
+  { id: 'sega',               name: 'Sega',                         rarity: 4, profession: 'SPECIALIST', collab: true, welfare: true, freeType: 'collab' },
 
   // ── 3★ ────────────────────────────────────────────────────────────
   { id: 'steward',            name: 'Steward',                      rarity: 3, profession: 'CASTER' },
@@ -334,12 +380,12 @@ export const OP_LIST = [
   { id: 'rangers',            name: 'Rangers',                      rarity: 2, profession: 'SNIPER' },
   { id: 'durin',              name: 'Durin',                        rarity: 2, profession: 'CASTER' },
 
-  // ── 1★ ────────────────────────────────────────────────────────────
-  { id: 'castle_3',              name: 'Castle-3',                  rarity: 1, profession: 'DEFENDER' },
-  { id: 'lancet_2',              name: 'Lancet-2',                  rarity: 1, profession: 'MEDIC' },
-  { id: 'thrm_ex',               name: 'THRM-EX',                   rarity: 1, profession: 'SPECIALIST' },
-  { id: 'justice_knight',        name: 'Justice Knight',            rarity: 1, profession: 'GUARD' },
-  { id: 'terra_research_commission', name: 'Terra Research Commission', rarity: 1, profession: 'SUPPORTER' },
-  { id: 'friston_3',             name: 'Friston-3',                 rarity: 1, profession: 'MEDIC' },
-  { id: 'phonor_0',              name: 'Phonor-0',                  rarity: 1, profession: 'SUPPORTER' },
+  // ── 1★ (robots — free via Recruitment, not welfare) ───────────────
+  { id: 'castle_3',       name: 'Castle-3',                  rarity: 1, profession: 'DEFENDER',   freeType: 'robot' },
+  { id: 'lancet_2',       name: 'Lancet-2',                  rarity: 1, profession: 'MEDIC',      freeType: 'robot' },
+  { id: 'thrm_ex',        name: 'THRM-EX',                   rarity: 1, profession: 'SPECIALIST', freeType: 'robot' },
+  { id: 'justice_knight', name: 'Justice Knight',            rarity: 1, profession: 'GUARD',      freeType: 'robot' },
+  { id: 'terra_rc',       name: 'Terra Research Commission', rarity: 1, profession: 'SUPPORTER',  collab: true, welfare: true, freeType: 'collab' },
+  { id: 'friston_3',      name: 'Friston-3',                 rarity: 1, profession: 'MEDIC',      freeType: 'robot' },
+  { id: 'phonor_0',       name: 'Phonor-0',                  rarity: 1, profession: 'SUPPORTER',  freeType: 'robot' },
 ];
