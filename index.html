@@ -67,6 +67,7 @@
         <div class="preview-tab">Period</div>
         <div class="preview-tab">Finance</div>
         <div class="preview-tab">Notes</div>
+        <div class="preview-tab">Gacha</div>
       </div>
     </div>
     <div class="preview-body">
@@ -130,6 +131,16 @@
         <span class="feature-sub" data-en="Drawing" data-id="Menggambar" data-jp="ドローイング">Drawing</span>
       </div>
     </a>
+    <div class="feature-card reveal optional">
+      <div class="feature-icon"><span class="material-symbols-outlined">casino</span></div>
+      <div class="feature-name" data-en="Gacha" data-id="Gacha" data-jp="ガチャ">Gacha</div>
+      <div class="feature-subs">
+        <span class="feature-sub" data-en="Pity" data-id="Pity" data-jp="ピティ">Pity</span>
+        <span class="feature-sub" data-en="Banner" data-id="Banner" data-jp="バナー">Banner</span>
+        <span class="feature-sub" data-en="Collection" data-id="Koleksi" data-jp="コレクション">Collection</span>
+        <span class="feature-sub" data-en="Optional" data-id="Opsional" data-jp="オプション">Optional</span>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -363,6 +374,17 @@
         { label:'Quick note', valueHtml:`<div class="preview-note-lines"><span id="preview-typing"></span><span class="typing-cursor"></span></div>`, inner:'' },
         { label:'Pinned', value:'Tokyo trip', color:null, sub:'5 items · last edited today', inner:'' },
         { label:'Parked', value:'2 events', color:null, sub:'waiting to schedule', inner:'' }
+      ]
+    },
+    {
+      tab: 4,
+      cards: [
+        { label:'Current banner', value:'Limited', color:'var(--accent)', sub:'2 banners open', inner:`<div class="preview-bar-chart">
+            <div class="bar" style="height:42%"></div><div class="bar hi" style="height:72%"></div><div class="bar" style="height:55%"></div>
+          </div>` },
+        { label:'Pity', value:'14 / 50', color:'var(--accent)', sub:'soft pity soon', inner:`<div style="margin-top:var(--s3);height:6px;border-radius:100px;background:var(--surface-3)">
+            <div class="prog-bar" style="width:28%"></div></div>` },
+        { label:'Owned', value:'24 ops', color:null, sub:'3 6★ missing', inner:'' }
       ]
     }
   ];

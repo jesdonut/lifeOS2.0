@@ -397,6 +397,11 @@ section {
   display: block;
 }
 .feature-card:hover { border-color: var(--border); }
+.feature-card.optional { cursor: default; }
+.feature-card.optional:hover { border-color: var(--border-dim); }
+.feature-card.optional .feature-sub:last-child {
+  color: var(--text-3);
+}
 
 .feature-icon {
   font-size: 22px;
