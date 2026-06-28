@@ -185,13 +185,23 @@ section {
 }
 
 .preview-card {
-  background: var(--surface-2);
+  background: linear-gradient(155deg,
+    color-mix(in srgb, var(--surface-3) 55%, var(--surface-2)),
+    var(--surface-2) 70%);
   border: 1px solid var(--border-dim);
   border-radius: var(--radius);
   padding: var(--s4);
   height: 100%;
   overflow: hidden;
   box-sizing: border-box;
+  box-shadow: 0 1px 2px color-mix(in srgb, #000 10%, transparent),
+              inset 0 1px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  transition: transform 240ms var(--ease), box-shadow 240ms var(--ease);
+}
+.preview-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px color-mix(in srgb, #000 18%, transparent),
+              inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 .preview-card-label {
@@ -391,22 +401,43 @@ section {
   border-radius: var(--radius-lg);
   padding: var(--s5);
   position: relative;
-  transition: border-color 200ms ease;
+  transition: transform 220ms var(--ease), border-color 220ms var(--ease),
+              box-shadow 220ms var(--ease), background 220ms var(--ease);
   text-decoration: none;
   color: inherit;
   display: block;
 }
-.feature-card:hover { border-color: var(--border); }
+.feature-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: color-mix(in srgb, var(--accent) 4%, var(--surface));
+  box-shadow: 0 12px 28px color-mix(in srgb, #000 22%, transparent);
+}
+.feature-card:hover .feature-icon {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+}
 .feature-card.optional { cursor: default; }
-.feature-card.optional:hover { border-color: var(--border-dim); }
+.feature-card.optional:hover {
+  transform: none;
+  border-color: var(--border-dim);
+  background: var(--surface);
+  box-shadow: none;
+}
 .feature-card.optional .feature-sub:last-child {
   color: var(--text-3);
 }
 
 .feature-icon {
-  font-size: 22px;
-  margin-bottom: var(--s3);
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 11%, transparent);
   color: var(--accent);
+  margin-bottom: var(--s4);
+  transition: background 220ms var(--ease);
 }
 .feature-icon .material-symbols-outlined {
   font-size: 22px;
