@@ -346,7 +346,9 @@ function _buildCard(code, s) {
       const nv = Math.round((v + step) * 1e6) / 1e6;
       inp.value = nv; _saveRate(code, t, nv);
     });
-    stepWrap.append(sym, dn, inp, up);
+    const inpWrap = document.createElement('div'); inpWrap.className = 'fin-cur-stepper-inp-wrap';
+    inpWrap.append(dn, inp, up);
+    stepWrap.append(sym, inpWrap);
     rateRow.appendChild(stepWrap);
   });
   card.appendChild(rateRow);
@@ -518,12 +520,7 @@ function _fmtLotDate(dateStr) {
 
 function _fmtCompact(val, code) {
   if (!val && val !== 0) return '—';
-  if (NO_DECIMALS.has(code)) {
-    const n = Math.round(val);
-    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
-    if (n >= 1_000)     return (n / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
-    return n.toLocaleString();
-  }
+  if (NO_DECIMALS.has(code)) return Math.round(val).toLocaleString();
   return val.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 
