@@ -714,8 +714,14 @@ function _onTitleTap() {
   }
 }
 
+let _lastRenderedTab = null;
+
 function _render() {
   const app = document.getElementById('mob-app');
+  // Preserve scroll position across a same-tab rebuild (e.g. toggling a symptom
+  // shouldn't fling you back to the top). Switching tabs still starts at the top.
+  const sameTab    = _tab === _lastRenderedTab;
+  const prevScroll = sameTab ? (app.querySelector('.mob-main')?.scrollTop ?? 0) : 0;
   app.innerHTML = '';
 
   const hdr = el('div', 'mob-header');
@@ -736,6 +742,10 @@ function _render() {
   app.appendChild(main);
 
   app.appendChild(_buildBottomNav());
+
+  // Restore scroll position after the rebuild.
+  main.scrollTop = prevScroll;
+  _lastRenderedTab = _tab;
 }
 
 load().then(data => { _mobileData = data; _render(); });
