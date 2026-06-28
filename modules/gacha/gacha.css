@@ -311,11 +311,13 @@
   transition: all var(--dur-fast);
 }
 
-/* Arknights rarity colors: 6★ orange, 5★ gold, 4★ purple, 3★ blue */
+/* Arknights rarity colors: 6★ orange, 5★ gold, 4★ purple, 3★ blue, 2★ green, 1★ gray */
 .ak-r6 { --rc: #f2922a; }
 .ak-r5 { --rc: #e8bf4d; }
 .ak-r4 { --rc: #b585dd; }
 .ak-r3 { --rc: #5fa8e0; }
+.ak-r2 { --rc: #7cc36a; }
+.ak-r1 { --rc: #a8a29a; }
 
 .ak-rarity-btn.active,
 .ak-rarity-btn:hover {

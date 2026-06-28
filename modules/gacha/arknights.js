@@ -13,7 +13,7 @@ const BANNERS = [
 ];
 
 const RARITIES = [6, 5, 4, 3];
-const RARITY_CLASS = { 6: 'ak-r6', 5: 'ak-r5', 4: 'ak-r4', 3: 'ak-r3' };
+const RARITY_CLASS = { 6: 'ak-r6', 5: 'ak-r5', 4: 'ak-r4', 3: 'ak-r3', 2: 'ak-r2', 1: 'ak-r1' };
 
 const PROFESSIONS = ['CASTER','DEFENDER','GUARD','MEDIC','VANGUARD','SNIPER','SPECIALIST','SUPPORTER'];
 
@@ -32,6 +32,7 @@ export function mountArknights(container, state, save) {
   _el    = container;
   _state = {
     orundum:   0,
+    originium:  0,
     hhPermit:  0,
     tenPermit: 0,
     banner:    'standard',
@@ -88,7 +89,10 @@ function _buildNav() {
 
 // ── Dashboard ──────────────────────────────────────────────────────
 function _renderDashboard(el) {
-  const pullsAvail = Math.floor(s().orundum / 600) + s().hhPermit + (s().tenPermit * 10);
+  // 1 originium = 180 orundum. We don't spend originium directly, just estimate pulls.
+  const totalOrundum = s().orundum + (s().originium * 180);
+  const orundumPulls = Math.floor(totalOrundum / 600);
+  const pullsAvail   = orundumPulls + s().hhPermit + (s().tenPermit * 10);
 
   // Resources
   const resWrap = document.createElement('div');
@@ -96,6 +100,7 @@ function _renderDashboard(el) {
 
   const resources = [
     { key: 'orundum',   label: 'Orundum',     icon: '💎', suffix: '' },
+    { key: 'originium', label: 'Originium',   icon: '🔷', suffix: '' },
     { key: 'hhPermit',  label: 'HH Permit',   icon: '🎫', suffix: '' },
     { key: 'tenPermit', label: '10x Permit',  icon: '🎫', suffix: '' },
   ];
@@ -107,7 +112,7 @@ function _renderDashboard(el) {
     <div class="ak-res-top"><span>🎲</span><span class="ak-res-lbl">Pulls available</span></div>
     <div class="ak-res-val">${pullsAvail.toLocaleString()}</div>
     <div class="ak-res-breakdown">
-      ${Math.floor(s().orundum/600)} + ${s().hhPermit} + ${s().tenPermit*10}
+      ${orundumPulls} (${totalOrundum.toLocaleString()} orundum) + ${s().hhPermit} + ${s().tenPermit*10}
     </div>`;
   resWrap.appendChild(pullCard);
   el.appendChild(resWrap);
