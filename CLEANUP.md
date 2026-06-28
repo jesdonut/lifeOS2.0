@@ -106,9 +106,10 @@ renders pink. Keep the layout identical; only the accent variables differ.
 - [x] Commit
 
 ### Level 1 — Low risk (consistency moves, few refs each)
-- [ ] Move `style/period.css` → `modules/period/period.css`; update refs in `period-ui.js` + `sw.js`
-- [ ] Group import feature: `core/import-v1.js` + `core/import-delta.js` → `core/import/`; update importers
-- [ ] Verify app boots (load app.html locally), then commit per move
+- [x] Move `style/period.css` → `modules/period/period.css`; refs updated in `period-ui.js` (`./period.css`) + `sw.js`
+- [x] Group import feature: `import-v1.js` + `import-delta.js` → `core/import/`; refs updated in settings.js, import-data.html, sw.js
+- [x] Bumped sw.js cache `seratus-v10` → `v11` so clients fetch the moved files
+- [x] Smoke test: files exist at new paths, old gone, `node --check` passes on edited JS
 
 ### Level 2 — Medium risk (separate the static site + mobile)
 - [ ] Decide target layout (see proposal below) — get Jessica's OK on folder names
@@ -159,6 +160,7 @@ Each split keeps the module contract (`init`/`destroy`/`onDataChange`). One file
 ---
 
 ## Log (newest first)
+- 2026-06-28 — Level 1: moved period.css into modules/period/, grouped import files into core/import/, sw cache v11.
 - 2026-06-28 — Level 0: removed dead `modules/tasks/` (orphan; real tasks UI is in notes-tab.js). DS_Store already clean.
 - 2026-06-28 — Step 0: promoted `.cal-header` from calendar.css → base.css (now app-wide). Rename of cal-* deferred.
 - 2026-06-28 — Added Step 0 CSS base template + "create" rule (also pinned in CLAUDE.md).

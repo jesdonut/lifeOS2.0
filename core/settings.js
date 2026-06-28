@@ -1,8 +1,8 @@
 // core/settings.js — full settings modal
 
 import { exportBackup, importBackup } from './store.js';
-import { doImportV1, doMergeInvestments } from './import-v1.js';
-import { doImportDelta } from './import-delta.js';
+import { doImportV1, doMergeInvestments } from './import/import-v1.js';
+import { doImportDelta } from './import/import-delta.js';
 
 // ── Constants ──────────────────────────────────────────────────────
 

@@ -1225,7 +1225,7 @@ function _bbtNote(temp) {
 
 
 function _loadCss() {
-  const href = new URL('../../style/period.css', import.meta.url).href;
+  const href = new URL('./period.css', import.meta.url).href;
   if (!document.querySelector(`link[href="${href}"]`))
     document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', href }));
 }

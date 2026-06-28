@@ -1,4 +1,4 @@
-const CACHE = 'seratus-v10';
+const CACHE = 'seratus-v11';
 
 const SHELL = [
   '/app.html',
@@ -9,7 +9,7 @@ const SHELL = [
   '/style/base.css',
   '/style/layout.css',
   '/style/settings.css',
-  '/style/period.css',
+  '/modules/period/period.css',
   '/style/pages.css',
   '/style/landing.css',
   '/style/setup.css',
@@ -19,8 +19,8 @@ const SHELL = [
   '/core/settings.js',
   '/core/gestures.js',
   '/core/lang.js',
-  '/core/import-delta.js',
-  '/core/import-v1.js',
+  '/core/import/import-delta.js',
+  '/core/import/import-v1.js',
   '/modules/calendar/calendar.js',
   '/modules/calendar/calendar.css',
   '/modules/finance/finance.js',
