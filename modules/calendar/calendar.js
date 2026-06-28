@@ -1183,7 +1183,20 @@ function buildTimeline(scroll) {
       cell.className = 'tl-year-cell';
       if (y === todayYear) cell.classList.add('tl-year-today');
       if (y > lastYear) cell.classList.add('tl-year-out');
-      cell.textContent = y;
+
+      const yNum = document.createElement('span');
+      yNum.className = 'tl-year-num';
+      yNum.textContent = y;
+      cell.appendChild(yNum);
+
+      const age = y - birthYear;
+      if (age >= 0) {
+        const ageEl = document.createElement('span');
+        ageEl.className = 'tl-year-age';
+        ageEl.textContent = age;
+        cell.appendChild(ageEl);
+      }
+
       cell.addEventListener('click', () => openTimelineModal(y));
       yearRow.appendChild(cell);
     }
