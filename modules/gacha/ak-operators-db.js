@@ -171,7 +171,6 @@ export const OP_LIST = [
   { id: 'nasti',              name: 'Nasti',                        rarity: 6, profession: 'SUPPORTER' },
   { id: 'virtuosa',           name: 'Virtuosa',                     rarity: 6, profession: 'SUPPORTER', limited: true },
   { id: 'skadi_alter',        name: 'Skadi the Corrupting Heart',   rarity: 6, profession: 'SUPPORTER', limited: true },
-  { id: 'silence_trimmed',    name: 'Silence the Trimmed',          rarity: 6, profession: 'SUPPORTER' },
 
   // ── 5★ Guards (前衛) ──────────────────────────────────────────────
   { id: 'lappland',           name: 'Lappland',                     rarity: 5, profession: 'GUARD' },
