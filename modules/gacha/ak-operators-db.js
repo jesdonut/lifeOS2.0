@@ -459,7 +459,7 @@ export const OP_LIST = [
 
   // ── 2★ (recruitment only) ─────────────────────────────────────────
   { id: 'noir_corne',         name: 'Noir Corne',                   rarity: 2, profession: 'GUARD',    recruit: true },
-  { id: 'yato',               name: 'Yato',                         rarity: 2, profession: 'VANGUARD', recruit: true },
+  { id: 'yato',               name: 'Yato',                         rarity: 2, profession: 'VANGUARD',  recruit: true },
   { id: '12f',                name: '12F',                          rarity: 2, profession: 'GUARD',    recruit: true },
   { id: 'rangers',            name: 'Rangers',                      rarity: 2, profession: 'SNIPER',   recruit: true },
   { id: 'durin',              name: 'Durin',                        rarity: 2, profession: 'CASTER',   recruit: true },

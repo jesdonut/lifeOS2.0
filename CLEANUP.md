@@ -101,9 +101,9 @@ renders pink. Keep the layout identical; only the accent variables differ.
 ## STEP 1 — Organize (do in levels, low risk first)
 
 ### Level 0 — Zero risk (delete confirmed dead, fix gitignore)
-- [ ] Confirm `modules/tasks/` truly unused, then remove it (or move to `_local/_archive/`)
-- [ ] Remove `.DS_Store` from git tracking; ensure `.gitignore` covers `.DS_Store`
-- [ ] Commit: `chore: remove dead tasks module and DS_Store`
+- [x] Confirm `modules/tasks/` truly unused, then remove it — DONE (live tasks UI lives in notes-tab.js)
+- [x] `.DS_Store` — already gitignored and untracked, nothing to do
+- [x] Commit
 
 ### Level 1 — Low risk (consistency moves, few refs each)
 - [ ] Move `style/period.css` → `modules/period/period.css`; update refs in `period-ui.js` + `sw.js`
@@ -159,6 +159,7 @@ Each split keeps the module contract (`init`/`destroy`/`onDataChange`). One file
 ---
 
 ## Log (newest first)
+- 2026-06-28 — Level 0: removed dead `modules/tasks/` (orphan; real tasks UI is in notes-tab.js). DS_Store already clean.
 - 2026-06-28 — Step 0: promoted `.cal-header` from calendar.css → base.css (now app-wide). Rename of cal-* deferred.
 - 2026-06-28 — Added Step 0 CSS base template + "create" rule (also pinned in CLAUDE.md).
 - 2026-06-28 — Investigated mobile build: confirmed ACTIVE (device-split, not legacy). Recorded above.
