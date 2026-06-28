@@ -21,6 +21,7 @@ const PROFESSIONS = ['CASTER','DEFENDER','GUARD','MEDIC','VANGUARD','SNIPER','SP
 let _el, _state, _save;
 let _view      = 'dashboard'; // dashboard | pulls | operators | collection
 let _opFilter  = { q: '', rarity: 0, prof: '' };
+let _ownFilter = { q: '' };
 let _colFilter = { q: '', rarity: 0, fav: false };
 
 function s() { return _state; }
@@ -370,6 +371,14 @@ function _renderOperators(el) {
   ownedHdr.textContent = 'Owned';
   ownedCol.appendChild(ownedHdr);
 
+  const ownedFilterBar = document.createElement('div'); ownedFilterBar.className = 'ak-filter-bar';
+  const ownedQ = document.createElement('input');
+  ownedQ.type = 'text'; ownedQ.className = 'ak-filter-q'; ownedQ.placeholder = 'Search…';
+  ownedQ.value = _ownFilter.q;
+  ownedQ.addEventListener('input', () => { _ownFilter.q = ownedQ.value; _renderOwnedList(ownedList); });
+  ownedFilterBar.append(ownedQ);
+  ownedCol.appendChild(ownedFilterBar);
+
   const ownedList = document.createElement('div'); ownedList.className = 'ak-op-list';
   ownedCol.appendChild(ownedList);
 
@@ -433,10 +442,12 @@ function _renderOwnedList(list) {
   list.innerHTML = '';
   const col = s().collection ?? {};
 
+  const q = _ownFilter.q.toLowerCase();
   const owned = Object.entries(col)
     .filter(([, c]) => c.owned)
     .map(([id, data]) => ({ op: OP_LIST.find(o => o.id === id), data }))
     .filter(({ op }) => op)
+    .filter(({ op }) => !q || op.name.toLowerCase().includes(q))
     .sort((a, b) => b.op.rarity - a.op.rarity || a.op.name.localeCompare(b.op.name));
 
   owned.forEach(({ op, data }) => {

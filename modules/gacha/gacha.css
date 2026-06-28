@@ -311,10 +311,11 @@
   transition: all var(--dur-fast);
 }
 
-.ak-r6 { --rc: #f4a73b; }
-.ak-r5 { --rc: #c5a0e8; }
-.ak-r4 { --rc: #6ab4e8; }
-.ak-r3 { --rc: var(--text-3); }
+/* Arknights rarity colors: 6★ orange, 5★ gold, 4★ purple, 3★ blue */
+.ak-r6 { --rc: #f2922a; }
+.ak-r5 { --rc: #e8bf4d; }
+.ak-r4 { --rc: #b585dd; }
+.ak-r3 { --rc: #5fa8e0; }
 
 .ak-rarity-btn.active,
 .ak-rarity-btn:hover {
@@ -450,7 +451,8 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 700;
   color: #fff;
-  background: color-mix(in srgb, var(--rc, var(--text-3)) 40%, var(--surface-3));
+  background: color-mix(in srgb, var(--rc, var(--text-3)) 72%, var(--surface-3));
+  border: 1px solid color-mix(in srgb, var(--rc, var(--text-3)) 60%, transparent);
 }
 
 .ak-col-avatar-ph {
