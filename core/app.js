@@ -4,18 +4,23 @@ import { load, get, save, subscribe, getSession, signIn, signOut } from './store
 import { initGestures } from './gestures.js';
 import { openSettings, applyAccent } from './settings.js';
 
-const _bootData = await load();
-const _periodOn = _bootData.settings?.periodEnabled ?? false;
+const _bootData  = await load();
+const _periodOn  = _bootData.settings?.periodEnabled ?? false;
+const _gachaOn   = _bootData.settings?.gachaEnabled  ?? false;
 
-const TABS = _periodOn
-  ? ['calendar', 'period', 'finance', 'notes']
-  : ['calendar', 'finance', 'notes'];
+const TABS = ['calendar',
+  ...(_periodOn ? ['period'] : []),
+  'finance',
+  'notes',
+  ...(_gachaOn ? ['gacha'] : []),
+];
 
 const MODULE_MAP = {
   calendar: () => import('../modules/calendar/calendar.js?v=5'),
   period:   () => import('../modules/period/period-ui.js?v=5'),
   finance:  () => import('../modules/finance/finance.js?v=5'),
   notes:    () => import('../modules/notes/notes-tab.js?v=5'),
+  gacha:    () => import('../modules/gacha/gacha.js'),
 };
 
 // ── DOM refs ───────────────────────────────────────────────────────

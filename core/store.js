@@ -7,7 +7,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const MODULE_KEYS = ['settings', 'period', 'finance', 'currency', 'nisa', 'savings', 'notes', 'tasks'];
+const MODULE_KEYS = ['settings', 'period', 'finance', 'currency', 'nisa', 'savings', 'notes', 'tasks', 'gacha'];
 
 function defaultData() {
   return {
@@ -37,6 +37,7 @@ function defaultData() {
     savings:  { accounts: [], bonds: [], deposits: [] },
     notes:    { items: [], countdowns: [] }, // drawings stored separately in lifeOS_drawings (localStorage-only)
     tasks:    {},
+    gacha:    {},
   };
 }
 

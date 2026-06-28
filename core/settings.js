@@ -275,6 +275,22 @@ function renderProfile(el) {
   });
   el.appendChild(toggleRow);
 
+  let gachaEnabled = s.gachaEnabled ?? false;
+  const gachaRow = document.createElement('div');
+  gachaRow.className = 'sp-toggle-row';
+  gachaRow.innerHTML = `
+    <div>
+      <div class="sp-toggle-name">Gacha tracker</div>
+      <div class="sp-toggle-desc">Arknights pull log, pity counter</div>
+    </div>
+    <div class="sp-switch${gachaEnabled ? ' on' : ''}" id="sp-gacha-sw"></div>
+  `;
+  gachaRow.addEventListener('click', () => {
+    gachaEnabled = !gachaEnabled;
+    gachaRow.querySelector('#sp-gacha-sw').classList.toggle('on', gachaEnabled);
+  });
+  el.appendChild(gachaRow);
+
   // Save
   const actions = document.createElement('div');
   actions.className = 'sp-actions';
@@ -298,11 +314,13 @@ function renderProfile(el) {
         locations:     getLoc(),
         currencies:    [...selectedCurs],
         periodEnabled,
+        gachaEnabled,
       }
     });
-    const periodChanged = periodEnabled !== (_data.settings?.periodEnabled ?? false);
+    const needsReload = periodEnabled !== (_data.settings?.periodEnabled ?? false)
+                     || gachaEnabled  !== (_data.settings?.gachaEnabled  ?? false);
     saveBtn.textContent = 'Saved';
-    if (periodChanged) {
+    if (needsReload) {
       setTimeout(() => location.reload(), 800);
     } else {
       setTimeout(() => { saveBtn.textContent = 'Save changes'; }, 1500);
