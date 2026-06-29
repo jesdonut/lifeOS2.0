@@ -238,8 +238,8 @@ function _buildMiniCal(showPeriod) {
   return wrap;
 }
 
-// ── Add event sheet ───────────────────────────────────────────────────
-function _showAddEvent(dateStr) {
+// ── Add / edit event sheet ────────────────────────────────────────────
+function _showAddEvent(dateStr, existing = null) {
   const d    = _D();
   const cats = [
     { id: 'personal',  label: 'Personal'  },
@@ -258,7 +258,7 @@ function _showAddEvent(dateStr) {
 
   sheet.innerHTML = `
     <div class="mob-sheet-hdr">
-      <span class="mob-sheet-title">Add event</span>
+      <span class="mob-sheet-title">${existing ? 'Edit event' : 'Add event'}</span>
       <button class="mob-sheet-close">✕</button>
     </div>
     <div class="mob-sheet-body">
@@ -268,13 +268,20 @@ function _showAddEvent(dateStr) {
       </div>
       <input id="ms-ev-location" type="text" placeholder="Location (optional)" autocomplete="off">
       <div class="mob-cat-grid" id="ms-ev-cats"></div>
-      <button class="mob-sheet-save" id="ms-ev-save">Add</button>
+      <div class="mob-sheet-actions">
+        <button class="mob-sheet-save" id="ms-ev-save">${existing ? 'Save' : 'Add'}</button>
+        ${existing ? '<button class="mob-sheet-del" id="ms-ev-del">Delete</button>' : ''}
+      </div>
     </div>
   `;
   overlay.appendChild(sheet);
   document.body.appendChild(overlay);
 
-  let selCat = 'personal';
+  sheet.querySelector('#ms-ev-title').value    = existing?.title ?? '';
+  sheet.querySelector('#ms-ev-time').value     = existing?.time ?? existing?.startTime ?? '';
+  sheet.querySelector('#ms-ev-location').value = existing?.location ?? '';
+
+  let selCat = existing?.categoryId ?? existing?.category ?? 'personal';
   const catGrid = sheet.querySelector('#ms-ev-cats');
   cats.forEach(c => {
     const btn = el('button', 'mob-cat-btn' + (c.id === selCat ? ' active' : ''), c.label);
@@ -291,39 +298,50 @@ function _showAddEvent(dateStr) {
   sheet.querySelector('.mob-sheet-close').addEventListener('click', close);
   overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
 
+  const saveCal = events => {
+    const cal = { ...(d.calendar || {}), events };
+    d.calendar = cal; _mobileData = d; save({ calendar: cal });
+    close(); _render();
+  };
+
   sheet.querySelector('#ms-ev-save').addEventListener('click', () => {
     const title = sheet.querySelector('#ms-ev-title').value.trim();
     if (!title) { sheet.querySelector('#ms-ev-title').focus(); return; }
     const time     = sheet.querySelector('#ms-ev-time').value;
     const location = sheet.querySelector('#ms-ev-location').value.trim();
-    const event = { id: _uid(), date: dateStr, title, category: selCat, categoryId: selCat };
-    if (time)     event.startTime = time;
-    if (location) event.location  = location;
-    const cal = { ...(d.calendar || {}), events: [...(d.calendar?.events || []), event] };
-    d.calendar = cal;
-    _mobileData = d;
-    save({ calendar: cal });
-    close();
-    _render();
+    const ev = { ...(existing || {}), id: existing?.id ?? _uid(), date: existing?.date ?? dateStr, title, category: selCat, categoryId: selCat };
+    delete ev.startTime;                 // drop legacy field
+    if (time) ev.time = time; else delete ev.time;
+    if (location) ev.location = location; else delete ev.location;
+    const events = existing
+      ? (d.calendar?.events || []).map(e => e.id === existing.id ? ev : e)
+      : [...(d.calendar?.events || []), ev];
+    saveCal(events);
   });
 
-  setTimeout(() => sheet.querySelector('#ms-ev-title').focus(), 100);
+  if (existing) {
+    sheet.querySelector('#ms-ev-del').addEventListener('click', () => {
+      saveCal((d.calendar?.events || []).filter(e => e.id !== existing.id));
+    });
+  } else {
+    setTimeout(() => sheet.querySelector('#ms-ev-title').focus(), 100);
+  }
 }
 
-// ── Add spend sheet ───────────────────────────────────────────────────
-function _showAddSpend(dateStr) {
+// ── Add / edit spend sheet ────────────────────────────────────────────
+function _showAddSpend(dateStr, existing = null) {
   const d    = _D();
   const cats = (d.settings?.spendCategories || []);
 
   const overlay = el('div', 'mob-sheet-overlay');
   const sheet   = el('div', 'mob-sheet');
 
-  let selCat = cats[0]?.id || 'food';
-  let selSub = '';
+  let selCat = existing?.categoryId || cats[0]?.id || 'food';
+  let selSub = existing?.subcategory || '';
 
   sheet.innerHTML = `
     <div class="mob-sheet-hdr">
-      <span class="mob-sheet-title">Add spend</span>
+      <span class="mob-sheet-title">${existing ? 'Edit spend' : 'Add spend'}</span>
       <button class="mob-sheet-close">✕</button>
     </div>
     <div class="mob-sheet-body">
@@ -331,11 +349,17 @@ function _showAddSpend(dateStr) {
       <div class="mob-cat-grid" id="ms-sp-cats"></div>
       <div class="mob-sub-wrap" id="ms-sp-subs"></div>
       <input id="ms-sp-note" type="text" placeholder="Note (optional)" autocomplete="off">
-      <button class="mob-sheet-save" id="ms-sp-save">Add</button>
+      <div class="mob-sheet-actions">
+        <button class="mob-sheet-save" id="ms-sp-save">${existing ? 'Save' : 'Add'}</button>
+        ${existing ? '<button class="mob-sheet-del" id="ms-sp-del">Delete</button>' : ''}
+      </div>
     </div>
   `;
   overlay.appendChild(sheet);
   document.body.appendChild(overlay);
+
+  sheet.querySelector('#ms-sp-amt').value  = existing?.amount ?? '';
+  sheet.querySelector('#ms-sp-note').value = existing?.note ?? '';
 
   function renderSubs() {
     const wrap = sheet.querySelector('#ms-sp-subs');
@@ -373,22 +397,31 @@ function _showAddSpend(dateStr) {
   sheet.querySelector('.mob-sheet-close').addEventListener('click', close);
   overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
 
+  const saveSpend = entries => {
+    const spendEntries = { ...(d.calendar?.spendEntries || {}) };
+    if (entries.length) spendEntries[dateStr] = entries; else delete spendEntries[dateStr];
+    const cal = { ...(d.calendar || {}), spendEntries };
+    d.calendar = cal; _mobileData = d; save({ calendar: cal });
+    close(); _render();
+  };
+
   sheet.querySelector('#ms-sp-save').addEventListener('click', () => {
     const amt = parseFloat(sheet.querySelector('#ms-sp-amt').value);
     if (!amt || isNaN(amt)) { sheet.querySelector('#ms-sp-amt').focus(); return; }
     const note  = sheet.querySelector('#ms-sp-note').value.trim();
-    const entry = { id: _uid(), categoryId: selCat, subcategory: selSub || '', amount: amt, currency: 'JPY', note };
     const prev  = d.calendar?.spendEntries?.[dateStr] || [];
-    const spendEntries = { ...(d.calendar?.spendEntries || {}), [dateStr]: [...prev, entry] };
-    const cal = { ...(d.calendar || {}), spendEntries };
-    d.calendar = cal;
-    _mobileData = d;
-    save({ calendar: cal });
-    close();
-    _render();
+    const entry = { ...(existing || {}), id: existing?.id ?? _uid(), categoryId: selCat, subcategory: selSub || '', amount: amt, currency: existing?.currency ?? 'JPY', note };
+    const entries = existing ? prev.map(e => e.id === existing.id ? entry : e) : [...prev, entry];
+    saveSpend(entries);
   });
 
-  setTimeout(() => sheet.querySelector('#ms-sp-amt').focus(), 100);
+  if (existing) {
+    sheet.querySelector('#ms-sp-del').addEventListener('click', () => {
+      saveSpend((d.calendar?.spendEntries?.[dateStr] || []).filter(e => e.id !== existing.id));
+    });
+  } else {
+    setTimeout(() => sheet.querySelector('#ms-sp-amt').focus(), 100);
+  }
 }
 
 // ── Day detail (events + spend for one date) ─────────────────────────
@@ -420,7 +453,8 @@ function _buildDayDetail(dateStr) {
       item.appendChild(dot);
       const info = el('div', 'day-item-info');
       info.appendChild(el('span', 'day-item-title', ev.title));
-      if (ev.startTime) info.appendChild(el('span', 'day-item-meta', ev.startTime));
+      const evTime = ev.time ?? ev.startTime;
+      if (evTime) info.appendChild(el('span', 'day-item-meta', ev.endTime ? `${evTime}–${ev.endTime}` : evTime));
       if (ev.location) {
         const loc = document.createElement('a');
         loc.className = 'day-item-location';
@@ -428,9 +462,12 @@ function _buildDayDetail(dateStr) {
         loc.target = '_blank';
         loc.rel = 'noopener noreferrer';
         loc.innerHTML = `<span class="material-symbols-outlined">location_on</span>${ev.location}`;
+        loc.addEventListener('click', e => e.stopPropagation()); // tap map link = maps, not edit
         info.appendChild(loc);
       }
       item.appendChild(info);
+      item.style.cursor = 'pointer';
+      item.addEventListener('click', () => _showAddEvent(dateStr, ev));
       list.appendChild(item);
     }
     evSec.appendChild(list);
@@ -467,6 +504,8 @@ function _buildDayDetail(dateStr) {
       if (entry.note) info.appendChild(el('span', 'day-item-meta', entry.note));
       item.appendChild(info);
       item.appendChild(el('span', 'day-item-amt', '¥' + (entry.amount || 0).toLocaleString()));
+      item.style.cursor = 'pointer';
+      item.addEventListener('click', () => _showAddSpend(dateStr, entry));
       list.appendChild(item);
     }
     spSec.appendChild(list);
