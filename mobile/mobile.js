@@ -264,7 +264,9 @@ function _showAddEvent(dateStr, existing = null) {
     <div class="mob-sheet-body">
       <input id="ms-ev-title" type="text" placeholder="Title" autocomplete="off">
       <div class="mob-field-row">
-        <input id="ms-ev-time" type="time" placeholder="Time (optional)">
+        <input id="ms-ev-time" type="time" placeholder="Start">
+        <span class="mob-time-sep">–</span>
+        <input id="ms-ev-time-end" type="time" placeholder="End">
       </div>
       <input id="ms-ev-location" type="text" placeholder="Location (optional)" autocomplete="off">
       <div class="mob-cat-grid" id="ms-ev-cats"></div>
@@ -279,6 +281,7 @@ function _showAddEvent(dateStr, existing = null) {
 
   sheet.querySelector('#ms-ev-title').value    = existing?.title ?? '';
   sheet.querySelector('#ms-ev-time').value     = existing?.time ?? existing?.startTime ?? '';
+  sheet.querySelector('#ms-ev-time-end').value = existing?.endTime ?? '';
   sheet.querySelector('#ms-ev-location').value = existing?.location ?? '';
 
   let selCat = existing?.categoryId ?? existing?.category ?? 'personal';
@@ -308,10 +311,12 @@ function _showAddEvent(dateStr, existing = null) {
     const title = sheet.querySelector('#ms-ev-title').value.trim();
     if (!title) { sheet.querySelector('#ms-ev-title').focus(); return; }
     const time     = sheet.querySelector('#ms-ev-time').value;
+    const endTime  = sheet.querySelector('#ms-ev-time-end').value;
     const location = sheet.querySelector('#ms-ev-location').value.trim();
     const ev = { ...(existing || {}), id: existing?.id ?? _uid(), date: existing?.date ?? dateStr, title, category: selCat, categoryId: selCat };
     delete ev.startTime;                 // drop legacy field
     if (time) ev.time = time; else delete ev.time;
+    if (endTime) ev.endTime = endTime; else delete ev.endTime;
     if (location) ev.location = location; else delete ev.location;
     const events = existing
       ? (d.calendar?.events || []).map(e => e.id === existing.id ? ev : e)

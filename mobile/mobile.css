@@ -608,8 +608,9 @@ html, body {
 }
 .mob-sheet-body input:focus { border-color: var(--accent-2); outline: none; }
 
-.mob-field-row { display: flex; gap: var(--s2); }
+.mob-field-row { display: flex; gap: var(--s2); align-items: center; }
 .mob-field-row input { flex: 1; }
+.mob-time-sep { color: var(--text-3); flex-shrink: 0; }
 
 /* Category grid */
 .mob-cat-grid {
