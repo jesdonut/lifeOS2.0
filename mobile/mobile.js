@@ -59,7 +59,40 @@ let _tab      = 'day';
 let _calView  = 'day'; // 'day' | 'week'
 let _selDate  = _todayStr();
 let _calMonth = { y: +_selDate.slice(0, 4), m: +_selDate.slice(5, 7) };
+let _finMonth = { y: +_selDate.slice(0, 4), m: +_selDate.slice(5, 7) - 1 }; // m is 0-indexed
 let _expandedNote = null;
+
+// ── Finance (income only, mirrors desktop finance.js data model) ──────
+const FIN_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const FIN_DEFAULT_INCOME = [
+  { id: 'salary',     label: '給料',              amount: 0, isNeg: false },
+  { id: 'transport',  label: '交通費補助',         amount: 0, isNeg: false },
+  { id: 'other',      label: 'その他収入',         amount: 0, isNeg: false },
+  { id: 'health',     label: '健康保険',           amount: 0, isNeg: true  },
+  { id: 'care',       label: '介護保険',           amount: 0, isNeg: true  },
+  { id: 'child',      label: '子ども・子育て支援',  amount: 0, isNeg: true  },
+  { id: 'pension',    label: '厚生年金保険',        amount: 0, isNeg: true  },
+  { id: 'employment', label: '雇用保険',           amount: 0, isNeg: true  },
+  { id: 'incometax',  label: '所得税',             amount: 0, isNeg: true  },
+  { id: 'resident',   label: '住民税',             amount: 0, isNeg: true  },
+];
+function _finKey(y, m) { return `${y}-${String(m + 1).padStart(2, '0')}`; }
+function _finIncome(y, m) {
+  const saved = _D().finance?.months?.[_finKey(y, m)]?.income;
+  if (!saved) return FIN_DEFAULT_INCOME.map(r => ({ ...r }));
+  const ids = new Set(saved.map(r => r.id));
+  const missing = FIN_DEFAULT_INCOME.filter(r => !ids.has(r.id));
+  return (missing.length ? [...saved, ...missing] : saved).filter(r => !r.hidden).map(r => ({ ...r }));
+}
+function _setFinIncome(y, m, rows) {
+  const d = _D();
+  const key    = _finKey(y, m);
+  const month  = { ...(d.finance?.months?.[key] ?? {}), income: rows };
+  const months = { ...(d.finance?.months ?? {}), [key]: month };
+  d.finance = { months };
+  _mobileData = d;
+  save({ finance: { months } });
+}
 
 // ── Data ────────────────────────────────────────────────────────────
 function _D() {
@@ -657,6 +690,53 @@ function _buildPeriodTab() {
   return wrap;
 }
 
+// ── Finance tab (income / salary) ────────────────────────────────────
+function _buildFinanceTab() {
+  const wrap = el('div', 'tab-content');
+  const { y, m } = _finMonth;
+
+  // Month nav
+  const nav = el('div', 'fin-month-nav');
+  nav.appendChild(btn('fin-month-btn', '‹', () => {
+    let nm = m - 1, ny = y; if (nm < 0) { nm = 11; ny--; }
+    _finMonth = { y: ny, m: nm }; _render();
+  }));
+  nav.appendChild(el('span', 'fin-month-label', `${FIN_MONTHS[m]} ${y}`));
+  nav.appendChild(btn('fin-month-btn', '›', () => {
+    let nm = m + 1, ny = y; if (nm > 11) { nm = 0; ny++; }
+    _finMonth = { y: ny, m: nm }; _render();
+  }));
+  wrap.appendChild(nav);
+
+  const rows = _finIncome(y, m);
+
+  const netEl = el('div', 'fin-net');
+  const calcNet = () => rows.reduce((s, r) => s + (r.isNeg ? -(r.amount || 0) : (r.amount || 0)), 0);
+  const paintNet = () => {
+    const n = calcNet();
+    netEl.innerHTML = `<span>Net</span><span class="fin-net-val">¥${n.toLocaleString()}</span>`;
+  };
+
+  const sec = el('div', 'fin-income-sec');
+  sec.appendChild(el('div', 'fin-sec-title', 'Income'));
+  rows.forEach((r, i) => {
+    const row = el('div', 'fin-row' + (r.isNeg ? ' neg' : ''));
+    row.appendChild(el('span', 'fin-row-label', r.label));
+    const inp = el('input', 'fin-row-amt');
+    inp.type = 'number'; inp.inputMode = 'numeric'; inp.placeholder = '0';
+    inp.value = r.amount || '';
+    inp.addEventListener('input', () => { rows[i].amount = parseFloat(inp.value) || 0; paintNet(); });
+    inp.addEventListener('blur',  () => _setFinIncome(y, m, rows));
+    row.appendChild(inp);
+    sec.appendChild(row);
+  });
+  wrap.appendChild(sec);
+
+  paintNet();
+  wrap.appendChild(netEl);
+  return wrap;
+}
+
 // ── Notes tab ────────────────────────────────────────────────────────
 function _buildNotesTab() {
   const d     = _D();
@@ -735,9 +815,10 @@ function _deleteNote(id) {
 function _buildBottomNav() {
   const nav = el('div', 'bottom-nav');
   for (const { id, label, icon } of [
-    { id: 'day',    label: 'Day',    icon: 'calendar_today' },
-    { id: 'period', label: 'Period', icon: 'water_drop' },
-    { id: 'notes',  label: 'Notes',  icon: 'note' },
+    { id: 'day',     label: 'Day',     icon: 'calendar_today' },
+    { id: 'period',  label: 'Period',  icon: 'water_drop' },
+    { id: 'finance', label: 'Finance', icon: 'payments' },
+    { id: 'notes',   label: 'Notes',   icon: 'note' },
   ]) {
     const b = el('button', 'nav-btn' + (_tab === id ? ' active' : ''));
     b.innerHTML = `<span class="material-symbols-outlined">${icon}</span><span class="nav-label">${label}</span>`;
@@ -821,9 +902,10 @@ function _render() {
   app.appendChild(hdr);
 
   const main = el('div', 'mob-main');
-  if (_tab === 'day')    main.appendChild(_buildDayTab());
-  if (_tab === 'period') main.appendChild(_buildPeriodTab());
-  if (_tab === 'notes')  main.appendChild(_buildNotesTab());
+  if (_tab === 'day')     main.appendChild(_buildDayTab());
+  if (_tab === 'period')  main.appendChild(_buildPeriodTab());
+  if (_tab === 'finance') main.appendChild(_buildFinanceTab());
+  if (_tab === 'notes')   main.appendChild(_buildNotesTab());
   app.appendChild(main);
 
   app.appendChild(_buildBottomNav());
